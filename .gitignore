@@ -5,3 +5,10 @@ node_modules/
 #Environment Variables
 .env
 **/.env
+
+#Database
+*.db
+
+#Package Files
+package-lock.json
+package.json
