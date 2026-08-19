@@ -1,6 +1,7 @@
+require('dotenv').config();
+
 const axios= require('axios');
 const dns=require('dns').promises;
-require('dotenv').config();
 const {calculateRiskScore} = require('./riskScore');
 
 async function checkUrl(rawURL) {
@@ -84,4 +85,4 @@ async function checkUrl(rawURL) {
     }
 }
 
-checkUrl("https://www.gooogle.com");
+checkUrl("https://www.instagm.com");
