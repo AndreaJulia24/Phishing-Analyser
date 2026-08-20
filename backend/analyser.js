@@ -15,8 +15,29 @@ async function checkUrl(rawURL) {
         console.log("Domain: ", domain);
 
         //IP address with DNS lookup
-        const ipAddress = await dns.lookup(domain);
-        console.log("IP Address: ", ipAddress.address);
+        //const ipAddress = await dns.lookup(domain);
+        //console.log("IP Address: ", ipAddress.address);
+        let ipAddress;
+        try{
+            ipAddress = await dns.lookup(domain);
+            console.log("IP Address: ", ipAddress.address);
+        }
+        catch(dnsError){
+            console.error("DNS lookup failed: ", dnsError.message);
+            return {
+                domain: domain,
+                ip_address: "DNS lookup failed",
+                country: "No country information available",
+                city: "No city information available",
+                isp: "No ISP information available",
+                latitude: null,
+                longitude: null,
+                security_score: 0,
+                risk_score: 100,
+                verdict: "SUSPICIOUS",
+                reasons: ["Domain does not resolve to an IP address, possible phishing or malicious site"]
+            };
+        }
 
         //Ip geolocation for the detective map
         const geoResponse = await axios.get(`http://ip-api.com/json/${ipAddress.address}`);
@@ -100,6 +121,6 @@ async function checkUrl(rawURL) {
     }
 }
 
-//checkUrl("https://www.instagm.com");
+//checkUrl("https://www.instagram.com");
 
 module.exports = { checkUrl };
