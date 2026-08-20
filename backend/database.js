@@ -3,7 +3,7 @@ const path = require('path');
 
 const dbPath = path.resolve(__dirname, 'phishing_analyser.db');
 
-//rakapcsolqs a SQLite adatbázisra
+//rakapcsolas a SQLite adatbázisra
 const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('Error connecting to the database:', err.message);

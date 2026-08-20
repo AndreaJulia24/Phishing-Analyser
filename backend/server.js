@@ -1,8 +1,6 @@
-require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
-const checkUrl = require('./analyser');
+const {checkUrl} = require('./analyser');
 
 //adatbazissal osszekapcsolodas
 const db = require('./database');

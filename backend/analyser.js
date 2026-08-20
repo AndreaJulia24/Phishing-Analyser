@@ -1,5 +1,5 @@
-require('dotenv').config();
-
+const path = require('path');
+require('dotenv').config({path: path.resolve(__dirname, '.env')});
 const axios= require('axios');
 const dns=require('dns').promises;
 const {calculateRiskScore} = require('./riskScore');
@@ -80,9 +80,26 @@ async function checkUrl(rawURL) {
         console.log("Verdict: ", riskResult.verdict);
         console.log("Reasons: ", riskResult.reasons.join(", "));
 
+        return {
+            domain: domain,
+            ip_address: ipAddress.address,
+            country: geoData.country || "No country information available",
+            city: geoData.city || "No city information available",
+            isp: geoData.org || "No ISP information available",
+            latitude: geoData.lat || "No latitude information available",
+            longitude: geoData.lon || "No longitude information available",
+            security_score: riskResult.securityScore,
+            risk_score: riskResult.riskScore,
+            verdict: riskResult.verdict,
+            reasons: riskResult.reasons
+        };
+
     } catch (error) {
         console.error("Error during URL analysis: ", error.message);
+        throw error;
     }
 }
 
-checkUrl("https://www.instagm.com");
+//checkUrl("https://www.instagm.com");
+
+module.exports = { checkUrl };
