@@ -1,0 +1,59 @@
+# Logs & Hibakeresés
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Függőségek (Frontend & Backend rekurzívan)
+node_modules
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build kimenetek & ideiglenes fájlok
+dist
+dist-ssr
+client/dist/
+build/
+*.local
+
+# Környezeti változók, API kulcsok és titkok
+.env
+.env.*
+!.env.example
+client/.env
+client/.env.*
+server/.env
+server/.env.*
+server/.env.local
+
+# Generált jelentések & tesztfájlok (PDF / Excel export)
+*.pdf
+*.xlsx
+*.csv
+reports/
+exports/
+
+# Helyi adatbázis állományok (ha később lokális teszt DB fut)
+*.sqlite
+*.sqlite3
+*.db
+
+# Szerkesztői és IDE beállítások
+.vscode/*
+!.vscode/extensions.json
+.idea
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operációs rendszer fájlok
+.DS_Store
+Thumbs.db
+Desktop.ini
