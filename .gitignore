@@ -29,7 +29,7 @@ client/.env.*
 server/.env
 server/.env.*
 server/.env.local
-.env.local
+client/.env.local
 
 # Generált jelentések & tesztfájlok (PDF / Excel export)
 *.pdf

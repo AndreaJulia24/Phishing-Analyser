@@ -88,11 +88,54 @@ const fetchHistory = async () => {
           setLoading(false);
         }
       };
-// CSV Exportálás közvetlenül a backendről (UC4)
+  // CSV exportálás a Firestore-ból (UC4)
+      const handleExportCSV = async () => {
+          try {
+            // 1. Lekérjük a legfrissebb előzményeket a Firestore-ból
+            const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const items = querySnapshot.docs.map(docSnap => docSnap.data());
 
-  const handleExportCSV = () => {
-    window.open(`${API_BASE_URL}/api/export/csv`, '_blank');
-  }; 
+            if (items.length === 0) {
+              alert('Nincs exportálható előzmény!');
+              return;
+            }
+
+            // 2. CSV fejléc (angol nyelvű Excelhez univerzális vesszővel)
+            const headers = ['"Idő"', '"Típus"', '"Vizsgált tartalom"', '"Kockázati pontszám"', '"Besorolás"'];
+
+            // 3. Adatsorok generálása
+            const rows = items.map(item => [
+              `"${item.timestamp || ''}"`,
+              `"${item.type || ''}"`,
+              `"${(item.target_data || '').replace(/"/g, '""')}"`,
+              `"${item.risk_score || ''}"`,
+              `"${item.verdict || ''}"`
+            ]);
+
+            // 4. Tartalom összefűzése vesszővel (nincs sep=;, mert az zavarja a BOM-ot)
+            const csvString = [
+              headers.join(','),
+              ...rows.map(e => e.join(','))
+            ].join('\r\n');
+
+            // 5. Kizárólag a bináris UTF-8 BOM-ot tesszük a fájl elejére az ékezetek miatt
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `phishing_history_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+          } catch (err) {
+            console.error('Hiba a CSV exportálás közben:', err);
+            alert('Nem sikerült az adatok exportálása.');
+          }
+        };
 
 //================================================
 // Teljes előzmény törlése es egyetlen elem torlése a backend API-n keresztül (UC5)
