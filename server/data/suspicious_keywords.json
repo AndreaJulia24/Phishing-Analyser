@@ -1,0 +1,32 @@
+{
+  "suspicious": [
+    "urgent", "immediate", "act now", "act fast", "limited time", "don't miss out", 
+    "verify", "24 hours", "expires", "deadline", "action required", "restore access",
+    "click the link", "click here", "surgetos", "azonnal", "24 ora", "hatarido", 
+    "fontos", "urgent", "imediat", "actionati", "termen limitat", "verifica"
+  ],
+  "fear": [
+    "fear", "scare", "threat", "danger", "risk", "warning", "locked", "blocked", 
+    "suspended", "suspension", "compromised", "unauthorized", "penalty", "legal action", 
+    "unusual", "attempt", "failure to", "permanent", "veszely", "figyelmeztetes", 
+    "zarolva", "felfuggesztve", "letiltva", "buntetes", "szokatlan", "pericol", 
+    "avertisment", "blocat", "suspendat", "compromis", "inchis", "neobisnuit"
+  ],
+  "authority": [
+    "official", "government", "authority", "police", "bank", "security", "support", 
+    "department", "irs", "post", "courier", "security team", "customer support",
+    "rendorseg", "ugyintezes", "hivatalos", "biztonsag", "posta", "futarszolgalat",
+    "politia", "autoritate", "banca", "securitate", "posta", "curier"
+  ],
+  "financial": [
+    "bank", "account", "credit", "debit", "payment", "transaction", "card", "billing", 
+    "invoice", "wallet", "funds", "paypal", "szamla", "fizetes", "utalas", "kartya", 
+    "egyenleg", "osszeg", "cont", "plata", "tranzactie", "card", "sold", "factura"
+  ],
+  "personal_info": [
+    "password", "username", "social security", "personal information", "confidential", 
+    "pin", "credentials", "login details", "login", "identity", "identitate",
+    "jelszo", "felhasznalonev", "szemelyes adat", "bizalmas", "azonosito", "belepes",
+    "parola", "nume utilizator", "date personale", "confidential", "cod pin", "autentificare"
+  ]
+}

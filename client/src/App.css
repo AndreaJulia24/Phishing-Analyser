@@ -223,3 +223,172 @@
   height: 18px;
   object-fit: contain;
 }
+
+/* Részpontszám pill-ek */
+.breakdown-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.breakdown-pill {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #24292f;
+}
+
+.xai-title {
+  margin: 16px 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.xai-list {
+  padding-left: 20px;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Előzmény fejléc és CSV Export gomb */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.history-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #f0f6fc;
+}
+
+.export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background-color: #30363d;
+  color: #ffffff;
+  border-color: #58a6ff;
+}
+
+.export-btn-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Előzmény táblázat */
+.history-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.history-table th {
+  background: #161b22;
+  color: #8b949e;
+  padding: 12px 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #30363d;
+}
+
+.history-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #21262d;
+  color: #c9d1d9;
+}
+
+.history-table tr:last-child td {
+  border-bottom: none;
+}
+
+.truncate-text {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty-state {
+  color: #8b949e;
+  font-style: italic;
+  padding: 24px;
+  text-align: center;
+}
+
+/* ==========================================
+              RESZPONZIVITAS 
+   ========================================== */
+@media (max-width: 768px) {
+  #root {
+    padding: 16px 12px;
+  }
+
+  .header-section {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .header-title {
+    font-size: 1.45rem;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.88rem;
+  }
+
+  .result-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .card-score {
+    align-self: flex-start;
+    font-size: 1.15rem;
+  }
+
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .export-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .truncate-text {
+    max-width: 140px;
+  }
+}

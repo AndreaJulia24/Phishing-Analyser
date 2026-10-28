@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-// Ikonok beimportálása
 import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
 import notesIcon from './assets/icons/note.png';
+import exportIcon from './assets/icons/export.png';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
 function App() {
   const [activeTab, setActiveTab] = useState('analyser');
-  const [serverStatus, setServerStatus] = useState('Kapcsolódás...');
   const [inputText, setInputText] = useState('');
   const [result, setResult] = useState(null);
   const [history, setHistory] = useState([]);
@@ -18,7 +19,7 @@ function App() {
 
   const fetchHistory = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/history');
+      const res = await axios.get(`${API_BASE_URL}/api/history`)
       setHistory(res.data);
     } catch (err) {
       console.error('Előzmények betöltési hiba:', err);
@@ -26,16 +27,13 @@ function App() {
   };
 
   useEffect(() => {
-    axios.get('http://localhost:5001/api/health')
-      .then((res) => setServerStatus(res.data.message))
-      .catch(() => setServerStatus('Nem sikerült kapcsolódni a szerverhez.'));
     fetchHistory();
   }, []);
 
   const handleAnalyze = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) {
-      setErrorMsg('Kérlek adj meg egy URL-t vagy szöveget!');
+      setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
       return;
     }
 
@@ -44,29 +42,41 @@ function App() {
     setResult(null);
 
     try {
-      const response = await axios.post('http://localhost:5001/api/analyze', {
+      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
         targetData: inputText
       });
       setResult(response.data);
       fetchHistory();
     } catch (err) {
       console.error(err);
-      setErrorMsg('Hiba történt az elemzés során.');
+      setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a backend kapcsolatot.');
     } finally {
       setLoading(false);
     }
   };
 
-  // Dinamikus inline stílusok a kockázati kategóriákhoz
+// CSV Exportálás közvetlenül a backendről (UC4)
+  const handleExportCSV = () => {
+    window.open(`${API_BASE_URL}/api/export/csv`, '_blank');
+  }; 
+
+
   const getBadgeStyle = (verdict) => {
-    if (verdict === 'Phishing') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
-    if (verdict === 'Suspicious') return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
+    if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
+    if (verdict === 'Gyanús') return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
     return { bg: '#dafbe1', border: '#3fb950', text: '#238636' };
+  };
+
+  const getTypeBadgeClass = (type) => {
+    if (type === 'Telefonszám') return 'type-badge phone';
+    if (type === 'URL') return 'type-badge url';
+    if (type === 'E-mail') return 'type-badge email';
+    return 'type-badge text';
   };
 
   return (
     <div className="app-container">
-      {/* Header */}
+      {/* Fejléc */}
       <header className="header-section">
         <div className="header-icon">
           <img src={encryptedIcon} alt="Shield Icon" className="ui-icon-header" />
@@ -76,14 +86,14 @@ function App() {
         </div>
       </header>
 
-      {/* NAVIGATION TABS */}
+      {/* Navigation tabs*/}
       <nav className="tabs-nav">
         <button
           className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
           onClick={() => setActiveTab('analyser')}
         >
           <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
-          Elemző (Dashboard)
+          Adathalász Elemző
         </button>
         <button
           className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
@@ -93,14 +103,15 @@ function App() {
           Előzmények ({history.length})
         </button>
       </nav>
-      {/* 1. TAB: PHISHING ANALYSER */}
+
+      {/* 1. TAB: Phishing Analyser */}
       {activeTab === 'analyser' && (
         <section>
           <form className="analyser-form" onSubmit={handleAnalyze}>
             <textarea
               className="analyser-textarea"
               rows={4}
-              placeholder="Másolj be egy ellenőrizendő URL-t, SMS-t vagy gyanús e-mail szöveget..."
+              placeholder="Másolj be egy ellenőrizendő URL-t, SMS-t, e-mail szöveget vagy gyanús nemzetközi telefonszámot..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -122,19 +133,48 @@ function App() {
               }}
             >
               <div className="result-card-header">
-                <h3 style={{ margin: 0, color: getBadgeStyle(result.verdict).text }}>
-                  Besorolás: {result.verdict}
-                </h3>
-                <span style={{ fontSize: '1.25rem', fontWeight: '700', color: getBadgeStyle(result.verdict).text }}>
+                <div>
+                  <h3 style={{ margin: 0, color: getBadgeStyle(result.verdict).text }}>
+                    Besorolás: {result.verdict}
+                  </h3>
+                  <div style={{ marginTop: '6px' }}>
+                    <span className={getTypeBadgeClass(result.type)}>
+                      {result.type}
+                    </span>
+                  </div>
+                </div>
+                <span style={{ fontSize: '1.35rem', fontWeight: '700', color: getBadgeStyle(result.verdict).text }}>
                   {result.risk_score} / 100 pont
                 </span>
               </div>
 
-              <p className="result-type-tag">
-                <strong>Észlelt típus:</strong> {result.type}
-              </p>
+              {/* Részletes pontszám bontás (ha elérhető) */}
+              {result.breakdown && (
+                <div className="breakdown-container">
+                  {result.breakdown.phone_score !== undefined && result.breakdown.phone_score > 0 && (
+                    <span className="breakdown-pill">
+                      Telefonszám kockázat: <strong>{result.breakdown.phone_score} pont</strong>
+                    </span>
+                  )}
+                  {result.breakdown.url_score !== undefined && result.breakdown.url_score > 0 && (
+                    <span className="breakdown-pill">
+                      URL kockázat: <strong>{result.breakdown.url_score} pont</strong>
+                    </span>
+                  )}
+                  {result.breakdown.text_score !== undefined && result.breakdown.text_score > 0 && (
+                    <span className="breakdown-pill">
+                      Szöveges kockázat: <strong>{result.breakdown.text_score} pont</strong>
+                    </span>
+                  )}
+                  {result.breakdown.sender_score !== undefined && result.breakdown.sender_score > 0 && (
+                    <span className="breakdown-pill">
+                      Feladói kockázat: <strong>{result.breakdown.sender_score} pont</strong>
+                    </span>
+                  )}
+                </div>
+              )}
 
-              <h4 className="xai-title">XAI Magyarázat (Aktivált szabályok):</h4>
+              <h4 className="xai-title">XAI Magyarázat (Aktivált szabályok és indoklások):</h4>
               <ul className="xai-list">
                 {result.flags.map((flag, idx) => (
                   <li key={idx}>{flag}</li>
@@ -148,6 +188,16 @@ function App() {
       {/* 2. TAB: SCAN HISTORY */}
       {activeTab === 'history' && (
         <section>
+          <div className="history-header">
+            <h3 className="history-title">Korábbi vizsgálatok naplója</h3>
+            {history.length > 0 && (
+              <button className="export-btn" onClick={handleExportCSV}>
+                <img src={exportIcon} alt="Export" className="export-btn-icon" />
+                Exportálás CSV-be
+              </button>
+            )}
+          </div>
+
           {history.length === 0 ? (
             <div className="history-table-wrapper empty-state">
               Még nem történt vizsgálat ebben a munkamenetben.
@@ -168,7 +218,11 @@ function App() {
                   {history.map((item) => (
                     <tr key={item.id}>
                       <td style={{ color: '#8b949e', whiteSpace: 'nowrap' }}>{item.timestamp}</td>
-                      <td style={{ whiteSpace: 'nowrap' }}>{item.type}</td>
+                      <td>
+                        <span className={getTypeBadgeClass(item.type)}>
+                          {item.type}
+                        </span>
+                      </td>
                       <td className="truncate-text">{item.target_data}</td>
                       <td style={{ fontWeight: '700' }}>{item.risk_score}</td>
                       <td>
