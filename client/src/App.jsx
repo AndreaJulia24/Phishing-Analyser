@@ -7,6 +7,19 @@ import analyserIcon from './assets/icons/analyser.png';
 import notesIcon from './assets/icons/note.png';
 import exportIcon from './assets/icons/export.png';
 
+// Firebase Firestore hivatkozások
+import { db } from './firebase';
+import { 
+  collection, 
+  addDoc, 
+  getDocs, 
+  deleteDoc, 
+  doc, 
+  query, 
+  orderBy, 
+  serverTimestamp 
+} from 'firebase/firestore';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
 function App() {
@@ -17,12 +30,17 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  const fetchHistory = async () => {
+const fetchHistory = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/history`)
-      setHistory(res.data);
+      const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const items = querySnapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+      setHistory(items);
     } catch (err) {
-      console.error('Előzmények betöltési hiba:', err);
+      console.error('Firestore előzmények lekérési hiba:', err);
     }
   };
 
@@ -30,30 +48,46 @@ function App() {
     fetchHistory();
   }, []);
 
-  const handleAnalyze = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) {
-      setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
-      return;
-    }
+{/* analyze api vegpont a kliens oldalon */}
+    const handleAnalyze = async (e) => {
+        e.preventDefault();
+        if (!inputText.trim()) {
+          setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
+          return;
+        }
 
-    setLoading(true);
-    setErrorMsg('');
-    setResult(null);
+        setLoading(true);
+        setErrorMsg('');
+        setResult(null);
 
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-        targetData: inputText
-      });
-      setResult(response.data);
-      fetchHistory();
-    } catch (err) {
-      console.error(err);
-      setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a backend kapcsolatot.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        try {
+          // 1. Elemzés a Node.js backenddel
+          const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
+            targetData: inputText
+          });
+          setResult(response.data);
+
+          // 2. Mentés a Firestore felhőbe
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
+
+          await addDoc(collection(db, 'history'), {
+            target_data: inputText.trim(),
+            type: response.data.type,
+            risk_score: response.data.risk_score,
+            verdict: response.data.verdict,
+            timestamp: timeStr,
+            createdAt: serverTimestamp()
+          });
+
+          fetchHistory();// 3. Táblázat újratöltése a felhőből
+        } catch (err) {
+          console.error(err);
+          setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a kapcsolatot.');
+        } finally {
+          setLoading(false);
+        }
+      };
 // CSV Exportálás közvetlenül a backendről (UC4)
 
   const handleExportCSV = () => {
@@ -63,26 +97,27 @@ function App() {
 //================================================
 // Teljes előzmény törlése es egyetlen elem torlése a backend API-n keresztül (UC5)
 //================================================
-const handleClearAllHistory = async () => {
+
+  const handleClearAllHistory = async () => {
     if (!window.confirm('Biztosan törölni szeretnéd a teljes vizsgálati naplót?')) return;
     try {
-      await axios.delete(`${API_BASE_URL}/api/history`);
+      const querySnapshot = await getDocs(collection(db, 'history'));
+      const deletePromises = querySnapshot.docs.map(docSnap => deleteDoc(doc(db, 'history', docSnap.id)));
+      await Promise.all(deletePromises);
       setHistory([]);
     } catch (err) {
-      console.error('Hiba a teljes törléskor:', err);
+      console.error('Hiba a Firestore törlésekor:', err);
     }
   };
 
-  // Egyetlen rekord törlése
-  const handleDeleteItem = async (id) => {
+  const handleDeleteItem = async (docId) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/history/${id}`);
-      setHistory(prev => prev.filter(item => item.id !== id));
+      await deleteDoc(doc(db, 'history', docId));
+      setHistory(prev => prev.filter(item => item.id !== docId));
     } catch (err) {
       console.error('Hiba az elem törlésekor:', err);
     }
   };
-
 
   const getBadgeStyle = (verdict) => {
     if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
