@@ -6,23 +6,34 @@ import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
 import notesIcon from './assets/icons/note.png';
 import exportIcon from './assets/icons/export.png';
+import binIcon from './assets/icons/bin.png';
 
-// Firebase Firestore hivatkozások
-import { db } from './firebase';
+// Firebase modulok
+import { db, auth } from './firebase';
 import { 
   collection, 
   addDoc, 
   getDocs, 
   deleteDoc, 
   doc, 
+  getDoc,
   query, 
   orderBy, 
   serverTimestamp 
 } from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+// Külön bejelentkező / regisztrációs oldal komponens
+import Auth from './Auth';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+  const [userFullName, setUserFullName] = useState('');
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [activeTab, setActiveTab] = useState('analyser');
   const [inputText, setInputText] = useState('');
   const [result, setResult] = useState(null);
@@ -30,7 +41,43 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-const fetchHistory = async () => {
+  // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          const role = userDoc.exists() ? (userDoc.data().role || 'user') : 'user';
+          const fullName = userDoc.exists() && userDoc.data().fullName ? userDoc.data().fullName : (user.displayName || user.email);
+          
+          setCurrentUser(user);
+          setUserRole(role);
+          setUserFullName(fullName);
+        } catch (err) {
+          console.error('Hiba a szerepkör lekérésekor:', err);
+          setCurrentUser(user);
+          setUserRole('user');
+          setUserFullName(user.displayName || user.email);
+        }
+      } else {
+        // Kijelentkezéskor mindent lenullázunk
+        setCurrentUser(null);
+        setUserRole(null);
+        setUserFullName('');
+        setHistory([]);
+        setResult(null);
+        setInputText('');
+      }
+      setAuthLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // 2. Előzmények betöltése - CSAK ADMIN JOGOSULTSÁG ESETÉN
+  const fetchHistory = async () => {
+    if (userRole !== 'admin') return;
+
     try {
       const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
@@ -45,107 +92,108 @@ const fetchHistory = async () => {
   };
 
   useEffect(() => {
-    fetchHistory();
-  }, []);
+    if (currentUser && userRole === 'admin') {
+      fetchHistory();
+    }
+  }, [currentUser, userRole]);
 
-{/* analyze api vegpont a kliens oldalon */}
-    const handleAnalyze = async (e) => {
-        e.preventDefault();
-        if (!inputText.trim()) {
-          setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
-          return;
-        }
+  // 3. Elemzés végrehajtása
+  const handleAnalyze = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) {
+      setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
+      return;
+    }
 
-        setLoading(true);
-        setErrorMsg('');
-        setResult(null);
+    setLoading(true);
+    setErrorMsg('');
+    setResult(null);
 
-        try {
-          // 1. Elemzés a Node.js backenddel
-          const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-            targetData: inputText
-          });
-          setResult(response.data);
+    try {
+      // Backend API hívás
+      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
+        targetData: inputText
+      });
+      setResult(response.data);
 
-          // 2. Mentés a Firestore felhőbe
-          const now = new Date();
-          const timeStr = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
 
-          await addDoc(collection(db, 'history'), {
-            target_data: inputText.trim(),
-            type: response.data.type,
-            risk_score: response.data.risk_score,
-            verdict: response.data.verdict,
-            timestamp: timeStr,
-            createdAt: serverTimestamp()
-          });
+      // Mentés Firestore-ba a felhasználó adataival összekötve
+      await addDoc(collection(db, 'history'), {
+        target_data: inputText.trim(),
+        type: response.data.type,
+        risk_score: response.data.risk_score,
+        verdict: response.data.verdict,
+        timestamp: timeStr,
+        userId: currentUser ? currentUser.uid : 'vendeg',
+        userName: userFullName || (currentUser ? currentUser.email : 'Ismeretlen'),
+        userEmail: currentUser ? currentUser.email : 'Ismeretlen',
+        createdAt: serverTimestamp()
+      });
 
-          fetchHistory();// 3. Táblázat újratöltése a felhőből
-        } catch (err) {
-          console.error(err);
-          setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a kapcsolatot.');
-        } finally {
-          setLoading(false);
-        }
-      };
-  // CSV exportálás a Firestore-ból (UC4)
-      const handleExportCSV = async () => {
-          try {
-            // 1. Lekérjük a legfrissebb előzményeket a Firestore-ból
-            const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const items = querySnapshot.docs.map(docSnap => docSnap.data());
+      // Ha admin végezte az elemzést, frissítjük a naplót
+      if (userRole === 'admin') {
+        fetchHistory();
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a kapcsolatot.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            if (items.length === 0) {
-              alert('Nincs exportálható előzmény!');
-              return;
-            }
+  // 4. CSV exportálás az Admin számára
+  const handleExportCSV = async () => {
+    try {
+      const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const items = querySnapshot.docs.map(docSnap => docSnap.data());
 
-            // 2. CSV fejléc (angol nyelvű Excelhez univerzális vesszővel)
-            const headers = ['"Idő"', '"Típus"', '"Vizsgált tartalom"', '"Kockázati pontszám"', '"Besorolás"'];
+      if (items.length === 0) {
+        alert('Nincs exportálható előzmény!');
+        return;
+      }
 
-            // 3. Adatsorok generálása
-            const rows = items.map(item => [
-              `"${item.timestamp || ''}"`,
-              `"${item.type || ''}"`,
-              `"${(item.target_data || '').replace(/"/g, '""')}"`,
-              `"${item.risk_score || ''}"`,
-              `"${item.verdict || ''}"`
-            ]);
+      const headers = ['"Idő"', '"Típus"', '"Vizsgált tartalom"', '"Kockázati pontszám"', '"Besorolás"', '"Felhasználó"'];
 
-            // 4. Tartalom összefűzése vesszővel (nincs sep=;, mert az zavarja a BOM-ot)
-            const csvString = [
-              headers.join(','),
-              ...rows.map(e => e.join(','))
-            ].join('\r\n');
+      const rows = items.map(item => [
+        `"${item.timestamp || ''}"`,
+        `"${item.type || ''}"`,
+        `"${(item.target_data || '').replace(/"/g, '""')}"`,
+        `"${item.risk_score || ''}"`,
+        `"${item.verdict || ''}"`,
+        `"${item.userName || item.userEmail || 'Vendég'}"`
+      ]);
 
-            // 5. Kizárólag a bináris UTF-8 BOM-ot tesszük a fájl elejére az ékezetek miatt
-            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-            const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
+      const csvString = [
+        headers.join(','),
+        ...rows.map(e => e.join(','))
+      ].join('\r\n');
 
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', `phishing_history_${new Date().toISOString().slice(0, 10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-          } catch (err) {
-            console.error('Hiba a CSV exportálás közben:', err);
-            alert('Nem sikerült az adatok exportálása.');
-          }
-        };
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
 
-//================================================
-// Teljes előzmény törlése es egyetlen elem torlése a backend API-n keresztül (UC5)
-//================================================
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `phishing_history_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Hiba a CSV exportálás közben:', err);
+      alert('Nem sikerült az adatok exportálása.');
+    }
+  };
 
+  // 5. Előzmények törlése az Admin számára
   const handleClearAllHistory = async () => {
     if (!window.confirm('Biztosan törölni szeretnéd a teljes vizsgálati naplót?')) return;
     try {
-      const querySnapshot = await getDocs(collection(db, 'history'));
-      const deletePromises = querySnapshot.docs.map(docSnap => deleteDoc(doc(db, 'history', docSnap.id)));
+      const deletePromises = history.map(item => deleteDoc(doc(db, 'history', item.id)));
       await Promise.all(deletePromises);
       setHistory([]);
     } catch (err) {
@@ -162,6 +210,14 @@ const fetchHistory = async () => {
     }
   };
 
+  // ======================================
+  //         KIJELENTKEZÉS FUNKCIÓ
+  // ======================================
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
+
   const getBadgeStyle = (verdict) => {
     if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
     if (verdict === 'Gyanús') return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
@@ -175,37 +231,83 @@ const fetchHistory = async () => {
     return 'type-badge text';
   };
 
+  // Betöltési képernyő a kapcsolat felállásáig
+  if (authLoading) {
+    return <div style={{ color: '#fff', textAlign: 'center', marginTop: '50px' }}>Betöltés...</div>;
+  }
+
+  // HA NINCS BEJELENTKEZVE: CSAK AZ AUTH OLDAL JELENIK MEG!
+  if (!currentUser) {
+    return (
+      <Auth 
+        onLoginSuccess={(user, role, fullName) => {
+          setCurrentUser(user);
+          setUserRole(role);
+          setUserFullName(fullName);
+        }} 
+      />
+    );
+  }
+
+  // HA BE VAN JELENTKEZVE: AZ ALKALMAZÁS FELÜLETE JELENIK MEG
   return (
     <div className="app-container">
-      {/* Fejléc */}
-      <header className="header-section">
-        <div className="header-icon">
-          <img src={encryptedIcon} alt="Shield Icon" className="ui-icon-header" />
+      {/* Fejléc a belépett felhasználó adataival és kilépés gombbal */}
+      <header className="header-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div className="header-icon">
+            <img src={encryptedIcon} alt="Shield Icon" className="ui-icon-header" />
+          </div>
+          <div>
+            <h1 className="header-title">Phishing Analyser</h1>
+          </div>
         </div>
-        <div>
-          <h1 className="header-title">Phishing Analyser</h1>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div className="user-badge">
+            <span style={{ fontWeight: '600' }}>{userFullName || currentUser.email}</span>
+            <span className={`role-pill ${userRole}`}>
+              {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
+            </span>
+          </div>
+          <button 
+            onClick={handleLogout}
+            style={{
+              background: 'transparent',
+              border: '1px solid #30363d',
+              color: '#8b949e',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              cursor: 'pointer'
+            }}
+          >
+            Kijelentkezés
+          </button>
         </div>
       </header>
 
-      {/* Navigation tabs*/}
-      <nav className="tabs-nav">
-        <button
-          className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
-          onClick={() => setActiveTab('analyser')}
-        >
-          <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
-          Adathalász Elemző
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('history'); fetchHistory(); }}
-        >
-          <img src={notesIcon} alt="History" className="ui-icon-tab" />
-          Előzmények ({history.length})
-        </button>
-      </nav>
+      {/* Navigációs fülek: KIZÁRÓLAG ADMIN ESETÉN JELENIK MEG A NAVBAR */}
+      {userRole === 'admin' && (
+        <nav className="tabs-nav">
+          <button
+            className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analyser')}
+          >
+            <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
+            Adathalász Elemző
+          </button>
 
-      {/* 1. TAB: Phishing Analyser */}
+          <button
+            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('history'); fetchHistory(); }}
+          >
+            <img src={notesIcon} alt="History" className="ui-icon-tab" />
+            Előzmények ({history.length})
+          </button>
+        </nav>
+      )}
+
+      {/* 1. TAB: Elemző (Mindkét szerepkör használhatja) */}
       {activeTab === 'analyser' && (
         <section>
           <form className="analyser-form" onSubmit={handleAnalyze}>
@@ -249,7 +351,6 @@ const fetchHistory = async () => {
                 </span>
               </div>
 
-              {/* Részletes pontszám bontás (ha elérhető) */}
               {result.breakdown && (
                 <div className="breakdown-container">
                   {result.breakdown.phone_score !== undefined && result.breakdown.phone_score > 0 && (
@@ -286,11 +387,11 @@ const fetchHistory = async () => {
         </section>
       )}
 
-      {/* 2. TAB: SCAN HISTORY */}
-      {activeTab === 'history' && (
+      {/* 2. TAB: Előzmények (KIZÁRÓLAG ADMIN) */}
+      {activeTab === 'history' && userRole === 'admin' && (
         <section>
           <div className="history-header">
-            <h3 className="history-title">Korábbi vizsgálatok naplója</h3>
+            <h3 className="history-title">Összes vizsgálat (Adminisztrátori napló)</h3>
             {history.length > 0 && (
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button className="export-btn" onClick={handleExportCSV}>
@@ -306,7 +407,7 @@ const fetchHistory = async () => {
 
           {history.length === 0 ? (
             <div className="history-table-wrapper empty-state">
-              Még nem történt vizsgálat ebben a munkamenetben.
+              Még nem érkezett vizsgálat a rendszerbe.
             </div>
           ) : (
             <div className="history-table-wrapper">
@@ -318,6 +419,7 @@ const fetchHistory = async () => {
                     <th>Vizsgált tartalom</th>
                     <th>Pontszám</th>
                     <th>Besorolás</th>
+                    <th>Felhasználó</th>
                     <th style={{ textAlign: 'center', width: '45px' }}></th>
                   </tr>
                 </thead>
@@ -348,27 +450,16 @@ const fetchHistory = async () => {
                           {item.verdict}
                         </span>
                       </td>
+                      <td style={{ color: '#58a6ff', fontSize: '0.85rem' }}>
+                        {item.userName || item.userEmail || 'Vendég'}
+                      </td>
                       <td style={{ textAlign: 'center' }}>
                         <button
                           className="delete-row-btn"
                           title="Bejegyzés törlése"
                           onClick={() => handleDeleteItem(item.id)}
                         >
-                          {/* Szemeteskuka SVG ikon */}
-                          <svg
-                            className="trash-icon"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                          </svg>
+                          <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
                         </button>
                       </td>
                     </tr>
