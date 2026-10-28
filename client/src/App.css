@@ -1,9 +1,9 @@
 /* Fő konténer */
 #root {
   width: 100%;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 24px;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
@@ -51,6 +51,9 @@
   border-bottom: 2px solid transparent;
   color: #8b949e;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .tab-btn:hover {
@@ -156,74 +159,6 @@
   line-height: 1.6;
 }
 
-/* Előzmény táblázat (History Table) */
-.history-table-wrapper {
-  overflow-x: auto;
-  border: 1px solid #30363d;
-  border-radius: 8px;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.history-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 0.88rem;
-}
-
-.history-table th {
-  background: #161b22;
-  color: #8b949e;
-  padding: 12px 14px;
-  font-weight: 600;
-  border-bottom: 1px solid #30363d;
-}
-
-.history-table td {
-  padding: 12px 14px;
-  border-bottom: 1px solid #21262d;
-  color: #c9d1d9;
-}
-
-.history-table tr:last-child td {
-  border-bottom: none;
-}
-
-.truncate-text {
-  max-width: 320px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.empty-state {
-  color: #8b949e;
-  font-style: italic;
-  padding: 24px;
-  text-align: center;
-}
-
-/* Ikon méretek és függőleges igazítás */
-.ui-icon-header {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  display: block;
-}
-
-.tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.ui-icon-tab {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-}
-
 /* Részpontszám pill-ek */
 .breakdown-container {
   display: flex;
@@ -239,19 +174,6 @@
   background-color: rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(0, 0, 0, 0.12);
   color: #24292f;
-}
-
-.xai-title {
-  margin: 16px 0 8px 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.xai-list {
-  padding-left: 20px;
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
 }
 
 /* Előzmény fejléc és CSV Export gomb */
@@ -297,12 +219,13 @@
   display: block;
 }
 
-/* Előzmény táblázat */
+/* Előzmény táblázat (History Table) */
 .history-table-wrapper {
   overflow-x: auto;
   border: 1px solid #30363d;
   border-radius: 8px;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .history-table {
@@ -365,12 +288,6 @@
   border-color: #da3633;
 }
 
-/* Kuka SVG méretezése */
-.trash-icon {
-  width: 16px;
-  height: 16px;
-}
-
 /* Törlés gomb a sor végén */
 .delete-row-btn {
   background: transparent;
@@ -390,85 +307,24 @@
   color: #f85149;
 }
 
-/* Kuka SVG méretezése */
 .trash-icon {
   width: 16px;
   height: 16px;
 }
 
-/* ==========================================
-              RESZPONZIVITAS 
-   ========================================== */
-@media (max-width: 768px) {
-  #root {
-    padding: 16px 12px;
-  }
+.ui-icon-header {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  display: block;
+}
 
-  .header-section {
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .header-title {
-    font-size: 1.45rem;
-  }
-
-  .tab-btn {
-    padding: 8px 12px;
-    font-size: 0.88rem;
-  }
-
-  .result-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .card-score {
-    align-self: flex-start;
-    font-size: 1.15rem;
-  }
-
-  .history-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .export-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .truncate-text {
-    max-width: 140px;
-  }
-
-  .clear-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .clear-btn:hover {
-    background-color: #da3633;
-    color: #ffffff;
-    border-color: #da3633;
-  }
-
-  .delete-row-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .delete-row-btn:hover {
-    background-color: rgba(248, 81, 73, 0.15);
-    color: #f85149;
-  }
-
-  .trash-icon {
-    width: 14px;
-    height: 14px;
-  }
+.ui-icon-tab {
+  width: 24px;      
+  height: 24px;
+  object-fit: contain;
+  vertical-align: middle;
+  margin-right: 10px;
 }
 
 /* Külön Bejelentkező / Regisztrációs képernyő */
@@ -519,14 +375,457 @@
   color: #fff;
 }
 
-/* Külön Bejelentkező / Regisztrációs képernyő RESZPONZIVITÁS */
+/* ==========================================
+   TELJES SZÉLESSÉGŰ KERET ÉS TOP BAR
+   ========================================== */
+
+.layout-wrapper {
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #0d1117;
+  overflow-x: hidden;
+}
+
+.top-bar {
+  width: 100%;
+  background-color: #161b22;
+  border-bottom: 1px solid #30363d;
+  padding: 14px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.top-bar-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.top-bar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #f0f6fc;
+  margin: 0;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Téma gomb */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #c9d1d9;
+  font-size: 0.85rem;
+  transition: background 0.2s;
+}
+
+.theme-toggle-btn:hover {
+  background-color: #21262d;
+}
+
+.theme-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Nyelvválasztó sáv */
+.lang-selector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #8b949e;
+  border-left: 1px solid #30363d;
+  padding-left: 14px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.lang-btn.active {
+  color: #58a6ff;
+  border-bottom: 2px solid #58a6ff;
+}
+
+.lang-divider {
+  color: #30363d;
+}
+
+/* Profil gomb és Dropdown */
+.profile-menu-container {
+  position: relative;
+  border-left: 1px solid #30363d;
+  padding-left: 14px;
+}
+
+.profile-avatar-btn {
+  background: #21262d;
+  border: 2px solid #30363d;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  padding: 0;
+}
+
+.profile-avatar-btn:hover {
+  border-color: #58a6ff;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  color: #f0f6fc;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 220px;
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  padding: 8px 0;
+  z-index: 100;
+}
+
+.dropdown-user-info {
+  padding: 8px 16px 12px 16px;
+  border-bottom: 1px solid #21262d;
+}
+
+.dropdown-name {
+  font-weight: 600;
+  color: #f0f6fc;
+  font-size: 0.9rem;
+}
+
+.dropdown-role {
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.dropdown-item {
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: #c9d1d9;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dropdown-item:hover {
+  background-color: #21262d;
+}
+
+.dropdown-item.logout {
+  color: #f85149;
+  border-top: 1px solid #21262d;
+}
+
+/* ==========================================
+   AZ ELEMZŐ DOBOZ ÉS XAI MAGYARÁZATOK
+   ========================================== */
+
+.content-area {
+  width: 100%;
+  max-width: 960px;   
+  margin: 40px auto 0 auto;
+  padding: 0 20px 40px 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.analyser-card-section {
+  width: 100%;
+  background-color: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+}
+
+.section-title {
+  display: flex;
+  align-items: center; 
+  font-size: 1.6rem;  
+  font-weight: 700;
+  color: #f0f6fc;
+  margin: 0 0 20px 0;
+  letter-spacing: -0.3px;
+}
+
+/* ==========================================
+   GYORS TESZTGOMBOK ÉS TEXTAREA AKCIÓK
+   ========================================== */
+
+.quick-test-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.quick-test-label {
+  font-size: 0.85rem;
+  color: #8b949e;
+  font-weight: 600;
+}
+
+.chip-btn {
+  background-color: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chip-btn:hover {
+  border-color: #58a6ff;
+  color: #58a6ff;
+  background-color: #161b22;
+  transform: translateY(-1px);
+}
+
+/* Eszköztár a szövegdoboz felett (így nem takarja el a szöveget) */
+.textarea-top-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.input-hint-label {
+  font-size: 0.82rem;
+  color: #8b949e;
+  font-weight: 500;
+}
+
+.textarea-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-icon-btn {
+  background-color: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.action-icon-btn:hover {
+  background-color: #30363d;
+  color: #58a6ff;
+  border-color: #58a6ff;
+}
+
+.action-icon-btn.clear:hover {
+  color: #f85149;
+  border-color: #f85149;
+  background-color: rgba(248, 81, 73, 0.1);
+}
+
+/* ==========================================
+               RESZPONZIVITAS 
+   ========================================== */
+
+/* Táblagép és kisebb monitorok (max 768px) */
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 12px 18px;
+  }
+
+  .top-bar-title {
+    font-size: 1.15rem;
+  }
+
+  .top-bar-right {
+    gap: 12px;
+  }
+
+  .lang-selector {
+    padding-left: 10px;
+    gap: 4px;
+  }
+
+  .profile-menu-container {
+    padding-left: 10px;
+  }
+
+  .content-area {
+    margin: 24px auto 0 auto;
+    padding: 0 16px 30px 16px;
+  }
+
+  .analyser-card-section {
+    padding: 18px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+  }
+
+  .header-section {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .header-title {
+    font-size: 1.45rem;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 0.88rem;
+  }
+
+  .result-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .export-btn,
+  .clear-btn,
+  .delete-row-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .truncate-text {
+    max-width: 140px;
+  }
+}
+
+/* Mobiltelefonok (max 480px) */
 @media (max-width: 480px) {
+  .top-bar {
+    padding: 10px 14px;
+  }
+
+  .top-bar-title {
+    font-size: 1rem;
+  }
+
+  .theme-toggle-btn span {
+    display: none;
+  }
+
+  .theme-toggle-btn {
+    padding: 6px;
+  }
+
+  .lang-selector {
+    padding-left: 8px;
+    font-size: 0.78rem;
+  }
+
+  .profile-menu-container {
+    padding-left: 8px;
+  }
+
+  .profile-avatar-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .profile-dropdown {
+    right: -10px;
+    width: 200px;
+  }
+
+  .content-area {
+    margin: 16px auto 0 auto;
+    padding: 0 12px 24px 12px;
+  }
+
+  .analyser-card-section {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .section-title {
+    font-size: 1.15rem;
+  }
+
+  .submit-btn {
+    width: 100%;
+    text-align: center;
+  }
+
   .auth-page-container {
     padding: 16px;
   }
 
   .auth-card {
-    padding: 24px;
+    padding: 20px;
   }
 
   .user-badge {
@@ -538,14 +837,12 @@
     font-size: 0.65rem;
     padding: 2px 6px;
   }
+}
 
-  .role-pill.admin {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-  }
-
-  .role-pill.user {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-  }
+/*bootstrap iconok*/
+.chip-btn i,
+.action-icon-btn i {
+  margin-right: 6px;
+  font-size: 0.95rem;
+  vertical-align: middle;
 }

@@ -7,6 +7,9 @@ import analyserIcon from './assets/icons/analyser.png';
 import notesIcon from './assets/icons/note.png';
 import exportIcon from './assets/icons/export.png';
 import binIcon from './assets/icons/bin.png';
+import sunIcon from './assets/icons/sun.png';
+import moonIcon from './assets/icons/moon.png';
+import userIcon from './assets/icons/user.png';
 
 // Firebase modulok
 import { db, auth } from './firebase';
@@ -40,6 +43,7 @@ function App() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isProfileOpen, setIsProfileOpen] = useState(false); 
 
   // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
   useEffect(() => {
@@ -251,225 +255,322 @@ function App() {
 
   // HA BE VAN JELENTKEZVE: AZ ALKALMAZÁS FELÜLETE JELENIK MEG
   return (
-    <div className="app-container">
-      {/* Fejléc a belépett felhasználó adataival és kilépés gombbal */}
-      <header className="header-section" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div className="header-icon">
-            <img src={encryptedIcon} alt="Shield Icon" className="ui-icon-header" />
-          </div>
-          <div>
-            <h1 className="header-title">Phishing Analyser</h1>
-          </div>
+    <div className="layout-wrapper">
+      {/* 1. Teljes szélességű Top Bar */}
+      <header className="top-bar">
+        <div className="top-bar-left">
+          <img src={encryptedIcon} alt="Shield Icon" className="top-bar-logo" />
+          <h1 className="top-bar-title">Adathalász elemző</h1>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="user-badge">
-            <span style={{ fontWeight: '600' }}>{userFullName || currentUser.email}</span>
-            <span className={`role-pill ${userRole}`}>
-              {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
-            </span>
+        <div className="top-bar-right">
+          {/* Téma gomb */}
+          <button className="theme-toggle-btn" title="Váltás témára">
+            <img src={sunIcon} alt="Theme" className="theme-icon" />
+            <span>Világos mód</span>
+          </button>
+
+          {/* Nyelvválasztó */}
+          <div className="lang-selector">
+            <button className="lang-btn active">HU</button>
+            <span className="lang-divider">|</span>
+            <button className="lang-btn">EN</button>
+            <span className="lang-divider">|</span>
+            <button className="lang-btn">RO</button>
           </div>
-          <button 
-            onClick={handleLogout}
-            style={{
-              background: 'transparent',
-              border: '1px solid #30363d',
-              color: '#8b949e',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              cursor: 'pointer'
-            }}
-          >
-            Kijelentkezés
-          </button>
-        </div>
-      </header>
 
-      {/* Navigációs fülek: KIZÁRÓLAG ADMIN ESETÉN JELENIK MEG A NAVBAR */}
-      {userRole === 'admin' && (
-        <nav className="tabs-nav">
-          <button
-            className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analyser')}
-          >
-            <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
-            Adathalász Elemző
-          </button>
-
-          <button
-            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('history'); fetchHistory(); }}
-          >
-            <img src={notesIcon} alt="History" className="ui-icon-tab" />
-            Előzmények ({history.length})
-          </button>
-        </nav>
-      )}
-
-      {/* 1. TAB: Elemző (Mindkét szerepkör használhatja) */}
-      {activeTab === 'analyser' && (
-        <section>
-          <form className="analyser-form" onSubmit={handleAnalyze}>
-            <textarea
-              className="analyser-textarea"
-              rows={4}
-              placeholder="Másolj be egy ellenőrizendő URL-t, SMS-t, e-mail szöveget vagy gyanús nemzetközi telefonszámot..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-            />
-
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? 'Elemzés folyamatban...' : 'Vizsgálat indítása'}
-            </button>
-          </form>
-
-          {errorMsg && <div className="error-banner">{errorMsg}</div>}
-
-          {result && (
-            <div
-              className="result-card"
-              style={{
-                backgroundColor: getBadgeStyle(result.verdict).bg,
-                border: `1px solid ${getBadgeStyle(result.verdict).border}`,
-                color: '#24292f'
-              }}
+          {/* Profil avatar és lenyíló ablak */}
+          <div className="profile-menu-container">
+            <button 
+              className="profile-avatar-btn" 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              title="Profil menü"
             >
-              <div className="result-card-header">
-                <div>
-                  <h3 style={{ margin: 0, color: getBadgeStyle(result.verdict).text }}>
-                    Besorolás: {result.verdict}
-                  </h3>
-                  <div style={{ marginTop: '6px' }}>
-                    <span className={getTypeBadgeClass(result.type)}>
-                      {result.type}
-                    </span>
-                  </div>
+              <img src={userIcon} alt="Profil" className="avatar-img" />
+            </button>
+
+            {isProfileOpen && (
+              <div className="profile-dropdown">
+                <div className="dropdown-user-info">
+                  <div className="dropdown-name">{userFullName || currentUser.email}</div>
+                  <span className={`role-pill ${userRole} dropdown-role`}>
+                    {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
+                  </span>
                 </div>
-                <span style={{ fontSize: '1.35rem', fontWeight: '700', color: getBadgeStyle(result.verdict).text }}>
-                  {result.risk_score} / 100 pont
-                </span>
-              </div>
 
-              {result.breakdown && (
-                <div className="breakdown-container">
-                  {result.breakdown.phone_score !== undefined && result.breakdown.phone_score > 0 && (
-                    <span className="breakdown-pill">
-                      Telefonszám kockázat: <strong>{result.breakdown.phone_score} pont</strong>
-                    </span>
-                  )}
-                  {result.breakdown.url_score !== undefined && result.breakdown.url_score > 0 && (
-                    <span className="breakdown-pill">
-                      URL kockázat: <strong>{result.breakdown.url_score} pont</strong>
-                    </span>
-                  )}
-                  {result.breakdown.text_score !== undefined && result.breakdown.text_score > 0 && (
-                    <span className="breakdown-pill">
-                      Szöveges kockázat: <strong>{result.breakdown.text_score} pont</strong>
-                    </span>
-                  )}
-                  {result.breakdown.sender_score !== undefined && result.breakdown.sender_score > 0 && (
-                    <span className="breakdown-pill">
-                      Feladói kockázat: <strong>{result.breakdown.sender_score} pont</strong>
-                    </span>
-                  )}
-                </div>
-              )}
-
-              <h4 className="xai-title">XAI Magyarázat (Aktivált szabályok és indoklások):</h4>
-              <ul className="xai-list">
-                {result.flags.map((flag, idx) => (
-                  <li key={idx}>{flag}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* 2. TAB: Előzmények (KIZÁRÓLAG ADMIN) */}
-      {activeTab === 'history' && userRole === 'admin' && (
-        <section>
-          <div className="history-header">
-            <h3 className="history-title">Összes vizsgálat (Adminisztrátori napló)</h3>
-            {history.length > 0 && (
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button className="export-btn" onClick={handleExportCSV}>
-                  <img src={exportIcon} alt="Export" className="export-btn-icon" />
-                  Exportálás CSV-be
+                <button 
+                  className="dropdown-item" 
+                  onClick={() => alert('Profilkép feltöltése hamarosan elérhető!')}
+                >
+                  Profilkép módosítása
                 </button>
-                <button className="clear-btn" onClick={handleClearAllHistory}>
-                  Napló ürítése
+
+                <button 
+                  className="dropdown-item logout" 
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  Kijelentkezés
                 </button>
               </div>
             )}
           </div>
+        </div>
+      </header>
 
-          {history.length === 0 ? (
-            <div className="history-table-wrapper empty-state">
-              Még nem érkezett vizsgálat a rendszerbe.
+      {/* 2. KÜLÖN SECTION: Az elemző és az adatok területe (középre zárt dobozban) */}
+      <main className="content-area">
+        {userRole === 'admin' && (
+          <nav className="tabs-nav">
+            <button
+              className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
+              onClick={() => setActiveTab('analyser')}
+            >
+              <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
+              Adathalász Elemző
+            </button>
+
+            <button
+              className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+              onClick={() => { setActiveTab('history'); fetchHistory(); }}
+            >
+              <img src={notesIcon} alt="History" className="ui-icon-tab" />
+              Előzmények ({history.length})
+            </button>
+          </nav>
+        )}
+
+        {/* SECTION: AZ ELEMZO ES AZ XAI MAGYARAZATOK */}
+        {activeTab === 'analyser' && (
+          <section className="analyser-card-section">
+            <div className="section-header-row">
+              <h2 className="section-title">
+                <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
+                Adathalászat és Csalás Elemző
+              </h2>
             </div>
-          ) : (
-            <div className="history-table-wrapper">
-              <table className="history-table">
-                <thead>
-                  <tr>
-                    <th>Idő</th>
-                    <th>Típus</th>
-                    <th>Vizsgált tartalom</th>
-                    <th>Pontszám</th>
-                    <th>Besorolás</th>
-                    <th>Felhasználó</th>
-                    <th style={{ textAlign: 'center', width: '45px' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((item) => (
-                    <tr key={item.id}>
-                      <td style={{ color: '#8b949e', whiteSpace: 'nowrap' }}>{item.timestamp}</td>
-                      <td>
-                        <span className={getTypeBadgeClass(item.type)}>
-                          {item.type}
-                        </span>
-                      </td>
-                      <td className="truncate-text">{item.target_data}</td>
-                      <td style={{ fontWeight: '700' }}>{item.risk_score}</td>
-                      <td>
-                        <span
-                          style={{
-                            padding: '3px 10px',
-                            borderRadius: '12px',
-                            fontSize: '0.8rem',
-                            fontWeight: '600',
-                            display: 'inline-block',
-                            backgroundColor: getBadgeStyle(item.verdict).bg,
-                            color: getBadgeStyle(item.verdict).text,
-                            border: `1px solid ${getBadgeStyle(item.verdict).border}`
-                          }}
-                        >
-                          {item.verdict}
-                        </span>
-                      </td>
-                      <td style={{ color: '#58a6ff', fontSize: '0.85rem' }}>
-                        {item.userName || item.userEmail || 'Vendég'}
-                      </td>
-                      <td style={{ textAlign: 'center' }}>
-                        <button
-                          className="delete-row-btn"
-                          title="Bejegyzés törlése"
-                          onClick={() => handleDeleteItem(item.id)}
-                        >
-                          <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
-                        </button>
-                      </td>
-                    </tr>
+
+            {/* UX Gyors tesztminták */}
+            <div className="quick-test-bar">
+              <span className="quick-test-label">Próbáld ki egy mintával:</span>
+              <button 
+                type="button" 
+                className="chip-btn"
+                onClick={() => setInputText('https://secure-login.paypal.account-verify.info/update')}
+              >
+                <i className="bi bi-link-45deg"></i> Gyanús URL
+              </button>
+              <button 
+                type="button" 
+                className="chip-btn"
+                onClick={() => setInputText('SÜRGŐS! A bankszámláját zároltuk gyanús tranzakció miatt. Lépjen be azonnal: http://otp-biztonsag-ellenorzes.com')}
+              >
+                <i className="bi bi-chat-left-dots"></i> Csaló SMS
+              </button>
+              <button 
+                type="button" 
+                className="chip-btn"
+                onClick={() => setInputText('+234 801 234 5678')}
+              >
+                <i className="bi bi-telephone-x"></i> Nemzetközi hívószám
+              </button>
+            </div>
+
+            <form className="analyser-form" onSubmit={handleAnalyze}>
+              {/* Eszköztár a szövegdoboz felett */}
+              <div className="textarea-top-toolbar">
+                <div className="textarea-actions">
+                  <button 
+                    type="button" 
+                    className="action-icon-btn" 
+                    title="Beillesztés vágólapról"
+                    onClick={async () => {
+                      try {
+                        const text = await navigator.clipboard.readText();
+                        setInputText(text);
+                      } catch (err) {
+                        alert('A vágólap elérése nem engedélyezett vagy üres.');
+                      }
+                    }}
+                  >
+                    <i className="bi bi-clipboard"></i> Beillesztés
+                  </button>
+                  {inputText && (
+                    <button 
+                      type="button" 
+                      className="action-icon-btn clear" 
+                      title="Szövegmező törlése"
+                      onClick={() => setInputText('')}
+                    >
+                      <i className="bi bi-x-lg"></i> Törlés
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Szövegbeviteli mező */}
+              <textarea
+                className="analyser-textarea"
+                rows={4}
+                placeholder="Másolj be egy ellenőrizendő URL-t, SMS-t, e-mail szöveget vagy gyanús nemzetközi telefonszámot..."
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+              />
+
+              <button type="submit" className="submit-btn" disabled={loading}>
+                {loading ? 'Elemzés folyamatban...' : 'Vizsgálat indítása'}
+              </button>
+            </form>
+
+            {errorMsg && <div className="error-banner">{errorMsg}</div>}
+
+            {result && (
+              <div
+                className="result-card"
+                style={{
+                  backgroundColor: getBadgeStyle(result.verdict).bg,
+                  border: `1px solid ${getBadgeStyle(result.verdict).border}`,
+                  color: '#24292f'
+                }}
+              >
+                <div className="result-card-header">
+                  <div>
+                    <h3 style={{ margin: 0, color: getBadgeStyle(result.verdict).text }}>
+                      Besorolás: {result.verdict}
+                    </h3>
+                    <div style={{ marginTop: '6px' }}>
+                      <span className={getTypeBadgeClass(result.type)}>
+                        {result.type}
+                      </span>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: '1.35rem', fontWeight: '700', color: getBadgeStyle(result.verdict).text }}>
+                    {result.risk_score} / 100 pont
+                  </span>
+                </div>
+
+                {result.breakdown && (
+                  <div className="breakdown-container">
+                    {result.breakdown.phone_score !== undefined && result.breakdown.phone_score > 0 && (
+                      <span className="breakdown-pill">
+                        Telefonszám kockázat: <strong>{result.breakdown.phone_score} pont</strong>
+                      </span>
+                    )}
+                    {result.breakdown.url_score !== undefined && result.breakdown.url_score > 0 && (
+                      <span className="breakdown-pill">
+                        URL kockázat: <strong>{result.breakdown.url_score} pont</strong>
+                      </span>
+                    )}
+                    {result.breakdown.text_score !== undefined && result.breakdown.text_score > 0 && (
+                      <span className="breakdown-pill">
+                        Szöveges kockázat: <strong>{result.breakdown.text_score} pont</strong>
+                      </span>
+                    )}
+                    {result.breakdown.sender_score !== undefined && result.breakdown.sender_score > 0 && (
+                      <span className="breakdown-pill">
+                        Feladói kockázat: <strong>{result.breakdown.sender_score} pont</strong>
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <h4 className="xai-title">XAI Magyarázat (Aktivált szabályok és indoklások):</h4>
+                <ul className="xai-list">
+                  {result.flags.map((flag, idx) => (
+                    <li key={idx}>{flag}</li>
                   ))}
-                </tbody>
-              </table>
+                </ul>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Előzmények szekció (Admin) */}
+        {activeTab === 'history' && userRole === 'admin' && (
+          <section className="history-section">
+            <div className="history-header">
+              <h3 className="history-title">Összes vizsgálat (Adminisztrátori napló)</h3>
+              {history.length > 0 && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button className="export-btn" onClick={handleExportCSV}>
+                    <img src={exportIcon} alt="Export" className="export-btn-icon" />
+                    Exportálás CSV-be
+                  </button>
+                  <button className="clear-btn" onClick={handleClearAllHistory}>
+                    Napló ürítése
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </section>
-      )}
+
+            {history.length === 0 ? (
+              <div className="history-table-wrapper empty-state">
+                Még nem érkezett vizsgálat a rendszerbe.
+              </div>
+            ) : (
+              <div className="history-table-wrapper">
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>Idő</th>
+                      <th>Típus</th>
+                      <th>Vizsgált tartalom</th>
+                      <th>Pontszám</th>
+                      <th>Besorolás</th>
+                      <th>Felhasználó</th>
+                      <th style={{ textAlign: 'center', width: '45px' }}></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((item) => (
+                      <tr key={item.id}>
+                        <td style={{ color: '#8b949e', whiteSpace: 'nowrap' }}>{item.timestamp}</td>
+                        <td>
+                          <span className={getTypeBadgeClass(item.type)}>
+                            {item.type}
+                          </span>
+                        </td>
+                        <td className="truncate-text">{item.target_data}</td>
+                        <td style={{ fontWeight: '700' }}>{item.risk_score}</td>
+                        <td>
+                          <span
+                            style={{
+                              padding: '3px 10px',
+                              borderRadius: '12px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              display: 'inline-block',
+                              backgroundColor: getBadgeStyle(item.verdict).bg,
+                              color: getBadgeStyle(item.verdict).text,
+                              border: `1px solid ${getBadgeStyle(item.verdict).border}`
+                            }}
+                          >
+                            {item.verdict}
+                          </span>
+                        </td>
+                        <td style={{ color: '#58a6ff', fontSize: '0.85rem' }}>
+                          {item.userName || item.userEmail || 'Vendég'}
+                        </td>
+                        <td style={{ textAlign: 'center' }}>
+                          <button
+                            className="delete-row-btn"
+                            title="Bejegyzés törlése"
+                            onClick={() => handleDeleteItem(item.id)}
+                          >
+                            <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+      </main>
     </div>
   );
 }
