@@ -78,17 +78,23 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Előzmények betöltése - CSAK ADMIN JOGOSULTSÁG ESETÉN
+  // 2. Előzmények betöltése: Admin az összeset látja, End-User csak a sajátját
   const fetchHistory = async () => {
-    if (userRole !== 'admin') return;
+    if (!currentUser) return;
 
     try {
       const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
       const querySnapshot = await getDocs(q);
-      const items = querySnapshot.docs.map(docSnap => ({
+      let items = querySnapshot.docs.map(docSnap => ({
         id: docSnap.id,
         ...docSnap.data()
       }));
+
+      // Ha sima felhasználó, csak a sajátjait tartjuk meg
+      if (userRole !== 'admin') {
+        items = items.filter(item => item.userId === currentUser.uid);
+      }
+
       setHistory(items);
     } catch (err) {
       console.error('Firestore előzmények lekérési hiba:', err);
@@ -96,7 +102,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (currentUser && userRole === 'admin') {
+    if (currentUser) {
       fetchHistory();
     }
   }, [currentUser, userRole]);
@@ -114,7 +120,6 @@ function App() {
     setResult(null);
 
     try {
-      // Backend API hívás
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
         targetData: inputText
       });
@@ -123,7 +128,6 @@ function App() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
 
-      // Mentés Firestore-ba a felhasználó adataival összekötve
       await addDoc(collection(db, 'history'), {
         target_data: inputText.trim(),
         type: response.data.type,
@@ -136,10 +140,7 @@ function App() {
         createdAt: serverTimestamp()
       });
 
-      // Ha admin végezte az elemzést, frissítjük a naplót
-      if (userRole === 'admin') {
-        fetchHistory();
-      }
+      fetchHistory();
     } catch (err) {
       console.error(err);
       setErrorMsg('Hiba történt az elemzés során. Ellenőrizd a kapcsolatot.');
@@ -214,10 +215,6 @@ function App() {
     }
   };
 
-  // ======================================
-  //         KIJELENTKEZÉS FUNKCIÓ
-  // ======================================
-
   const handleLogout = async () => {
     await signOut(auth);
   };
@@ -235,12 +232,10 @@ function App() {
     return 'type-badge text';
   };
 
-  // Betöltési képernyő a kapcsolat felállásáig
   if (authLoading) {
     return <div style={{ color: '#fff', textAlign: 'center', marginTop: '50px' }}>Betöltés...</div>;
   }
 
-  // HA NINCS BEJELENTKEZVE: CSAK AZ AUTH OLDAL JELENIK MEG!
   if (!currentUser) {
     return (
       <Auth 
@@ -253,7 +248,6 @@ function App() {
     );
   }
 
-  // HA BE VAN JELENTKEZVE: AZ ALKALMAZÁS FELÜLETE JELENIK MEG
   return (
     <div className="layout-wrapper">
       {/* 1. Teljes szélességű Top Bar */}
@@ -264,13 +258,11 @@ function App() {
         </div>
 
         <div className="top-bar-right">
-          {/* Téma gomb */}
           <button className="theme-toggle-btn" title="Váltás témára">
             <img src={sunIcon} alt="Theme" className="theme-icon" />
             <span>Világos mód</span>
           </button>
 
-          {/* Nyelvválasztó */}
           <div className="lang-selector">
             <button className="lang-btn active">HU</button>
             <span className="lang-divider">|</span>
@@ -279,7 +271,6 @@ function App() {
             <button className="lang-btn">RO</button>
           </div>
 
-          {/* Profil avatar és lenyíló ablak */}
           <div className="profile-menu-container">
             <button 
               className="profile-avatar-btn" 
@@ -320,29 +311,48 @@ function App() {
         </div>
       </header>
 
-      {/* 2. KÜLÖN SECTION: Az elemző és az adatok területe (középre zárt dobozban) */}
+      {/* 2. Középre zárt fő tartalom */}
       <main className="content-area">
-        {userRole === 'admin' && (
-          <nav className="tabs-nav">
-            <button
-              className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
-              onClick={() => setActiveTab('analyser')}
-            >
-              <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
-              Adathalász Elemző
-            </button>
+        {/* Navigációs fülek mindenkinek */}
+        <nav className="tabs-nav">
+          <button
+            className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
+            onClick={() => setActiveTab('analyser')}
+          >
+            <i className="bi bi-shield-check"></i>
+            Elemző
+          </button>
 
+          {userRole !== 'admin' && (
             <button
-              className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('history'); fetchHistory(); }}
+              className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tips')}
             >
-              <img src={notesIcon} alt="History" className="ui-icon-tab" />
-              Előzmények ({history.length})
+              <i className="bi bi-lightbulb"></i>
+              Biztonsági Útmutató
             </button>
-          </nav>
-        )}
+          )}
 
-        {/* SECTION: AZ ELEMZO ES AZ XAI MAGYARAZATOK */}
+          <button
+            className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('history'); fetchHistory(); }}
+          >
+            <i className="bi bi-clock-history"></i>
+            {userRole === 'admin' ? `Összes vizsgálat (${history.length})` : `Saját előzményeim (${history.length})`}
+          </button>
+
+          {userRole === 'admin' && (
+            <button
+              className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
+              onClick={() => setActiveTab('stats')}
+            >
+              <i className="bi bi-bar-chart-line"></i>
+              Statisztika
+            </button>
+          )}
+        </nav>
+
+        {/* 1. TAB: Elemző szekció */}
         {activeTab === 'analyser' && (
           <section className="analyser-card-section">
             <div className="section-header-row">
@@ -352,7 +362,6 @@ function App() {
               </h2>
             </div>
 
-            {/* UX Gyors tesztminták */}
             <div className="quick-test-bar">
               <span className="quick-test-label">Próbáld ki egy mintával:</span>
               <button 
@@ -379,7 +388,6 @@ function App() {
             </div>
 
             <form className="analyser-form" onSubmit={handleAnalyze}>
-              {/* Eszköztár a szövegdoboz felett */}
               <div className="textarea-top-toolbar">
                 <div className="textarea-actions">
                   <button 
@@ -410,7 +418,6 @@ function App() {
                 </div>
               </div>
 
-              {/* Szövegbeviteli mező */}
               <textarea
                 className="analyser-textarea"
                 rows={4}
@@ -487,12 +494,14 @@ function App() {
           </section>
         )}
 
-        {/* Előzmények szekció (Admin) */}
-        {activeTab === 'history' && userRole === 'admin' && (
+        {/* 2. TAB: Előzmények (Admin: összes, End-User: saját) */}
+        {activeTab === 'history' && (
           <section className="history-section">
             <div className="history-header">
-              <h3 className="history-title">Összes vizsgálat (Adminisztrátori napló)</h3>
-              {history.length > 0 && (
+              <h3 className="history-title">
+                {userRole === 'admin' ? 'Összes vizsgálat (Adminisztrátori napló)' : 'Korábbi vizsgálataim'}
+              </h3>
+              {history.length > 0 && userRole === 'admin' && (
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button className="export-btn" onClick={handleExportCSV}>
                     <img src={exportIcon} alt="Export" className="export-btn-icon" />
@@ -520,7 +529,7 @@ function App() {
                       <th>Pontszám</th>
                       <th>Besorolás</th>
                       <th>Felhasználó</th>
-                      <th style={{ textAlign: 'center', width: '45px' }}></th>
+                      {userRole === 'admin' && <th style={{ textAlign: 'center', width: '45px' }}></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -553,18 +562,20 @@ function App() {
                         <td style={{ color: '#58a6ff', fontSize: '0.85rem' }}>
                           {item.userName || item.userEmail || 'Vendég'}
                         </td>
-                        <td style={{ textAlign: 'center' }}>
-                          <button
-                            className="delete-row-btn"
-                            title="Bejegyzés törlése"
-                            onClick={() => handleDeleteItem(item.id)}
-                          >
-                            <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
-                          </button>
-                        </td>
+                        {userRole === 'admin' && (
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              className="delete-row-btn"
+                              title="Bejegyzés törlése"
+                              onClick={() => handleDeleteItem(item.id)}
+                            >
+                              <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
+                            </button>
+                          </td>
+                        )}
                       </tr>
-                    ))}
-                  </tbody>
+                      ))}
+                    </tbody>
                 </table>
               </div>
             )}
