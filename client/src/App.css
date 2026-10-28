@@ -344,6 +344,58 @@
   text-align: center;
 }
 
+/* Napló ürítése gomb */
+.clear-btn {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(248, 81, 73, 0.1);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clear-btn:hover {
+  background-color: #da3633;
+  color: #ffffff;
+  border-color: #da3633;
+}
+
+/* Kuka SVG méretezése */
+.trash-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Törlés gomb a sor végén */
+.delete-row-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8b949e;
+  transition: all 0.2s ease;
+}
+
+.delete-row-btn:hover {
+  background-color: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+}
+
+/* Kuka SVG méretezése */
+.trash-icon {
+  width: 16px;
+  height: 16px;
+}
+
 /* ==========================================
               RESZPONZIVITAS 
    ========================================== */
@@ -390,5 +442,31 @@
 
   .truncate-text {
     max-width: 140px;
+  }
+
+  .clear-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .clear-btn:hover {
+    background-color: #da3633;
+    color: #ffffff;
+    border-color: #da3633;
+  }
+
+  .delete-row-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .delete-row-btn:hover {
+    background-color: rgba(248, 81, 73, 0.15);
+    color: #f85149;
+  }
+
+  .trash-icon {
+    width: 14px;
+    height: 14px;
   }
 }

@@ -448,6 +448,19 @@ app.get('/api/history', (_req, res) => {
     res.json(scanHistory);
 });
 
+// teljes előzmény törlése
+app.delete('/api/history', (_req, res) => {
+    scanHistory = [];
+    return res.json({ message: 'Az előzmények sikeresen törölve lettek.' });
+});
+
+// egyetlen elozmény rekord törlése ID alapján
+app.delete('/api/history/:id', (req, res) => {
+    const idToDelete = Number(req.params.id);
+    scanHistory = scanHistory.filter(item => item.id !== idToDelete);
+    return res.json({ message: 'A rekord sikeresen törölve lett.' });
+});
+
 
 // CSV export API végpont (Garantált ékezethelyes UTF-16LE formátum az Excelnek)
 app.get('/api/export/csv', (_req, res) => {

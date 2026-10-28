@@ -54,11 +54,34 @@ function App() {
       setLoading(false);
     }
   };
-
 // CSV Exportálás közvetlenül a backendről (UC4)
+
   const handleExportCSV = () => {
     window.open(`${API_BASE_URL}/api/export/csv`, '_blank');
   }; 
+
+//================================================
+// Teljes előzmény törlése es egyetlen elem torlése a backend API-n keresztül (UC5)
+//================================================
+const handleClearAllHistory = async () => {
+    if (!window.confirm('Biztosan törölni szeretnéd a teljes vizsgálati naplót?')) return;
+    try {
+      await axios.delete(`${API_BASE_URL}/api/history`);
+      setHistory([]);
+    } catch (err) {
+      console.error('Hiba a teljes törléskor:', err);
+    }
+  };
+
+  // Egyetlen rekord törlése
+  const handleDeleteItem = async (id) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/history/${id}`);
+      setHistory(prev => prev.filter(item => item.id !== id));
+    } catch (err) {
+      console.error('Hiba az elem törlésekor:', err);
+    }
+  };
 
 
   const getBadgeStyle = (verdict) => {
@@ -191,10 +214,15 @@ function App() {
           <div className="history-header">
             <h3 className="history-title">Korábbi vizsgálatok naplója</h3>
             {history.length > 0 && (
-              <button className="export-btn" onClick={handleExportCSV}>
-                <img src={exportIcon} alt="Export" className="export-btn-icon" />
-                Exportálás CSV-be
-              </button>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button className="export-btn" onClick={handleExportCSV}>
+                  <img src={exportIcon} alt="Export" className="export-btn-icon" />
+                  Exportálás CSV-be
+                </button>
+                <button className="clear-btn" onClick={handleClearAllHistory}>
+                  Napló ürítése
+                </button>
+              </div>
             )}
           </div>
 
@@ -212,6 +240,7 @@ function App() {
                     <th>Vizsgált tartalom</th>
                     <th>Pontszám</th>
                     <th>Besorolás</th>
+                    <th style={{ textAlign: 'center', width: '45px' }}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -240,6 +269,29 @@ function App() {
                         >
                           {item.verdict}
                         </span>
+                      </td>
+                      <td style={{ textAlign: 'center' }}>
+                        <button
+                          className="delete-row-btn"
+                          title="Bejegyzés törlése"
+                          onClick={() => handleDeleteItem(item.id)}
+                        >
+                          {/* Szemeteskuka SVG ikon */}
+                          <svg
+                            className="trash-icon"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            <line x1="10" y1="11" x2="10" y2="17" />
+                            <line x1="14" y1="11" x2="14" y2="17" />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   ))}
