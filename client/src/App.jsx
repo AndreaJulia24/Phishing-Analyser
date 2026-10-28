@@ -151,21 +151,18 @@ function App() {
     }
   };
 
-  // 4. CSV exportálás az Admin számára
-  const handleExportCSV = async () => {
+  // 4. CSV exportálás MINDKETTO szamara
+ const handleExportCSV = async () => {
     try {
-      const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      const items = querySnapshot.docs.map(docSnap => docSnap.data());
-
-      if (items.length === 0) {
+      // A helyi history state-ből dolgozunk, így pontosan azt menti le, amit a felhasználó lát a képernyőn
+      if (history.length === 0) {
         alert('Nincs exportálható előzmény!');
         return;
       }
 
       const headers = ['"Idő"', '"Típus"', '"Vizsgált tartalom"', '"Kockázati pontszám"', '"Besorolás"', '"Felhasználó"'];
 
-      const rows = items.map(item => [
+      const rows = history.map(item => [
         `"${item.timestamp || ''}"`,
         `"${item.type || ''}"`,
         `"${(item.target_data || '').replace(/"/g, '""')}"`,
@@ -182,10 +179,14 @@ function App() {
       const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
       const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
 
+      const fileName = userRole === 'admin' 
+        ? `phishing_all_history_${new Date().toISOString().slice(0, 10)}.csv`
+        : `phishing_my_scans_${new Date().toISOString().slice(0, 10)}.csv`;
+
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `phishing_history_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', fileName);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -506,15 +507,20 @@ function App() {
               <h3 className="history-title">
                 {userRole === 'admin' ? 'Összes vizsgálat (Adminisztrátori napló)' : 'Korábbi vizsgálataim'}
               </h3>
-              {history.length > 0 && userRole === 'admin' && (
+              {history.length > 0 && (
                 <div style={{ display: 'flex', gap: '10px' }}>
+                  {/* Export gomb: mind az Adminnak, mind az end usernek elérhető */}
                   <button className="export-btn" onClick={handleExportCSV}>
                     <img src={exportIcon} alt="Export" className="export-btn-icon" />
                     Exportálás CSV-be
                   </button>
-                  <button className="clear-btn" onClick={handleClearAllHistory}>
-                    Napló ürítése
-                  </button>
+
+                  {/* Teljes napló törlése:  csak Adminnak */}
+                  {userRole === 'admin' && (
+                    <button className="clear-btn" onClick={handleClearAllHistory}>
+                      Napló ürítése
+                    </button>
+                  )}
                 </div>
               )}
             </div>
