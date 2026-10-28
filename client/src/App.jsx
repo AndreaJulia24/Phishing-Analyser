@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
+
 import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
 import notesIcon from './assets/icons/note.png';
@@ -28,6 +29,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 // Külön bejelentkező / regisztrációs oldal komponens
 import Auth from './Auth';
+import Quiz from './Quiz.jsx';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
@@ -328,8 +330,8 @@ function App() {
               className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
               onClick={() => setActiveTab('tips')}
             >
-              <i className="bi bi-lightbulb"></i>
-              Biztonsági Útmutató
+            <i className="bi bi-patch-question"></i>
+              Biztonsági Kvíz
             </button>
           )}
 
@@ -494,7 +496,10 @@ function App() {
           </section>
         )}
 
-        {/* 2. TAB: Előzmények (Admin: összes, End-User: saját) */}
+        {/* 2. TAB: KVÍZ TAB (End-User) */}
+        {activeTab === 'tips' && <Quiz />}
+
+        {/* 3. TAB: Előzmények (Admin: összes, End-User: saját) */}
         {activeTab === 'history' && (
           <section className="history-section">
             <div className="history-header">

@@ -1,0 +1,422 @@
+[
+  {
+    "id": 1,
+    "type": "URL",
+    "scenario": "A kapott link: https://secure-login.paypal.account-verify.info/update",
+    "question": "Melyik a tényleges fődomain, amely a webhelyet birtokolja?",
+    "options": [
+      "paypal.com",
+      "secure-login.paypal",
+      "account-verify.info",
+      "paypal.account-verify.info"
+    ],
+    "correctIndex": 2,
+    "explanation": "A domainhierarchiában a perjel (/) előtti utolsó két tag a valódi domain. A 'paypal' csak egy aldomain a támadó által regisztrált account-verify.info címen."
+  },
+  {
+    "id": 2,
+    "type": "SMS",
+    "scenario": "SMS érkezik: 'Csomagja érkezett! A kézbesítéshez erősítse meg címét és fizessen 850 Ft vámot: http://posta-kezbesites-info.top'",
+    "question": "Mi az elsődleges gyanús jel ebben az üzenetben?",
+    "options": [
+      "A 850 Ft-os összeg túl alacsony",
+      "A hivatalos posta nem használ szokatlan .top végződésű domaint és SMS-es fizetési linket",
+      "Az SMS-ben nincs feltüntetve a feladó keresztneve",
+      "A vámot mindig kizárólag készpénzben lehet fizetni"
+    ],
+    "correctIndex": 1,
+    "explanation": "A csomagküldős adathalászatok tipikusan olcsó, generikus TLD-ket (.top, .xyz) használnak, és sürgős fizetésre kényszerítenek bankkártyaadatok megszerzéséhez."
+  },
+  {
+    "id": 3,
+    "type": "Hívás",
+    "scenario": "Éjszaka egyetlen csörrenést kapsz egy +234-es (Nigéria) előhívóról, majd a hívás megszakad.",
+    "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást, és mit kell tenned?",
+    "options": [
+      "Man-in-the-Middle; azonnal jelszót kell cserélni",
+      "Wangiri csalás; semmiképp sem szabad visszahívni",
+      "SIM Swapping; értesíteni kell a szolgáltatót",
+      "Spear Phishing; SMS-ben vissza kell kérdezni"
+    ],
+    "correctIndex": 1,
+    "explanation": "A Wangiri (egy csörgés és leteszi) célja, hogy a kíváncsiságból visszahívó áldozatnak emelt díjas nemzetközi tarifát számlázzon ki."
+  },
+  {
+    "id": 4,
+    "type": "E-mail",
+    "scenario": "A feladó neve 'Netflix Support', de a nyers feladói e-mail cím: support@netfllix-billing-update.com.",
+    "question": "Milyen adathalász technikát figyelhetünk meg a címben?",
+    "options": [
+      "Typosquatting (elgépeléses megtévesztés duplázott 'l'-lel)",
+      "Cross-Site Scripting (XSS)",
+      "SQL Injection",
+      "DDoS támadás"
+    ],
+    "correctIndex": 0,
+    "explanation": "A támadó egy betű megkettőzésével (netfllix) próbálja elérni, hogy felületes olvasásnál eredetinek tűnjön a feladó."
+  },
+  {
+    "id": 5,
+    "type": "Alapok",
+    "scenario": "Egy weboldal címében a protokoll 'https://', és a böngésző lakat ikont mutat.",
+    "question": "Garantálja-e a lakat ikon, hogy a weboldal nem csaló adathalász felület?",
+    "options": [
+      "Igen, mert csak bejegyzett cégek kaphatnak tanúsítványt",
+      "Nem, a lakat csak a titkosított csatornát jelzi, a csalók is kérhetnek ingyenes SSL-t",
+      "Igen, a Google és a Microsoft azonnal tiltja a csaló SSL tanúsítványokat",
+      "Csak akkor, ha zöld színű a lakat"
+    ],
+    "correctIndex": 1,
+    "explanation": "A HTTPS és a lakat csak azt jelenti, hogy a kommunikáció közted és a szerver között titkosított, azt nem, hogy a szerver tulajdonosa megbízható."
+  },
+  {
+    "id": 6,
+    "type": "SMS",
+    "scenario": "SMS: 'Tisztelt Ügyfelünk! Az Ön bankszámláját biztonsági incidens miatt zároltuk. Kattintson ide a feloldáshoz: http://bank-hitelesites.net'",
+    "question": "Miért nem küld a bankod ilyen jellegű üzenetet?",
+    "options": [
+      "Mert a bankok csak postai levelet küldhetnek zárolás esetén",
+      "Mert a bankok nem mellékelnek közvetlen bejelentkezési linket biztonsági zárolásról szóló SMS-ben",
+      "Mert a bankok nem dolgoznak hétvégén",
+      "Mert az SMS nem támogatja a magyar ékezetes karaktereket"
+    ],
+    "correctIndex": 1,
+    "explanation": "A pénzintézetek szigorú biztonsági protokoll szerint sosem küldenek kattintható jelszóbekérő linket váratlan fiókzárolás ürügyén."
+  },
+  {
+    "id": 7,
+    "type": "URL",
+    "scenario": "Gyanús link egy fórumon: http://192.168.1.105/apple-id-verify/login.php",
+    "question": "Miért azonnal gyanús egy ilyen link hivatalos bejelentkezés esetén?",
+    "options": [
+      "Mert nem tartalmaz 'www' előtagot",
+      "Mert legitim szolgáltatók nem IP-címes linkeken léptetik be a felhasználókat",
+      "Mert a php kiterjesztést betiltották",
+      "Mert a portszám hiányzik a végéről"
+    ],
+    "correctIndex": 1,
+    "explanation": "A nyers IP-cím használata a domain név helyett klasszikus adathalász heurisztikai indikátor."
+  },
+  {
+    "id": 8,
+    "type": "E-mail",
+    "scenario": "E-mail érkezik a HR-től: 'Kérjük, nyissa meg a csatolt fizetesjegyzek.pdf.exe fájlt a friss bérezés megtekintéséhez.'",
+    "question": "Milyen veszélyt rejt ez a fájl?",
+    "options": [
+      "Semmilyet, mert a PDF formátum biztonságos",
+      "Kettős kiterjesztésű trójai/futtatható malware (.exe)",
+      "A fájl mérete túl kicsi lesz",
+      "A Windows automatikusan letörli a PDF-eket"
+    ],
+    "correctIndex": 1,
+    "explanation": "A kettős kiterjesztés (double extension) célja a felhasználó megtévesztése: valójában egy futtatható kártékony program (.exe)."
+  },
+  {
+    "id": 9,
+    "type": "Alapok",
+    "scenario": "Mi a legbiztonságosabb teendő, ha gyanús belépési linket kapsz egy szolgáltató nevében?",
+    "question": "Hogyan érdemes megnyitni a szolgáltatást?",
+    "options": [
+      "A linkre kattintva inkognitó ablakban",
+      "Közvetlenül a böngészőbe beírva a hivatalos domaint vagy a hivatalos mobilapplikáción keresztül",
+      "A linket továbbítva egy ismerősnek ellenőrzésre",
+      "A link megnyitása után azonnali jelszóváltoztatással"
+    ],
+    "correctIndex": 1,
+    "explanation": "Mindig közvetlenül, kézzel beírt hivatalos címen vagy alkalmazásban kell belépni, megkerülve a kapott linket."
+  },
+  {
+    "id": 10,
+    "type": "URL",
+    "scenario": "Link vizsgálata: http://facebook.com@attacker-site.com/login",
+    "question": "Hová navigál a böngésző a fenti URL megnyitásakor?",
+    "options": [
+      "A facebook.com szerverére",
+      "Az attacker-site.com szerverére",
+      "Hibaüzenetet ad, mert két domaint tartalmaz",
+      "A Google kezdőlapra"
+    ],
+    "correctIndex": 1,
+    "explanation": "Az '@' jel előtti rész autentikációs felhasználónévként értelmeződik az URL specifikáció szerint, a valós célgép az '@' utáni domain (attacker-site.com)."
+  },
+  {
+    "id": 11,
+    "type": "SMS",
+    "scenario": "SMS: 'Anya, elhagytam a telefonom, ez az új számom! Sürgősen utalj 150.000 Ft-ot albérletre erre a számlaszámra...'",
+    "question": "Hogyan hívják ezt az egyre elterjedtebb csalási formát?",
+    "options": [
+      "Whaling támadás",
+      "Hi Mum / Szia Anya csalás (családi megszemélyesítés)",
+      "DDoS zsarolás",
+      "Ransomware terjesztés"
+    ],
+    "correctIndex": 1,
+    "explanation": "A 'Szia Anya' csalás során a támadók gyermeknek adják ki magukat, és sürgősségre hivatkozva azonnali pénzátutalást kérnek."
+  },
+  {
+    "id": 12,
+    "type": "Hívás",
+    "scenario": "Egy telefonáló a bankod csalásmegelőzési osztályának adja ki magát, és arra kér, hogy telepítsd az 'AnyDesk' vagy 'TeamViewer' programot a számlád védelmében.",
+    "question": "Mi a telefonáló valódi célja?",
+    "options": [
+      "A telefonod vírusirtóval való felszerelése",
+      "Távoli hozzáférés megszerzése az eszközödhöz és a netbankodhoz",
+      "A mobilhálózat sávszélességének növelése",
+      "A bankkártya lejárati idejének ellenőrzése"
+    ],
+    "correctIndex": 1,
+    "explanation": "A távoli asztal alkalmazásokkal a csalók átveszik az irányítást a gép felett, és maguk indítanak utalásokat a belépett netbankból."
+  },
+  {
+    "id": 13,
+    "type": "E-mail",
+    "scenario": "Egy levélben az áll: 'Fizessen 500 dollár értékű Bitcoint 48 órán belül, különben a webkamerájával készült kompromittáló felvételeket elküldjük az ismerőseinek.'",
+    "question": "Mi az ilyen típusú támadás neve és valóságtartalma?",
+    "options": [
+      "Sextortion átverés; általában tömeges kamu levél valódi felvételek nélkül",
+      "Zero-day exploit; a kamera biztosan felvette",
+      "Man-in-the-Browser; azonnal fizetni kell",
+      "Rootkit fertőzés"
+    ],
+    "correctIndex": 0,
+    "explanation": "A sextortion zsarolólevelek szinte kivétel nélkül sablon üzenetek korábbi adatszivárgásokból szerzett jelszórészletekkel, valós videó nélkül."
+  },
+  {
+    "id": 14,
+    "type": "Alapok",
+    "scenario": "Melyik kétfaktoros hitelesítési (2FA) forma nyújtja a legmagasabb védelmet adathalászat ellen?",
+    "question": "Válaszd ki a legbiztonságosabb módszert:",
+    "options": [
+      "SMS-ben kapott numerikus kód",
+      "E-mailben érkező megerősítő kód",
+      "Hardveres biztonsági kulcs (FIDO2 / U2F YubiKey)",
+      "Biztonsági kérdés (pl. anyja leánykori neve)"
+    ],
+    "correctIndex": 2,
+    "explanation": "A FIDO2 hardverkulcsok közvetlenül a domainhez kötik a hitelesítést, így ha adathalász oldalra írod be az adatokat, a kulcs nem adja át a tokent."
+  },
+  {
+    "id": 15,
+    "type": "URL",
+    "scenario": "Az URL-ben az alábbi karakterek találhatók: http://www.google.com%2Flogin%2Ephp@evil-site.com",
+    "question": "Milyen kódolást használt a támadó az URL egy részének elfedésére?",
+    "options": [
+      "Base64 kódolás",
+      "URL / Hexadecimális százalékos kódolás (%xx)",
+      "AES-256 titkosítás",
+      "MD5 hash"
+    ],
+    "correctIndex": 1,
+    "explanation": "A %2F és %2E a perjel (/) és a pont (.) URL-kódolt változatai, amivel a heurisztikus szűrőket és a felhasználó szemét próbálják megtéveszteni."
+  },
+  {
+    "id": 16,
+    "type": "SMS",
+    "scenario": "SMS érkezik a közműszolgáltató nevében: 'Fizesse be elmaradását, különben ma kikapcsoljuk az áramot!'",
+    "question": "Milyen pszichológiai manipulációs elvet (Social Engineering) alkalmaz ez a támadás?",
+    "options": [
+      "Kíváncsiságkeltés",
+      "Sürgősség és félelemkeltés (Urgency & Fear)",
+      "Kölcsönösség (Reciprocity)",
+      "Társadalmi bizonyíték (Social Proof)"
+    ],
+    "correctIndex": 1,
+    "explanation": "A sürgősség és a retorziótól való félelem kikapcsolja a racionális ellenőrzést, gyors cselekvésre kényszerítve az áldozatot."
+  },
+  {
+    "id": 17,
+    "type": "Alapok",
+    "scenario": "Egy ismeretlen feladótól érkező Word dokumentum megnyitásakor egy sárga sáv jelenik meg: 'A tartalom megtekintéséhez engedélyezze a makrókat.'",
+    "question": "Mi történik, ha engedélyezed a makrókat?",
+    "options": [
+      "Gyorsabban fog betölteni a dokumentum",
+      "Káros beágyazott VBA kód (letöltő malware) futhat le a számítógépeden",
+      "Automatikusan elmenti a fájlt a felhőbe",
+      "Megváltozik a betűtípus"
+    ],
+    "correctIndex": 1,
+    "explanation": "A kártékony Office makrók a fertőzések egyik leggyakoribb forrásai; azonnal letölthetnek háttérben futó zsarolóvírust vagy kémprogramot."
+  },
+  {
+    "id": 18,
+    "type": "URL",
+    "scenario": "Egy orosz karaktert (cirill 'а') tartalmaz a latin 'a' helyett egy domain: http://ebаy.com (punycode: xn--eby-7cd.com)",
+    "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást?",
+    "options": [
+      "Homoglif / IDN adathalászat",
+      "Buffer Overflow támadás",
+      "DNS mérgezés",
+      "Clickjacking"
+    ],
+    "correctIndex": 0,
+    "explanation": "Az IDN (Internationalized Domain Name) homoglif támadás lényege, hogy más ábécék szemre azonos karaktereivel hoznak létre megtévesztő címet."
+  },
+  {
+    "id": 19,
+    "type": "Hívás",
+    "scenario": "A telefonodon bejövő hívásként a saját bankod pontos ügyfélszolgálati telefonszáma jelenik meg a kijelzőn.",
+    "question": "Biztos lehetsz benne, hogy valóban a bank hív?",
+    "options": [
+      "Igen, mert a telefonszámok nem hamisíthatók",
+      "Nem, a hívószám-kijelzés (Caller ID) könnyen hamisítható (CLI Spoofing)",
+      "Csak akkor, ha a szolgáltató neve is ki van írva",
+      "Igen, ha a hívás belföldi"
+    ],
+    "correctIndex": 1,
+    "explanation": "A Caller ID Spoofing technológiával VoIP hívásoknál bármilyen tetszőleges feladói telefonszám megjeleníthető az áldozat kijelzőjén."
+  },
+  {
+    "id": 20,
+    "type": "E-mail",
+    "scenario": "A cég vezérigazgatója nevében e-mailt kap a könyvelő, hogy azonnal utaljon át 10 millió forintot egy új partnernek szigorúan titkos szerződésre hivatkozva.",
+    "question": "Mi az ilyen típusú célzott támadás neve?",
+    "options": [
+      "BEC (Business Email Compromise) / CEO Fraud",
+      "Adware fertőzés",
+      "SQL Injection",
+      "Brute-force támadás"
+    ],
+    "correctIndex": 0,
+    "explanation": "A BEC (üzleti e-mail kompromittálás) során vezetői pozícióval élnek vissza, kihasználva a hierarchiát és a sürgősséget."
+  },
+  {
+    "id": 21,
+    "type": "Alapok",
+    "scenario": "Egy webáruházban látod a keresett 400.000 Ft-os okostelefont 45.000 Ft-ért, de kizárólag előreutalással lehet fizetni egy magánszámlára.",
+    "question": "Mi a helyzet legvalószínűbb oka?",
+    "options": [
+      "Raktárkisöprés és akció",
+      "Csaló áruház (kamu webshop) előreutalásos csalással",
+      "Gyári hibás termék",
+      "Személyre szabott kuponkedvezmény"
+    ],
+    "correctIndex": 1,
+    "explanation": "A valós piaci ártól kirívóan eltérő ár és a biztonságos fizetési módok (utánvét, kártya) hiánya a kamu webáruházak ismertetőjele."
+  },
+  {
+    "id": 22,
+    "type": "URL",
+    "scenario": "A link így néz ki: https://login.microsoftonline.com.attacker.org/oauth2",
+    "question": "Hányadik szintű domain (subdomain) itt a 'microsoftonline' szó?",
+    "options": [
+      "Fődomain (TLD)",
+      "Második szintű domain (SLD)",
+      "Harmadik szintű aldomain (subdomain)",
+      "Nem része a domainnek"
+    ],
+    "correctIndex": 2,
+    "explanation": "A domain a végéről épül fel: .org (1. szint), attacker (2. szint), microsoftonline (3. szint), login (4. szint). A tulajdonos az attacker.org."
+  },
+  {
+    "id": 23,
+    "type": "SMS",
+    "scenario": "SMS: 'Gratulálunk! Az Ön telefonszáma 5.000.000 Ft-ot nyert a Nemzeti Lottón. A nyeremény átvételéhez küldje el a személyi igazolványát.'",
+    "question": "Mi a célja az ilyen üzenetnek, ha sosem lottóztál?",
+    "options": [
+      "Személyazonosság-lopás (Identity Theft) hivatalos okmányok megszerzésével",
+      "A lottózó reklámkampánya",
+      "Rendszerhiba a telefontársaságnál",
+      "Adóbevallási kötelezettség"
+    ],
+    "correctIndex": 0,
+    "explanation": "A kamu nyereményjátékok célja a személyes okmányok megszerzése, amikkel a csalók hiteleket vagy online számlákat nyithatnak az áldozat nevében."
+  },
+  {
+    "id": 24,
+    "type": "Alapok",
+    "scenario": "Egy ismeretlen feladó által küldött e-mailben van egy 'Leiratkozás' gomb egy nyilvánvaló spam levél alján.",
+    "question": "Biztonságos-e rákattintani a leiratkozásra egy agresszív adathalász levélben?",
+    "options": [
+      "Igen, mert a törvény kötelezi őket a leiratkozásra",
+      "Nem, mert a kattintással megerősíted, hogy az e-mail címed aktív, és még több támadás érkezik",
+      "Igen, a levélszemét azonnal törlődik a szerverről",
+      "Mindegy, nincs hatása"
+    ],
+    "correctIndex": 1,
+    "explanation": "Csaló, rosszindulatú spamek esetén a 'leiratkozás' link gyakran kártékony oldalra visz, vagy jelzi a spammernek, hogy a postafiók aktív."
+  },
+  {
+    "id": 25,
+    "type": "E-mail",
+    "scenario": "Egy e-mail szövegében a link szövege kékkel alá van húzva: 'https://otpbank.hu', de ha fölé viszed az egeret, a böngésző sávjában 'http://csalo-oldal.hu' látható.",
+    "question": "Hogyan működik ez a megtévesztés a HTML-ben?",
+    "options": [
+      "A megjelenített szöveg független a href attribútumban lévő tényleges célcímtől",
+      "A böngésző rosszul fordítja le a linket",
+      "Ez egy automatikus átirányítás a bank oldaláról",
+      "A vírusirtó módosította a linket"
+    ],
+    "correctIndex": 0,
+    "explanation": "HTML-ben az `<a href='cél'>látható szöveg</a>` struktúra miatt a látható felirat bármi lehet, a böngésző a href attribútumban megadott címre ugrik."
+  },
+  {
+    "id": 26,
+    "type": "Hívás",
+    "scenario": "A hívó felajánlja, hogy segít visszaszerezni a korábbi kriptovaluta befektetési csalásban elvesztett pénzedet, ha előre kifizetsz 10% sikerdíjat.",
+    "question": "Milyen csalási sémáról van szó?",
+    "options": [
+      "Recovery Scam (újraáldozattá tevés)",
+      "Pharming",
+      "Watering Hole támadás",
+      "Evil Twin támadás"
+    ],
+    "correctIndex": 0,
+    "explanation": "A Recovery Scam lényege, hogy a már egyszer megkárosított embereket újra célba veszik a pénz visszaszerzésének hamis ígéretével."
+  },
+  {
+    "id": 27,
+    "type": "URL",
+    "scenario": "Link: http://google.com.translate.goog/url?q=https://malicious-site.com",
+    "question": "Mire használják a támadók a legitim szolgáltatások (pl. Google Translate) linkjeit?",
+    "options": [
+      "Keresőoptimalizálásra (SEO)",
+      "Nyílt átirányításra (Open Redirect) és a biztonsági szűrők megkerülésére",
+      "A szerverek túlterhelésére",
+      "A weboldal nyelvének lefordítására"
+    ],
+    "correctIndex": 1,
+    "explanation": "A támadók megbízható szolgáltatások átirányító funkcióit használják fel, hogy az e-mail szűrők átengedjék a linket."
+  },
+  {
+    "id": 28,
+    "type": "Alapok",
+    "scenario": "Mit tesz a jelszókezelő (Password Manager), ha egy jól sikerült klónozott adathalász oldalon jársz?",
+    "question": "Hogyan véd a jelszókezelő az adathalászat ellen?",
+    "options": [
+      "Figyelmeztető hangot ad ki",
+      "Nem ajánlja fel az automatikus kitöltést, mert a domain nem egyezik a mentettel",
+      "Automatikusan letiltja a weboldalt a tűzfalban",
+      "Titkosított jelszót generál a támadónak"
+    ],
+    "correctIndex": 1,
+    "explanation": "A jelszókezelő a pontos domain nevet figyeli; ha a cím akár egy betűben is eltér (pl. paypaI a paypal helyett), nem hajlandó beilleszteni a jelszót."
+  },
+  {
+    "id": 29,
+    "type": "SMS",
+    "scenario": "SMS: 'A Netflix előfizetését felfüggesztettük elutasított kártyás fizetés miatt. 24 órán belül frissítse: netflix-payment.cc'",
+    "question": "Melyik gyanús elem utal leginkább csalásra a fentiek közül?",
+    "options": [
+      "A 24 órás határidő és a szokatlan (.cc) végződésű nem hivatalos domain",
+      "A Netflix neve kisbetűvel van írva",
+      "Az SMS szövege túl rövid",
+      "Nem szerepel benne a bankszámlaszám"
+    ],
+    "correctIndex": 0,
+    "explanation": "A streaming platformok a saját hivatalos domainjükön keresztül kezelik a számlázást, nem külső országkódos (.cc) generikus webcímeken."
+  },
+  {
+    "id": 30,
+    "type": "Alapok",
+    "scenario": "Mi a legfontosabb első lépés, ha észreveszed, hogy a bankkártyaadataidat egy adathalász weboldalon adtad meg?",
+    "question": "Mit kell tenned az első percekben?",
+    "options": [
+      "Újraindítani a számítógépet",
+      "Azonnal zárolni vagy fagyasztani a kártyát a banki alkalmazásban vagy telefonos ügyfélszolgálaton",
+      "Feljelentést tenni a rendőrségen",
+      "Törölni a böngészési előzményeket és a cookie-kat"
+    ],
+    "correctIndex": 1,
+    "explanation": "A kártya azonnali letiltása az egyetlen lépés, ami megakadályozza a jogosulatlan pénzlevonást az adatok megszerzése után."
+  }
+]
