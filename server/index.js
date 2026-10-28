@@ -4,6 +4,9 @@ const cors = require('cors');
 const app = express();
 const PORT = 5001;
 
+// elozmenyek tarolasa 
+let scanHistory = [];
+
 // Middleware-ek
 app.use(cors());
 app.use(express.json());
@@ -86,12 +89,40 @@ function countCallToAction(text, keywords) {
     return countKeywords(text, keywords);
 }
 
-// Szótárak
-const SUSPICIOUS_KEYWORDS = ["urgent", "immediate", "act now", "limited time", "don't miss out", "verify", "surgetos", "azonnal"];
-const FEAR_KEYWORDS = ["fear", "scare", "threat", "danger", "risk", "warning", "veszely", "figyelmeztetes"];
-const AUTHORITY_KEYWORDS = ["official", "government", "authority", "police", "bank", "security", "rendorseg", "ugyintezes"];
-const FINANCIAL_KEYWORDS = ["bank", "account", "credit", "debit", "payment", "transaction", "szamla", "fizetes", "utalas"];
-const PERSONAL_INFO_KEYWORDS = ["password", "username", "social security", "personal information", "confidential", "jelszo", "felhasznalonev"];
+const SUSPICIOUS_KEYWORDS = [
+  "urgent", "immediate", "act now", "act fast", "limited time", "don't miss out", 
+  "verify", "24 hours", "expires", "deadline", "action required",
+  "surgetos", "azonnal", "24 ora", "hatarido", "fontos",
+  "urgent", "imediat", "actionati", "termen limitat", "verifica"
+];
+
+const FEAR_KEYWORDS = [
+  "fear", "scare", "threat", "danger", "risk", "warning", "locked", "blocked", 
+  "suspended", "compromised", "unauthorized", "penalty", "legal action", "unusual", "attempt",
+  "veszely", "figyelmeztetes", "zarolva", "felfuggesztve", "letiltva", "buntetes", "szokatlan",
+  "pericol", "avertisment", "blocat", "suspendat", "compromis", "inchis", "neobisnuit"
+];
+
+const AUTHORITY_KEYWORDS = [
+  "official", "government", "authority", "police", "bank", "security", "support", 
+  "department", "irs", "post", "courier",
+  "rendorseg", "ugyintezes", "hivatalos", "biztonsag", "posta", "futarszolgalat",
+  "politia", "autoritate", "banca", "securitate", "posta", "curier"
+];
+
+const FINANCIAL_KEYWORDS = [
+  "bank", "account", "credit", "debit", "payment", "transaction", "card", "billing", 
+  "invoice", "wallet", "funds",
+  "szamla", "fizetes", "utalas", "kartya", "egyenleg", "osszeg",
+  "cont", "plata", "tranzactie", "card", "sold", "factura"
+];
+
+const PERSONAL_INFO_KEYWORDS = [
+  "password", "username", "social security", "personal information", "confidential", 
+  "pin", "credentials", "login details", "login", "identity", "identitate",
+  "jelszo", "felhasznalonev", "szemelyes adat", "bizalmas", "azonosito", "belepes",
+  "parola", "nume utilizator", "date personale", "confidential", "cod pin", "autentificare"
+];
 
 // Technikai modul (URL heurisztikák: P1 - P7)
 function evaluateUrlFeatures(url) {
@@ -230,9 +261,14 @@ function PhishingAnalyser(target_data) {
     };
 }
 
-// REST API Végpontok
-app.get('/api/health', (req, res) => {
+// REST API végpontok
+app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', message: 'Phishing Analyser API szerver fut!' });
+});
+
+// Visszaküldjük a teljes elemzési előzményt is
+app.get('/api/history', (_req, res) => {
+    res.json(scanHistory);
 });
 
 // A központi /api/analyze végpont a Sequence és Architecture diagramok szerint
@@ -243,7 +279,20 @@ app.post('/api/analyze', (req, res) => {
         return res.status(400).json({ error: 'Kérlek adj meg egy URL-t vagy szöveget!' });
     }
 
+    //elemzes a sajat algoritmusommal
     const result = PhishingAnalyser(targetData.trim());
+
+    // Elemzési rekord összeállítása és mentése
+    const historyItem = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' }),
+        target_data: targetData.trim(),
+        type: result.type,
+        risk_score: result.risk_score,
+        verdict: result.verdict
+    };
+    scanHistory.unshift(historyItem); // a legfrissebb elemzés kerül az elejére
+
     return res.json(result);
 });
 
