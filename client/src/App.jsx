@@ -198,14 +198,32 @@ function App() {
     }
   }, [userRole, activeTab]);
 
-  // ======== SEGÉDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
-  const getVerdictText = (verdict) => {
-    if (!verdict) return '';
-    const v = String(verdict).toLowerCase();
+    // ======== SEGÉDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
+  const getVerdictClass = (verdict, score) => {
+    const numScore = Number(score);
+    if (!isNaN(numScore) && numScore > 0) {
+      if (numScore > 70) return 'danger';
+      if (numScore > 30) return 'warning';
+      return 'safe';
+    }
+    const v = String(verdict || '').toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) return 'danger';
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return 'warning';
+    return 'safe';
+  };
+
+  const getVerdictText = (verdict, score) => {
+    const numScore = Number(score);
+    if (!isNaN(numScore) && numScore > 0) {
+      if (numScore > 70) return t('verdict_phishing');
+      if (numScore > 30) return t('verdict_suspicious');
+      return t('verdict_safe');
+    }
+    const v = String(verdict || '').toLowerCase();
     if (v.includes('phishing') || v.includes('adathal')) return t('verdict_phishing');
     if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return t('verdict_suspicious');
     if (v.includes('safe') || v.includes('biztons') || v.includes('sigur')) return t('verdict_safe');
-    return verdict;
+    return verdict || '';
   };
 
   const getTypeText = (type) => {
@@ -743,8 +761,8 @@ function App() {
                         </td>
                         <td><strong>{item.risk_score}</strong></td>
                         <td>
-                          <span className={`status-badge ${item.verdict === 'Adathalász' ? 'danger' : item.verdict === 'Gyanús' ? 'warning' : 'safe'}`}>
-                            {getVerdictText(item.verdict)}
+                          <span className={`status-badge ${getVerdictClass(item.verdict, item.risk_score)}`}>
+                            {getVerdictText(item.verdict, item.risk_score)}
                           </span>
                         </td>
                         <td>

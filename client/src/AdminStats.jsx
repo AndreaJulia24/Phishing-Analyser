@@ -18,19 +18,18 @@ function AdminStats({ history }) {
     return 'safe';
   };
 
-  // Többnyelvű besorolási címke fordítása az éppen aktív nyelvre
+  // Többnyelvű besorolási címke fordítása az éppen aktív nyelvre (elsődlegesen pontszám alapján)
   const getVerdictLabel = (verdict, score) => {
-    const v = String(verdict || '').toLowerCase();
-    if (v.includes('phishing') || v.includes('adathal')) return t('verdict_phishing');
-    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return t('verdict_suspicious');
-    if (v.includes('safe') || v.includes('biztons') || v.includes('sigur')) return t('verdict_safe');
-
     const numScore = Number(score);
     if (!isNaN(numScore) && numScore > 0) {
       if (numScore > 70) return t('verdict_phishing');
       if (numScore > 30) return t('verdict_suspicious');
       return t('verdict_safe');
     }
+    const v = String(verdict || '').toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) return t('verdict_phishing');
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return t('verdict_suspicious');
+    if (v.includes('safe') || v.includes('biztons') || v.includes('sigur')) return t('verdict_safe');
     return verdict || '';
   };
 

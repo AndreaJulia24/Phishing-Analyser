@@ -294,7 +294,7 @@ i18n
           // Statisztika / Dashboard
           dashboardTitle: "Panou de control",
           dashboardSubtitle: "Centrul de Operațiuni de Securitate Cibernetică & Analizator Phishing",
-          liveNow: "Live Now",
+          liveNow: "În direct",
           securityScore: "Scor de Securitate",
           riskRatio: "Rată de risc",
           urgentText: "Text urgent",
