@@ -623,7 +623,7 @@ const handlePhotoUpload = (e) => {
                 Még nem érkezett vizsgálat a rendszerbe.
               </div>
             ) : (
-              <div className="history-table-wrapper">
+              <div className={`history-table-wrapper ${history.length >= 30 ? 'scrollable-table' : ''}`}>
                 <table className="history-table">
                   <thead>
                     <tr>

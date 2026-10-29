@@ -232,6 +232,39 @@
   border-radius: 8px;
   width: 100%;
   box-sizing: border-box;
+  background-color: #0d1117;
+  transition: max-height 0.3s ease;
+}
+
+.history-table-wrapper.scrollable-table {
+  max-height: 600px; 
+  overflow-y: auto;
+}
+/* Stílusos sötét görgetősáv Chrome, Edge, Safari esetén */
+.history-table-wrapper.scrollable-table::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.history-table-wrapper.scrollable-table::-webkit-scrollbar-track {
+  background: #0d1117;
+  border-radius: 4px;
+}
+
+.history-table-wrapper.scrollable-table::-webkit-scrollbar-thumb {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+}
+
+.history-table-wrapper.scrollable-table::-webkit-scrollbar-thumb:hover {
+  background: #38bdf8;
+}
+
+/* Firefox görgetősáv támogatás */
+.history-table-wrapper.scrollable-table {
+  scrollbar-width: thin;
+  scrollbar-color: #30363d #0d1117;
 }
 
 .history-table {
@@ -247,6 +280,9 @@
   padding: 12px 14px;
   font-weight: 600;
   border-bottom: 1px solid #30363d;
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 
 .history-table td {
@@ -795,6 +831,9 @@
 
   .auth-card {
     padding: 20px 16px;
+  }
+  .history-table-wrapper.scrollable-table {
+    max-height: 420px;
   }
 }
 /* ==========================================
