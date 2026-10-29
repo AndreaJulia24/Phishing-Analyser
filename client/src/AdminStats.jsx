@@ -3,13 +3,35 @@ import { useTranslation } from 'react-i18next';
 import './AdminStats.css';
 
 function AdminStats({ history }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
-  const getVerdictLabel = (verdict) => {
-    if (verdict === 'Adathalász') return t('verdict_phishing');
-    if (verdict === 'Gyanús') return t('verdict_suspicious');
-    if (verdict === 'Biztonságos') return t('verdict_safe');
-    return verdict;
+  const getVerdictClass = (verdict, score) => {
+    const numScore = Number(score);
+    if (!isNaN(numScore) && numScore > 0) {
+      if (numScore > 70) return 'danger';
+      if (numScore > 30) return 'warning';
+      return 'safe';
+    }
+    const v = String(verdict || '').toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) return 'danger';
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return 'warning';
+    return 'safe';
+  };
+
+  // Többnyelvű besorolási címke fordítása az éppen aktív nyelvre
+  const getVerdictLabel = (verdict, score) => {
+    const v = String(verdict || '').toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) return t('verdict_phishing');
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return t('verdict_suspicious');
+    if (v.includes('safe') || v.includes('biztons') || v.includes('sigur')) return t('verdict_safe');
+
+    const numScore = Number(score);
+    if (!isNaN(numScore) && numScore > 0) {
+      if (numScore > 70) return t('verdict_phishing');
+      if (numScore > 30) return t('verdict_suspicious');
+      return t('verdict_safe');
+    }
+    return verdict || '';
   };
 
   const stats = useMemo(() => {
@@ -36,13 +58,23 @@ function AdminStats({ history }) {
       const r = Number(item.risk_score || 0);
       riskSum += r;
 
-      if (item.verdict === 'Adathalász') phishingCount++;
-      else if (item.verdict === 'Gyanús') suspiciousCount++;
-      else safeCount++;
+      const v = String(item.verdict || '').toLowerCase();
+      if (r > 70 || v.includes('phishing') || v.includes('adathal')) {
+        phishingCount++;
+      } else if (r > 30 || v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) {
+        suspiciousCount++;
+      } else {
+        safeCount++;
+      }
 
-      if (item.type === 'URL') urlRisks++;
-      else if (item.type === 'SMS' || item.type === 'Szöveg') textRisks++;
-      else if (item.type === 'Telefonszám') phoneRisks++;
+      const tp = String(item.type || '').toLowerCase();
+      if (tp.includes('url')) {
+        urlRisks++;
+      } else if (tp.includes('sms') || tp.includes('szöveg') || tp.includes('text') || tp.includes('mail')) {
+        textRisks++;
+      } else if (tp.includes('telefon') || tp.includes('phone')) {
+        phoneRisks++;
+      }
     });
 
     const avgRisk = Math.round(riskSum / total);
@@ -78,7 +110,7 @@ function AdminStats({ history }) {
       bubbles,
       recentScores
     };
-  }, [history]);
+  }, [history, i18n.language]);
 
   const TOTAL_TICKS = 64;
   const litTicksCount = Math.round((stats.securityScore / 100) * TOTAL_TICKS);
@@ -102,27 +134,39 @@ function AdminStats({ history }) {
 
           <div className="soc-campaign-list">
             {stats.recentScans.length === 0 ? (
-              <div className="soc-empty-list">Még nincs beérkezett vizsgálat</div>
+              <div className="soc-empty-list">{t('emptyHistory')}</div>
             ) : (
-              stats.recentScans.map((item, idx) => (
-                <div key={item.id || idx} className="soc-campaign-card">
-                  <div className="card-top">
-                    <span className="campaign-icon">
-                      <i className={item.type === 'URL' ? 'bi bi-link-45deg' : item.type === 'Telefonszám' ? 'bi bi-telephone-x' : 'bi bi-chat-left-dots'}></i>
-                    </span>
-                    <span className="campaign-name truncate-name">
-                      {item.target_data || item.userName || 'Vizsgálat'}
-                    </span>
-                    <i className="bi bi-chevron-down chevron"></i>
+              stats.recentScans.map((item, idx) => {
+                const itemType = String(item.type || '').toLowerCase();
+                const iconClass = itemType.includes('url') 
+                  ? 'bi bi-link-45deg' 
+                  : itemType.includes('telefon') || itemType.includes('phone')
+                    ? 'bi bi-telephone-x' 
+                    : 'bi bi-chat-left-dots';
+
+                const statusClass = getVerdictClass(item.verdict, item.risk_score);
+                const statusLabel = getVerdictLabel(item.verdict, item.risk_score);
+
+                return (
+                  <div key={item.id || idx} className="soc-campaign-card">
+                    <div className="card-top">
+                      <span className="campaign-icon">
+                        <i className={iconClass}></i>
+                      </span>
+                      <span className="campaign-name truncate-name">
+                        {item.target_data || item.userName || 'Vizsgálat'}
+                      </span>
+                      <i className="bi bi-chevron-down chevron"></i>
+                    </div>
+                    <div className="card-bottom">
+                      <span className="campaign-time">{item.timestamp || 'Nemrég'}</span>
+                      <span className={`simulation-tag ${statusClass}`}>
+                        <span className="sim-dot"></span> {item.risk_score} Pts • {statusLabel}
+                      </span>
+                    </div>
                   </div>
-                  <div className="card-bottom">
-                    <span className="campaign-time">{item.timestamp || 'Nemrég'}</span>
-                    <span className={`simulation-tag ${item.verdict === 'Adathalász' ? 'danger' : item.verdict === 'Gyanús' ? 'warning' : 'safe'}`}>
-                      <span className="sim-dot"></span> {item.risk_score} Pts • {getVerdictLabel(item.verdict)}
-                    </span>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
