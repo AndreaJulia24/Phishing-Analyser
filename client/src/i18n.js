@@ -182,7 +182,7 @@ i18n
           // Statisztika / Dashboard
           dashboardTitle: "Dashboard",
           dashboardSubtitle: "Cybersecurity Operations Center & Phishing Analyser",
-          liveNow: "Live Now",
+          liveNow: "Élő most",
           securityScore: "Security Score",
           riskRatio: "Risk Ratio",
           urgentText: "Urgent text",
