@@ -316,7 +316,7 @@ function App() {
       </header>
 
       {/* 2. Középre zárt fő tartalom */}
-      <main className="content-area">
+      <main className="content-area ${activeTab === 'stats' ? 'stats-active' : ''}">
         {/* Navigációs fülek mindenkinek */}
         <nav className="tabs-nav">
           <button
