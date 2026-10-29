@@ -132,8 +132,11 @@ function App() {
     setResult(null);
 
     try {
+      const currentLang = i18n.language ? i18n.language.slice(0, 2) : 'hu';
+
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-        targetData: inputText
+        targetData: inputText,
+        lang: currentLang //az XAI magyarazat az aktuális nyelven jelenik meg
       });
       setResult(response.data);
 
@@ -180,7 +183,7 @@ function App() {
   };
   // ==============================================
 
-  // 4. CSV exportálás
+  // 4. CSV exportálás az aktuális nyelven
   const handleExportCSV = async () => {
     try {
       if (history.length === 0) {
@@ -188,15 +191,24 @@ function App() {
         return;
       }
 
-      const headers = ['"Idő"', '"Típus"', '"Vizsgált tartalom"', '"Kockázati pontszám"', '"Besorolás"', '"Felhasználó"'];
+      // Lefordított fejlécek az i18n szótárból
+      const headers = [
+        `"${t('colTime')}"`,
+        `"${t('colType')}"`,
+        `"${t('colTarget')}"`,
+        `"${t('colScore')}"`,
+        `"${t('colVerdict')}"`,
+        `"${t('colUser')}"`
+      ];
 
+      // Lefordított sorok az aktuális nyelvi segédfüggvényekkel
       const rows = history.map(item => [
         `"${item.timestamp || ''}"`,
-        `"${item.type || ''}"`,
+        `"${getTypeText(item.type)}"`,
         `"${(item.target_data || '').replace(/"/g, '""')}"`,
         `"${item.risk_score || ''}"`,
-        `"${item.verdict || ''}"`,
-        `"${item.userName || item.userEmail || 'Vendég'}"`
+        `"${getVerdictText(item.verdict)}"`,
+        `"${item.userName || item.userEmail || t('guestUser')}"`
       ]);
 
       const csvString = [
@@ -204,12 +216,13 @@ function App() {
         ...rows.map(e => e.join(','))
       ].join('\r\n');
 
-      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8 BOM az ékezetek helyes megjelenítéséhez Excelben
       const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
 
+      const currentLang = i18n.language ? i18n.language.slice(0, 2) : 'hu';
       const fileName = userRole === 'admin' 
-        ? `phishing_all_history_${new Date().toISOString().slice(0, 10)}.csv`
-        : `phishing_my_scans_${new Date().toISOString().slice(0, 10)}.csv`;
+        ? `phishing_all_history_${currentLang}_${new Date().toISOString().slice(0, 10)}.csv`
+        : `phishing_my_scans_${currentLang}_${new Date().toISOString().slice(0, 10)}.csv`;
 
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -317,9 +330,13 @@ function App() {
   };
 
   const getBadgeStyle = (verdict) => {
-    if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
-    if (verdict === 'Gyanús') return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
-    return { bg: '#dafbe1', border: '#3fb950', text: '#238636' };
+    if (verdict === 'Adathalász' || verdict === 'Phishing') {
+      return { bg: '#ffeef0', border: '#f85149', text: '#da3633' }; // Piros
+    }
+    if (verdict === 'Gyanús' || verdict === 'Suspicious' || verdict === 'Suspect') {
+      return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' }; // Sárga
+    }
+    return { bg: '#dafbe1', border: '#3fb950', text: '#238636' }; // Zöld
   };
 
   const getTypeBadgeClass = (type) => {

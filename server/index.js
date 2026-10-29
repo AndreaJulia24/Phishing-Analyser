@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const MESSAGES = require('./messages');
 
 const app = express();
 const PORT = 5001;
@@ -12,10 +13,9 @@ app.use(cors());
 app.use(express.json());
 
 // ==========================================
-// KULSO JSON ADATOK BETÖLTÉSE ÉS KONFIGURÁCIÓ
+// KÜLSŐ JSON ADATOK BETÖLTÉSE
 // ==========================================
 
-// 1. Telefonszám prefix adatbázis betöltése
 let HIGH_RISK_COUNTRY_CODES = [];
 const phoneDataPath = path.join(__dirname, 'data', 'phone_fraud.json');
 try {
@@ -27,7 +27,6 @@ try {
 
 const PREMIUM_RATE_PREFIXES = ["0900", "0903", "089", "+40900", "+3690"];
 
-// 2. Kiberbiztonsági Szótárak betöltése kizárólag a JSON-ból
 let DICTIONARIES = {
     suspicious: [],
     fear: [],
@@ -39,9 +38,9 @@ let DICTIONARIES = {
 const dictPath = path.join(__dirname, 'data', 'suspicious_keywords.json');
 try {
     DICTIONARIES = JSON.parse(fs.readFileSync(dictPath, 'utf-8'));
-    console.log('[Adatbazis] Kiberbiztonsági szótárak sikeresen betöltve a suspicious_keywords.json-ból.');
+    console.log('[Adatbázis] Kiberbiztonsági szótárak sikeresen betöltve a suspicious_keywords.json-ból.');
 } catch (err) {
-    console.error('[Adatbazis] Hiba a suspicious_keywords.json betöltésekor:', err.message);
+    console.error('[Adatbázis] Hiba a suspicious_keywords.json betöltésekor:', err.message);
 }
 
 // ==========================================
@@ -57,11 +56,6 @@ function normalize(x, x_min, x_max) {
 function isURL(data) {
     const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/i;
     return urlPattern.test(data.trim());
-}
-
-function containsURL(text) {
-    const urlPattern = /(https?:\/\/[^\s]+)/gi;
-    return urlPattern.test(text);
 }
 
 function extractURLs(text) {
@@ -123,14 +117,12 @@ function countKeywords(text, keywords = []) {
     return count;
 }
 
-// Telefonszám felismerés
 function isPhoneNumber(data) {
     const cleaned = data.trim().replace(/[\s\-\(\)\.]/g, '');
     const phonePattern = /^(\+?[0-9]{7,15})$/;
     return phonePattern.test(cleaned);
 }
 
-// E-mail formátum észlelése (From: vagy Subject: jelenléte)
 function isEmailFormat(text) {
     const lower = text.toLowerCase();
     return (lower.includes("from:") || lower.includes("subject:") || lower.includes("to:"));
@@ -150,55 +142,50 @@ function countRepeatedPatterns(digits) {
 // ==========================================
 // 1. TECHNIKAI URL MODUL (P1 - P7)
 // ==========================================
-function evaluateUrlFeatures(url) {
+function evaluateUrlFeatures(url, t) {
     let flags = [];
 
     let raw_url_length = url.length;
     let P1 = normalize(raw_url_length, 20, 120) * 10;
-    if (raw_url_length > 60) flags.push(`Hosszú URL cím (${raw_url_length} karakter)`);
+    if (raw_url_length > 60) flags.push(t.urlLong(raw_url_length));
 
     let domain = extractDomain(url) || '';
     let P2 = normalize(domain.length, 5, 40) * 5;
 
     let raw_subdomain_count = countSubdomains(url);
     let P3 = normalize(raw_subdomain_count, 0, 4) * 15;
-    if (raw_subdomain_count >= 2) flags.push(`Többszörös aldomain struktúra (${raw_subdomain_count} aldomain)`);
+    if (raw_subdomain_count >= 2) flags.push(t.urlSubdomains(raw_subdomain_count));
 
     let raw_suspicious_keyword_count = countKeywords(url, DICTIONARIES.suspicious);
     let P4 = normalize(raw_suspicious_keyword_count, 0, 3) * 20;
-    if (raw_suspicious_keyword_count > 0) flags.push(`Gyanús kulcsszavak az URL-ben (${raw_suspicious_keyword_count} db)`);
+    if (raw_suspicious_keyword_count > 0) flags.push(t.urlKeywords(raw_suspicious_keyword_count));
 
     let norm_ip = isIpAddress(domain) ? 1.0 : 0.0;
     let P5 = norm_ip * 25;
-    if (norm_ip === 1.0) flags.push('Közvetlen IP-cím használata domain név helyett');
+    if (norm_ip === 1.0) flags.push(t.urlIp);
 
     let raw_special_char_count = countSpecialCharacters(url);
     let P6 = normalize(raw_special_char_count, 0, 5) * 10;
-    if (raw_special_char_count > 3) flags.push(`Magas speciális karakterszám az URL-ben (${raw_special_char_count} db)`);
+    if (raw_special_char_count > 3) flags.push(t.urlSpecialChars(raw_special_char_count));
 
     let norm_https = hasHttps(url) ? 0.0 : 1.0;
     let P7 = norm_https * 15;
-    if (norm_https === 1.0) flags.push('Hiányzó HTTPS titkosítás');
+    if (norm_https === 1.0) flags.push(t.urlNoHttps);
 
     const score = P1 + P2 + P3 + P4 + P5 + P6 + P7;
     return { score: Number(score.toFixed(2)), flags };
 }
 
 // ==========================================
-// 2. TELEFONSZAM MODUL (PH1 - PH6)
-// ==========================================
-// ==========================================
 // 2. TELEFONSZÁM MODUL (PH1 - PH6)
 // ==========================================
-function evaluatePhoneFeatures(phoneStr) {
+function evaluatePhoneFeatures(phoneStr, t) {
     let flags = [];
     const raw = phoneStr.trim();
     
     const normalizedPhone = raw.replace(/[\s\-\(\)\.]/g, '');
     const digitsOnly = raw.replace(/\D/g, '');
 
-    // PH1: Wangiri / Egzotikus / Kaliforniai körzet ellenőrzése
-    // A hosszabb prefixeket vizsgáljuk először, hogy a +1415 előbb találjon mint az esetleges +1
     let matchedCountry = HIGH_RISK_COUNTRY_CODES
         .sort((a, b) => b.code.length - a.code.length)
         .find(item => normalizedPhone.startsWith(item.code));
@@ -206,42 +193,37 @@ function evaluatePhoneFeatures(phoneStr) {
     let norm_PH1 = matchedCountry ? 1.0 : 0.0;
     let PH1 = norm_PH1 * 30;
     if (norm_PH1 === 1.0) {
-        flags.push(`PH1: Magas kockázatú körzet / VoIP zóna (${matchedCountry.code} - ${matchedCountry.country})`);
-        flags.push(`XAI Indoklás: ${matchedCountry.reason}`);
+        flags.push(t.phoneHighRiskZone(matchedCountry.code, matchedCountry.country));
+        flags.push(t.phoneXaiReason(matchedCountry.reason));
     }
 
-    // PH2: Emelt díjas prefix
     let isPremium = PREMIUM_RATE_PREFIXES.some(prefix => normalizedPhone.startsWith(prefix) || digitsOnly.startsWith(prefix.replace(/\D/g, '')));
     let norm_PH2 = isPremium ? 1.0 : 0.0;
     let PH2 = norm_PH2 * 25;
-    if (norm_PH2 === 1.0) flags.push('PH2: Emelt díjas (prémium tarifás) előhívószám');
+    if (norm_PH2 === 1.0) flags.push(t.phonePremium);
 
-    // PH3: Hiányzó + nemzetközi előtag
     let norm_PH3 = normalizedPhone.startsWith('+') ? 0.0 : 1.0;
     let PH3 = norm_PH3 * 10;
-    if (norm_PH3 === 1.0) flags.push('PH3: Nemzetközi formátumjelző (+) hiánya');
+    if (norm_PH3 === 1.0) flags.push(t.phoneNoPlus);
 
-    // PH4: Eltérés az optimális hossztól (9 - 12 digit)
     let lenDiff = 0;
     if (digitsOnly.length < 9) lenDiff = 9 - digitsOnly.length;
     else if (digitsOnly.length > 12) lenDiff = digitsOnly.length - 12;
     let PH4 = normalize(lenDiff, 0, 4) * 15;
-    if (lenDiff > 0) flags.push(`PH4: Eltérés a szabványos számlenghossztól (${digitsOnly.length} digit)`);
+    if (lenDiff > 0) flags.push(t.phoneLengthDiff(digitsOnly.length));
 
-    // PH5: Ismétlődő / szekvenciális minták
     let repeatCount = countRepeatedPatterns(digitsOnly);
     let PH5 = normalize(repeatCount, 0, 3) * 10;
-    if (repeatCount > 0) flags.push(`PH5: Szintetikus mintázat észlelve (${repeatCount} ismétlődés)`);
+    if (repeatCount > 0) flags.push(t.phoneSyntheticPattern(repeatCount));
 
-    // PH6: Zavaró karakterek
     const specialChars = (raw.match(/[^0-9+\s\-()]/g) || []).length;
     let PH6 = normalize(specialChars, 0, 3) * 10;
-    if (specialChars > 0) flags.push(`PH6: Gyanús nem-numerikus karakterek (${specialChars} db)`);
+    if (specialChars > 0) flags.push(t.phoneNonNumeric(specialChars));
 
     const totalScore = PH1 + PH2 + PH3 + PH4 + PH5 + PH6;
     return {
         score: Number(Math.min(totalScore, 100).toFixed(2)),
-        flags: flags.length > 0 ? flags : ['Standard, érvényes telefonszám (tiszta adat).'],
+        flags: flags.length > 0 ? flags : [t.phoneClean],
         breakdown: {
             phone_score: Number(totalScore.toFixed(2))
         }
@@ -249,9 +231,9 @@ function evaluatePhoneFeatures(phoneStr) {
 }
 
 // ==========================================
-// 3. STRUCTURED TEXT AND EMAIL ANALYSER (T1 - T9)
+// 3. SZÖVEG ELEMZŐ MODUL (T1 - T9)
 // ==========================================
-function evaluateTextFeatures(text) {
+function evaluateTextFeatures(text, t) {
     let flags = [];
     let embeddedUrlScore = 0.0;
 
@@ -259,121 +241,132 @@ function evaluateTextFeatures(text) {
 
     let urgency_count = countKeywords(text, DICTIONARIES.suspicious);
     let T2 = normalize(urgency_count, 0, 3) * 15;
-    if (urgency_count > 0) flags.push(`Sürgető hangvétel és határidőre utaló kifejezések (${urgency_count} db)`);
+    if (urgency_count > 0) flags.push(t.textUrgent(urgency_count));
 
     let fear_count = countKeywords(text, DICTIONARIES.fear);
     let T3 = normalize(fear_count, 0, 3) * 15;
-    if (fear_count > 0) flags.push(`Félelemkeltő és fenyegető szavak észlelése (${fear_count} db)`);
+    if (fear_count > 0) flags.push(t.textFear(fear_count));
 
     let authority_count = countKeywords(text, DICTIONARIES.authority);
     let T4 = normalize(authority_count, 0, 3) * 10;
-    if (authority_count > 0) flags.push(`Hivatalos szervre vagy biztonsági csapatra való hivatkozás (${authority_count} db)`);
+    if (authority_count > 0) flags.push(t.textAuthority(authority_count));
 
     let financial_count = countKeywords(text, DICTIONARIES.financial);
     let T5 = normalize(financial_count, 0, 3) * 15;
-    if (financial_count > 0) flags.push(`Pénzügyi és fiókműveletekkel kapcsolatos felszólítás (${financial_count} db)`);
+    if (financial_count > 0) flags.push(t.textFinancial(financial_count));
 
     let call_to_action_count = countKeywords(text, ["click the link", "click here", "verify your account", "restore access"]);
     let T6 = normalize(call_to_action_count, 0, 2) * 10;
-    if (call_to_action_count > 0) flags.push(`Közvetlen cselekvésre ösztönző felhívás (${call_to_action_count} db)`);
+    if (call_to_action_count > 0) flags.push(t.textCta(call_to_action_count));
 
     let personal_info_count = countKeywords(text, DICTIONARIES.personal_info);
     let T7 = normalize(personal_info_count, 0, 3) * 20;
-    if (personal_info_count > 0) flags.push(`Azonosító vagy fiók-hitelesítés kérése (${personal_info_count} db)`);
+    if (personal_info_count > 0) flags.push(t.textPersonalInfo(personal_info_count));
 
     let uppercase_ratio = countUppercaseRatio(text);
     let T8 = normalize(uppercase_ratio, 0.0, 0.4) * 5;
-    if (uppercase_ratio > 0.2) flags.push(`Figyelemfelkeltő nagybetűhasználat (${Math.round(uppercase_ratio * 100)}%)`);
+    if (uppercase_ratio > 0.2) flags.push(t.textUppercase(Math.round(uppercase_ratio * 100)));
 
     // Beágyazott URL vizsgálat
     let urls = extractURLs(text);
     let T9 = 0.0;
     if (urls.length > 0) {
         T9 = 5.0;
-        flags.push(`Beágyazott link(ek) azonosítva (${urls.length} db)`);
+        flags.push(t.textEmbeddedUrls(urls.length));
         urls.forEach(u => {
-            const urlEval = evaluateUrlFeatures(u);
+            const urlEval = evaluateUrlFeatures(u, t);
             embeddedUrlScore = Math.max(embeddedUrlScore, urlEval.score);
-            flags.push(`Link ellenőrzés [${u}]: ${urlEval.flags.join(', ')}`);
+            flags.push(t.textLinkCheck(u, urlEval.flags.join(', ')));
         });
     }
 
-   let embeddedPhoneScore = 0.0;
+    let embeddedPhoneScore = 0.0;
     let phones = extractPhoneNumbers(text);
     if (phones && phones.length > 0) {
         phones.forEach(p => {
-            const phoneEval = evaluatePhoneFeatures(p);
+            const phoneEval = evaluatePhoneFeatures(p, t);
             if (phoneEval && typeof phoneEval.score === 'number' && phoneEval.score > 0) {
                 embeddedPhoneScore = Math.max(embeddedPhoneScore, phoneEval.score);
                 if (Array.isArray(phoneEval.flags)) {
-                    flags.push(`Beágyazott telefonszám vizsgálat [${p}]: ${phoneEval.flags.join(', ')}`);
+                    flags.push(t.textPhoneCheck(p, phoneEval.flags.join(', ')));
                 }
             }
         });
     }
-    let textScore = T1 + T2 + T3 + T4 + T5 + T6 + T7 + T8 + T9;
 
-    let finalScore = Math.max(textScore, embeddedUrlScore, embeddedPhoneScore);
-    if (embeddedPhoneScore > 0 && textScore > 30) {
-        finalScore = Math.min(finalScore + (embeddedPhoneScore * 0.4), 100);
+    // TISZTA SZÖVEGES PONT
+    let pureText = T1 + T2 + T3 + T4 + T5 + T6 + T7 + T8 + T9;
+
+   // ÖSSZESÍTETT PONT: A szöveg és a beágyazott elemek súlyozott kombinációja
+    let finalScore = pureText;
+    if (embeddedUrlScore > 0) {
+        // A szöveg és a beágyazott link együttes jelenléte magasabb kockázatot jelent
+        finalScore = Math.max(finalScore, embeddedUrlScore) + (pureText * 0.5);
+    }
+    if (embeddedPhoneScore > 0) {
+        finalScore = Math.max(finalScore, embeddedPhoneScore) + (pureText * 0.5);
     }
 
+    finalScore = Math.min(100, Math.max(pureText, finalScore));
+
     return {
-        textScore: Number(finalScore.toFixed(2)),
+        totalScore: Number(finalScore.toFixed(2)),
+        pureTextScore: Number(pureText.toFixed(2)),
         embeddedUrlScore: Number(embeddedUrlScore.toFixed(2)),
         embeddedPhoneScore: Number(embeddedPhoneScore.toFixed(2)),
         flags
     };
 }
-
+    
 // ==========================================
-// 4. STRUCTURED EMAIL ANALYSER (From:, Subject:, Body:)
+// 4. E-MAIL ELEMZŐ MODUL
 // ==========================================
-function evaluateEmailFeatures(rawEmail) {
+function evaluateEmailFeatures(rawEmail, t) {
     let flags = [];
     let senderScore = 0.0;
 
-    // Feladó kinyerése (From:)
     const fromMatch = rawEmail.match(/from:\s*([^\r\n]+)/i);
     if (fromMatch) {
         const fromHeader = fromMatch[1].trim();
-        flags.push(`Feladó azonosítva: ${fromHeader}`);
+        flags.push(t.emailSenderIdentified(fromHeader));
 
-        // Gyanús typosquatting vagy hamisítás vizsgálata
         if (fromHeader.toLowerCase().includes("paypai") || fromHeader.includes("@paypaI")) {
             senderScore += 35.0;
-            flags.push("Kritikus: Feladói e-mail cím typosquatting hamisítás (paypaI - nagy 'I' betűvel az 'l' helyett!)");
+            flags.push(t.emailTyposquatting);
         }
         if (fromHeader.includes("verify") || fromHeader.includes("security-update")) {
             senderScore += 15.0;
-            flags.push("Gyanús domaintag a feladó címében");
+            flags.push(t.emailSuspiciousDomain);
         }
     }
 
-    // Tárgy kinyerése (Subject:)
     const subjectMatch = rawEmail.match(/subject:\s*([^\r\n]+)/i);
     let subjectScore = 0.0;
     if (subjectMatch) {
         const subject = subjectMatch[1].trim();
-        flags.push(`Tárgy mező elemzése: "${subject}"`);
+        flags.push(t.emailSubjectAnalyzed(subject));
         if (subject.includes("!") || subject.toUpperCase() === subject) {
             subjectScore += 10.0;
-            flags.push("Sürgető írásjelek és formázás a tárgyban");
+            flags.push(t.emailUrgentSubject);
         }
     }
 
-    // Szövegtörzs és linkek általános szemantikai vizsgálata
-    const textEval = evaluateTextFeatures(rawEmail);
+    const textEval = evaluateTextFeatures(rawEmail, t);
     flags.push(...textEval.flags);
 
-    let totalScore = Math.max(textEval.textScore + senderScore + subjectScore, textEval.embeddedUrlScore, textEval.embeddedPhoneScore);
+    const baseTextScore = textEval.pureTextScore || 0;
+    let totalScore = Math.max(
+        baseTextScore + senderScore + subjectScore,
+        textEval.embeddedUrlScore,
+        textEval.embeddedPhoneScore
+    );
     totalScore = Math.min(totalScore, 100);
 
     return {
         score: Number(totalScore.toFixed(2)),
         flags,
         breakdown: {
-            text_score: Number(textEval.textScore.toFixed(2)),
+            text_score: Number(baseTextScore.toFixed(2)),
             phone_score: Number(textEval.embeddedPhoneScore.toFixed(2)),
             url_score: Number(textEval.embeddedUrlScore.toFixed(2)),
             sender_score: Number(senderScore.toFixed(2))
@@ -382,9 +375,12 @@ function evaluateEmailFeatures(rawEmail) {
 }
 
 // ==========================================
-// A FO ALGORITMUS (PhishingAnalyser)
+// A FŐ ALGORITMUS
 // ==========================================
-function PhishingAnalyser(target_data) {
+function PhishingAnalyser(target_data, lang = 'hu') {
+    const selectedLang = ['hu', 'en', 'ro'].includes(lang) ? lang : 'hu';
+    const t = MESSAGES[selectedLang];
+
     let risk_score = 0.0;
     let allFlags = [];
     let detectedType = '';
@@ -393,40 +389,44 @@ function PhishingAnalyser(target_data) {
     const cleanInput = target_data.trim();
 
     if (isPhoneNumber(cleanInput)) {
-        detectedType = 'Telefonszám';
-        const res = evaluatePhoneFeatures(cleanInput);
+        detectedType = t.typePhone;
+        const res = evaluatePhoneFeatures(cleanInput, t);
         risk_score = res.score;
         allFlags = res.flags;
         breakdown = res.breakdown;
     } else if (isEmailFormat(cleanInput)) {
-        detectedType = 'E-mail';
-        const res = evaluateEmailFeatures(cleanInput);
+        detectedType = t.typeEmail;
+        const res = evaluateEmailFeatures(cleanInput, t);
         risk_score = res.score;
         allFlags = res.flags;
         breakdown = res.breakdown;
     } else if (isURL(cleanInput)) {
-        detectedType = 'URL';
-        const res = evaluateUrlFeatures(cleanInput);
+        detectedType = t.typeUrl;
+        const res = evaluateUrlFeatures(cleanInput, t);
         risk_score = res.score;
         allFlags = res.flags;
         breakdown = { url_score: res.score };
     } else {
-        detectedType = 'Szöveges üzenet';
-        const res = evaluateTextFeatures(cleanInput);
-        risk_score = Math.max(res.textScore, res.embeddedUrlScore, res.embeddedPhoneScore);
+        detectedType = t.typeText;
+        const res = evaluateTextFeatures(cleanInput, t);
+        risk_score = res.totalScore;
         allFlags = res.flags;
-        breakdown = { text_score: res.textScore, url_score: res.embeddedUrlScore, phone_score: res.embeddedPhoneScore };
+        breakdown = { 
+            text_score: res.pureTextScore, 
+            url_score: res.embeddedUrlScore, 
+            phone_score: res.embeddedPhoneScore 
+        };
     }
 
     risk_score = Math.min(risk_score, 100);
 
     let verdict = "";
     if (risk_score <= 30) {
-        verdict = "Biztonságos";
+        verdict = t.verdictSafe;
     } else if (risk_score <= 70) {
-        verdict = "Gyanús";
+        verdict = t.verdictSuspicious;
     } else {
-        verdict = "Adathalász";
+        verdict = t.verdictPhishing;
     }
 
     return {
@@ -434,82 +434,41 @@ function PhishingAnalyser(target_data) {
         type: detectedType,
         risk_score: Number(risk_score.toFixed(2)),
         verdict,
-        flags: allFlags.length > 0 ? allFlags : ['Nem találtunk gyanús indikátort.'],
+        flags: allFlags.length > 0 ? allFlags : [t.cleanIndicators],
         breakdown
     };
 }
 
 // REST API VÉGPONTOK
 app.get('/api/health', (_req, res) => {
+    console.log('Health check requested');
     res.json({ status: 'ok', message: 'Phishing Analyser API szerver fut!' });
 });
 
 app.get('/api/history', (_req, res) => {
+    console.log('History requested');
     res.json(scanHistory);
 });
 
-// teljes előzmény törlése
 app.delete('/api/history', (_req, res) => {
     scanHistory = [];
     return res.json({ message: 'Az előzmények sikeresen törölve lettek.' });
 });
 
-// egyetlen elozmény rekord törlése ID alapján
 app.delete('/api/history/:id', (req, res) => {
     const idToDelete = Number(req.params.id);
     scanHistory = scanHistory.filter(item => item.id !== idToDelete);
     return res.json({ message: 'A rekord sikeresen törölve lett.' });
 });
 
-
-// CSV export API végpont (Garantált ékezethelyes UTF-16LE formátum az Excelnek)
-app.get('/api/export/csv', (_req, res) => {
-    const headers = ["Idő", "Típus", "Vizsgált tartalom", "Kockázati pontszám", "Besorolás"];
-    
-    const rows = scanHistory.map(item => {
-        const cleanContent = String(item.target_data || '')
-            .replace(/[\r\n\t]+/g, ' ')
-            .replace(/\s{2,}/g, ' ')
-            .replace(/"/g, '""')
-            .trim();
-
-        const time = String(item.timestamp || '').trim();
-        const type = String(item.type || '').trim();
-        const score = item.risk_score !== undefined ? item.risk_score : 0;
-        const verdict = String(item.verdict || '').trim();
-
-        // Szövegként formázás, hogy a telefonszám se váltson tudományos alakra
-        const formattedContent = (type === 'Telefonszám') ? `="${cleanContent}"` : `"${cleanContent}"`;
-
-        // Tabulátorral (\t) elválasztva az oszlopok nem csúsznak össze
-        return `"${time}"\t"${type}"\t${formattedContent}\t"${score}"\t"${verdict}"`;
-    });
-
-    const headerRow = headers.map(h => `"${h}"`).join("\t");
-    const fullText = [headerRow, ...rows].join("\r\n");
-
-    // UTF-16LE BOM bájtok (0xFF, 0xFE) - ezt az Excel azonnal tökéletesen olvassa ékezetekkel együtt
-    const bom = Buffer.from([0xFF, 0xFE]);
-    const buffer = Buffer.concat([bom, Buffer.from(fullText, 'utf16le')]);
-
-    const now = new Date();
-    const formattedDate = now.toISOString().slice(0, 10);
-    const formattedTime = now.toTimeString().slice(0, 5).replace(':', '-');
-    const fileName = `phishing_history_${formattedDate}_${formattedTime}.csv`;
-
-    res.setHeader('Content-Type', 'text/csv; charset=utf-16le');
-    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
-    return res.end(buffer);
-});
-
 app.post('/api/analyze', (req, res) => {
     try {
-        const { targetData } = req.body;
+        const { targetData, lang } = req.body;
         if (!targetData || !targetData.trim()) {
             return res.status(400).json({ error: 'Kérlek adj meg bemeneti adatot!' });
         }
 
-        const result = PhishingAnalyser(targetData);
+        const result = PhishingAnalyser(targetData, lang);
 
         const historyItem = {
             id: Date.now(),
