@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 
 import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
-//import notesIcon from './assets/icons/note.png';
 import exportIcon from './assets/icons/export.png';
 import binIcon from './assets/icons/bin.png';
 import sunIcon from './assets/icons/sun.png';
@@ -37,6 +36,17 @@ import AdminStats from './AdminStats.jsx';
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
 function App() {
+  const { t, i18n } = useTranslation();
+  
+  // Nyelv állapota: alapból a mentett nyelv vagy az i18n nyelve
+  const [currentLang, setCurrentLang] = useState(() => {
+    const saved = localStorage.getItem('i18nextLng');
+    if (saved && (saved.startsWith('hu') || saved.startsWith('en') || saved.startsWith('ro'))) {
+      return saved.slice(0, 2);
+    }
+    return (i18n.language || 'hu').slice(0, 2);
+  });
+
   const [currentUser, setCurrentUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [userFullName, setUserFullName] = useState('');
@@ -50,11 +60,10 @@ function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
   const [userPhoto, setUserPhoto] = useState(null);
   const fileInputRef = useRef(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false); // kephez felugro funkcio
-  const [theme, setTheme] = useState('dark'); // Alapértelmezett sötét mód
-  const { t, i18n } = useTranslation(); // i18n forditasra 
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [theme, setTheme] = useState('dark');
 
-  // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
+  // 1. Hitelesítési állapot figyelése
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -75,7 +84,6 @@ function App() {
           setUserFullName(user.displayName || user.email);
         }
       } else {
-        // Kijelentkezéskor mindent lenullázunk
         setCurrentUser(null);
         setUserRole(null);
         setUserFullName('');
@@ -90,53 +98,17 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  // 2. Előzmények betöltése: Admin az összeset látja, End-User csak a sajátját
-  const fetchHistory = async () => {
-    if (!currentUser) return;
-
-    try {
-      const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      let items = querySnapshot.docs.map(docSnap => ({
-        id: docSnap.id,
-        ...docSnap.data()
-      }));
-
-      // Ha sima felhasználó, csak a sajátjait tartjuk meg
-      if (userRole !== 'admin') {
-        items = items.filter(item => item.userId === currentUser.uid);
-      }
-
-      setHistory(items);
-    } catch (err) {
-      console.error('Firestore előzmények lekérési hiba:', err);
-    }
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      fetchHistory();
-    }
-  }, [currentUser, userRole]);
-
-  // 3. Elemzés végrehajtása
-  const handleAnalyze = async (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) {
-      setErrorMsg('Kérlek adj meg egy URL-t, SMS-t vagy telefonszámot!');
-      return;
-    }
+  // Valós idejű vizsgálat végrehajtása adott nyelven
+  const executeAnalysis = async (text, langToUse) => {
+    if (!text || !text.trim()) return;
 
     setLoading(true);
     setErrorMsg('');
-    setResult(null);
 
     try {
-      const currentLang = i18n.language ? i18n.language.slice(0, 2) : 'hu';
-
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-        targetData: inputText,
-        lang: currentLang //az XAI magyarazat az aktuális nyelven jelenik meg
+        targetData: text.trim(),
+        lang: langToUse
       });
       setResult(response.data);
 
@@ -144,7 +116,7 @@ function App() {
       const timeStr = now.toLocaleTimeString('hu-HU', { hour: '2-digit', minute: '2-digit' });
 
       await addDoc(collection(db, 'history'), {
-        target_data: inputText.trim(),
+        target_data: text.trim(),
         type: response.data.type,
         risk_score: response.data.risk_score,
         verdict: response.data.verdict,
@@ -164,24 +136,78 @@ function App() {
     }
   };
 
-  // ======== SEGEDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
-  // Besorolás fordítása
+  // ===================== API ANALYZE VEGPONT ES A NYELVEZET KÜLDÉSE=======================
+  // Form elküldésekor hívódik meg
+  const handleAnalyze = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) {
+      setErrorMsg(t('placeholder'));
+      return;
+    }
+    await executeAnalysis(inputText, currentLang);
+  };
+
+  // Nyelvváltás: azonnal frissíti a felületet ÉS az aktív eredménykártyát is F5 nélkül!
+  const handleLanguageChange = async (langCode) => {
+    await i18n.changeLanguage(langCode);
+    setCurrentLang(langCode);
+    localStorage.setItem('i18nextLng', langCode);
+
+    // Ha van éppen beírt szöveg és kint lévő eredmény, azonnal újrakérjük az új nyelven!
+    if (inputText && inputText.trim() && result) {
+      await executeAnalysis(inputText, langCode);
+    }
+  };
+
+  //==================================================================================================
+
+  // 2. Előzmények betöltése
+  const fetchHistory = async () => {
+    if (!currentUser) return;
+
+    try {
+      const q = query(collection(db, 'history'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      let items = querySnapshot.docs.map(docSnap => ({
+        id: docSnap.id,
+        ...docSnap.data()
+      }));
+
+      if (userRole !== 'admin') {
+        items = items.filter(item => item.userId === currentUser.uid);
+      }
+
+      setHistory(items);
+    } catch (err) {
+      console.error('Firestore előzmények lekérési hiba:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      fetchHistory();
+    }
+  }, [currentUser, userRole]);
+
+  // ======== SEGÉDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
   const getVerdictText = (verdict) => {
-    if (verdict === 'Adathalász') return t('verdict_phishing');
-    if (verdict === 'Gyanús') return t('verdict_suspicious');
-    if (verdict === 'Biztonságos') return t('verdict_safe');
+    if (!verdict) return '';
+    const v = String(verdict).toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) return t('verdict_phishing');
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) return t('verdict_suspicious');
+    if (v.includes('safe') || v.includes('biztons') || v.includes('sigur')) return t('verdict_safe');
     return verdict;
   };
 
-  // Típus fordítása
   const getTypeText = (type) => {
-    if (type === 'URL') return t('type_url');
-    if (type === 'Telefonszám') return t('type_phone');
-    if (type === 'SMS') return t('type_sms');
-    if (type === 'Szöveges üzenet' || type === 'Szöveg') return t('type_text');
-    return type;
+    if (!type) return '';
+    const tp = String(type).toLowerCase();
+    if (tp.includes('url')) return t('type_url');
+    if (tp.includes('phone') || tp.includes('telefon')) return t('type_phone');
+    if (tp.includes('sms')) return t('type_sms');
+    if (tp.includes('mail')) return 'E-mail';
+    return t('type_text');
   };
-  // ==============================================
 
   // 4. CSV exportálás az aktuális nyelven
   const handleExportCSV = async () => {
@@ -191,7 +217,6 @@ function App() {
         return;
       }
 
-      // Lefordított fejlécek az i18n szótárból
       const headers = [
         `"${t('colTime')}"`,
         `"${t('colType')}"`,
@@ -201,7 +226,6 @@ function App() {
         `"${t('colUser')}"`
       ];
 
-      // Lefordított sorok az aktuális nyelvi segédfüggvényekkel
       const rows = history.map(item => [
         `"${item.timestamp || ''}"`,
         `"${getTypeText(item.type)}"`,
@@ -216,10 +240,9 @@ function App() {
         ...rows.map(e => e.join(','))
       ].join('\r\n');
 
-      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]); // UTF-8 BOM az ékezetek helyes megjelenítéséhez Excelben
+      const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
       const blob = new Blob([bom, csvString], { type: 'text/csv;charset=utf-8;' });
 
-      const currentLang = i18n.language ? i18n.language.slice(0, 2) : 'hu';
       const fileName = userRole === 'admin' 
         ? `phishing_all_history_${currentLang}_${new Date().toISOString().slice(0, 10)}.csv`
         : `phishing_my_scans_${currentLang}_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -238,7 +261,7 @@ function App() {
     }
   };
 
-  // 5. Előzmények törlése az Admin számára
+  // 5. Előzmények törlése
   const handleClearAllHistory = async () => {
     if (!window.confirm('Biztosan törölni szeretnéd a teljes vizsgálati naplót?')) return;
     try {
@@ -263,7 +286,7 @@ function App() {
     await signOut(auth);
   };
 
-  // 6. Profilkép feltöltése és mentése Firestore-ba
+  // 6. Profilkép feltöltése
   const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -330,19 +353,23 @@ function App() {
   };
 
   const getBadgeStyle = (verdict) => {
-    if (verdict === 'Adathalász' || verdict === 'Phishing') {
-      return { bg: '#ffeef0', border: '#f85149', text: '#da3633' }; // Piros
+    if (!verdict) return { bg: '#dafbe1', border: '#3fb950', text: '#238636' };
+    const v = String(verdict).toLowerCase();
+    if (v.includes('phishing') || v.includes('adathal')) {
+      return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
     }
-    if (verdict === 'Gyanús' || verdict === 'Suspicious' || verdict === 'Suspect') {
-      return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' }; // Sárga
+    if (v.includes('suspicious') || v.includes('gyan') || v.includes('suspect')) {
+      return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
     }
-    return { bg: '#dafbe1', border: '#3fb950', text: '#238636' }; // Zöld
+    return { bg: '#dafbe1', border: '#3fb950', text: '#238636' };
   };
-
+  
   const getTypeBadgeClass = (type) => {
-    if (type === 'Telefonszám') return 'type-badge phone';
-    if (type === 'URL') return 'type-badge url';
-    if (type === 'E-mail') return 'type-badge email';
+    if (!type) return 'type-badge text';
+    const tp = String(type).toLowerCase();
+    if (tp.includes('phone') || tp.includes('telefon')) return 'type-badge phone';
+    if (tp.includes('url')) return 'type-badge url';
+    if (tp.includes('mail')) return 'type-badge email';
     return 'type-badge text';
   };
 
@@ -377,27 +404,28 @@ function App() {
             <span>{theme === 'dark' ? t('themeLight') : t('themeDark')}</span>
           </button>
 
+          {/* Nyelvválasztó, ami mostantól azonnal frissíti az aktív nyelvet */}
           <div className="lang-selector">
             <button 
               type="button"
-              className={`lang-btn ${i18n.language && i18n.language.startsWith('hu') ? 'active' : ''}`}
-              onClick={() => i18n.changeLanguage('hu')}
+              className={`lang-btn ${currentLang === 'hu' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('hu')}
             >
               HU
             </button>
             <span className="lang-divider">|</span>
             <button 
               type="button"
-              className={`lang-btn ${i18n.language && i18n.language.startsWith('en') ? 'active' : ''}`}
-              onClick={() => i18n.changeLanguage('en')}
+              className={`lang-btn ${currentLang === 'en' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('en')}
             >
               EN
             </button>
             <span className="lang-divider">|</span>
             <button 
               type="button"
-              className={`lang-btn ${i18n.language && i18n.language.startsWith('ro') ? 'active' : ''}`}
-              onClick={() => i18n.changeLanguage('ro')}
+              className={`lang-btn ${currentLang === 'ro' ? 'active' : ''}`}
+              onClick={() => handleLanguageChange('ro')}
             >
               RO
             </button>
@@ -472,7 +500,6 @@ function App() {
 
       {/* 2. Középre zárt fő tartalom */}
       <main className={`content-area ${activeTab === 'stats' ? 'stats-active' : ''}`}>
-        {/* Navigációs fülek */}
         <nav className="tabs-nav">
           <button
             className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
@@ -528,14 +555,14 @@ function App() {
               <button 
                 type="button" 
                 className="chip-btn"
-                onClick={() => setInputText('https://secure-login.paypal.account-verify.info/update')}
+                onClick={() => setInputText('http://192.168.1.100/secure-login.paypal.account-verify.banking-support.info/update-token.php?auth=expired')}
               >
                 <i className="bi bi-link-45deg"></i> {t('sampleUrl')}
               </button>
               <button 
                 type="button" 
                 className="chip-btn"
-                onClick={() => setInputText('SÜRGŐS! A bankszámláját zároltuk gyanús tranzakció miatt. Lépjen be azonnal: http://otp-biztonsag-ellenorzes.com')}
+                onClick={() => setInputText('FIGYELEM! A bankszámláját zároltuk jogosulatlan terhelés miatt. Lépjen be azonnal adategyeztetésre: http://otp-biztonsag-ellenorzes.com')}
               >
                 <i className="bi bi-chat-left-dots"></i> {t('sampleSms')}
               </button>
@@ -743,7 +770,7 @@ function App() {
         )}
       </main>
 
-      {/* Profilkép nagyított kör alakú előnézete */}
+      {/* Profilkép nagyított előnézete */}
       {isPreviewOpen && (
         <div className="avatar-modal-overlay" onClick={() => setIsPreviewOpen(false)}>
           <div className="avatar-modal-content" onClick={(e) => e.stopPropagation()}>

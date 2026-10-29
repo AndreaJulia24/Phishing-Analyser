@@ -267,7 +267,7 @@ function evaluateTextFeatures(text, t) {
     let T8 = normalize(uppercase_ratio, 0.0, 0.4) * 5;
     if (uppercase_ratio > 0.2) flags.push(t.textUppercase(Math.round(uppercase_ratio * 100)));
 
-    // Beágyazott URL vizsgálat
+    // Beágyazott linkek vizsgálata
     let urls = extractURLs(text);
     let T9 = 0.0;
     if (urls.length > 0) {
@@ -280,6 +280,7 @@ function evaluateTextFeatures(text, t) {
         });
     }
 
+    // Beágyazott telefonszámok vizsgálata
     let embeddedPhoneScore = 0.0;
     let phones = extractPhoneNumbers(text);
     if (phones && phones.length > 0) {
@@ -294,19 +295,14 @@ function evaluateTextFeatures(text, t) {
         });
     }
 
-    // TISZTA SZÖVEGES PONT
     let pureText = T1 + T2 + T3 + T4 + T5 + T6 + T7 + T8 + T9;
-
-   // ÖSSZESÍTETT PONT: A szöveg és a beágyazott elemek súlyozott kombinációja
     let finalScore = pureText;
     if (embeddedUrlScore > 0) {
-        // A szöveg és a beágyazott link együttes jelenléte magasabb kockázatot jelent
         finalScore = Math.max(finalScore, embeddedUrlScore) + (pureText * 0.5);
     }
     if (embeddedPhoneScore > 0) {
         finalScore = Math.max(finalScore, embeddedPhoneScore) + (pureText * 0.5);
     }
-
     finalScore = Math.min(100, Math.max(pureText, finalScore));
 
     return {
@@ -317,7 +313,7 @@ function evaluateTextFeatures(text, t) {
         flags
     };
 }
-    
+
 // ==========================================
 // 4. E-MAIL ELEMZŐ MODUL
 // ==========================================
@@ -378,7 +374,8 @@ function evaluateEmailFeatures(rawEmail, t) {
 // A FŐ ALGORITMUS
 // ==========================================
 function PhishingAnalyser(target_data, lang = 'hu') {
-    const selectedLang = ['hu', 'en', 'ro'].includes(lang) ? lang : 'hu';
+    const cleanLang = (lang && typeof lang === 'string') ? lang.toLowerCase().slice(0, 2) : 'hu';
+    const selectedLang = ['hu', 'en', 'ro'].includes(cleanLang) ? cleanLang : 'hu';
     const t = MESSAGES[selectedLang];
 
     let risk_score = 0.0;
@@ -441,12 +438,10 @@ function PhishingAnalyser(target_data, lang = 'hu') {
 
 // REST API VÉGPONTOK
 app.get('/api/health', (_req, res) => {
-    console.log('Health check requested');
     res.json({ status: 'ok', message: 'Phishing Analyser API szerver fut!' });
 });
 
 app.get('/api/history', (_req, res) => {
-    console.log('History requested');
     res.json(scanHistory);
 });
 
@@ -464,10 +459,12 @@ app.delete('/api/history/:id', (req, res) => {
 app.post('/api/analyze', (req, res) => {
     try {
         const { targetData, lang } = req.body;
+        console.log(`[Elemzés kérés] Nyelv érkezett: "${lang}", Cél adat: "${targetData?.slice(0, 30)}..."`);
+
         if (!targetData || !targetData.trim()) {
             return res.status(400).json({ error: 'Kérlek adj meg bemeneti adatot!' });
         }
-
+        console.log(`[Elemzés] Cél adat: "${targetData.trim()}"`);
         const result = PhishingAnalyser(targetData, lang);
 
         const historyItem = {
@@ -488,5 +485,5 @@ app.post('/api/analyze', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend szerver fut a http://localhost:${PORT} cimen`);
+    console.log(`Backend szerver fut a http://localhost:${PORT} cimen [HU, EN, RO támogatással]`);
 });
