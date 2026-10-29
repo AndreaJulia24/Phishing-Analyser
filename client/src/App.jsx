@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 
 
 import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
-import notesIcon from './assets/icons/note.png';
+//import notesIcon from './assets/icons/note.png';
 import exportIcon from './assets/icons/export.png';
 import binIcon from './assets/icons/bin.png';
 import sunIcon from './assets/icons/sun.png';
-import moonIcon from './assets/icons/moon.png';
+//import moonIcon from './assets/icons/moon.png';
 import userIcon from './assets/icons/user.png';
 
 // Firebase modulok
@@ -21,6 +21,7 @@ import {
   deleteDoc, 
   doc, 
   getDoc,
+  setDoc,
   query, 
   orderBy, 
   serverTimestamp 
@@ -39,7 +40,6 @@ function App() {
   const [userRole, setUserRole] = useState(null);
   const [userFullName, setUserFullName] = useState('');
   const [authLoading, setAuthLoading] = useState(true);
-
   const [activeTab, setActiveTab] = useState('analyser');
   const [inputText, setInputText] = useState('');
   const [result, setResult] = useState(null);
@@ -47,6 +47,10 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
+  const [userPhoto, setUserPhoto] = useState(null);
+  const fileInputRef = useRef(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false); //kephez felugro funkcio
+
 
   // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
   useEffect(() => {
@@ -56,10 +60,12 @@ function App() {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           const role = userDoc.exists() ? (userDoc.data().role || 'user') : 'user';
           const fullName = userDoc.exists() && userDoc.data().fullName ? userDoc.data().fullName : (user.displayName || user.email);
+          const photo = userDoc.exists() && userDoc.data().photoURL ? userDoc.data().photoURL : null;
           
           setCurrentUser(user);
           setUserRole(role);
           setUserFullName(fullName);
+          setUserPhoto(photo);
         } catch (err) {
           console.error('Hiba a szerepkör lekérésekor:', err);
           setCurrentUser(user);
@@ -74,6 +80,7 @@ function App() {
         setHistory([]);
         setResult(null);
         setInputText('');
+        setUserPhoto(null);
       }
       setAuthLoading(false);
     });
@@ -223,6 +230,63 @@ function App() {
     await signOut(auth);
   };
 
+// 6. Profilkép feltöltése és mentése Firestore-ba
+const handlePhotoUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = async () => {
+        // Nagyobb, éles HD felbontás (500x500 px - tökéletes retina kijelzőkre is)
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 500;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        // Kisimítás bekapcsolása a maximális élességhez
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // 85%-os JPEG minőség (kristálytiszta, de csak ~60-80 KB)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+        try {
+          await setDoc(doc(db, 'users', currentUser.uid), {
+            photoURL: compressedBase64
+          }, { merge: true });
+
+          setUserPhoto(compressedBase64);
+          setIsProfileOpen(false);
+        } catch (err) {
+          console.error('Hiba a profilkép mentésekor:', err);
+          alert('Nem sikerült elmenteni a profilképet.');
+        }
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+// Segédfüggvények
+
   const getBadgeStyle = (verdict) => {
     if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
     if (verdict === 'Gyanús') return { bg: '#fff8c5', border: '#d29922', text: '#9e6a03' };
@@ -267,56 +331,84 @@ function App() {
             <span>Világos mód</span>
           </button>
 
-          <div className="lang-selector">
-            <button className="lang-btn active">HU</button>
-            <span className="lang-divider">|</span>
-            <button className="lang-btn">EN</button>
-            <span className="lang-divider">|</span>
-            <button className="lang-btn">RO</button>
-          </div>
-
-          <div className="profile-menu-container">
-            <button 
-              className="profile-avatar-btn" 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              title="Profil menü"
-            >
-              <img src={userIcon} alt="Profil" className="avatar-img" />
-            </button>
-
-            {isProfileOpen && (
-              <div className="profile-dropdown">
-                <div className="dropdown-user-info">
-                  <div className="dropdown-name">{userFullName || currentUser.email}</div>
-                  <span className={`role-pill ${userRole} dropdown-role`}>
-                    {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
-                  </span>
+              <div className="lang-selector">
+                  <button className="lang-btn active">HU</button>
+                    <span className="lang-divider">|</span>
+                  <button className="lang-btn">EN</button>
+                    <span className="lang-divider">|</span>
+                  <button className="lang-btn">RO</button>
                 </div>
+                <div className="profile-menu-container">
+              {/* Rejtett fájlválasztó */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                accept="image/*" 
+                onChange={handlePhotoUpload} 
+              />
 
-                <button 
-                  className="dropdown-item" 
-                  onClick={() => alert('Profilkép feltöltése hamarosan elérhető!')}
-                >
-                  Profilkép módosítása
-                </button>
+              <button 
+                className="profile-avatar-btn" 
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                title="Profil menü"
+              >
+                <img 
+                  src={userPhoto || userIcon} 
+                  alt="Profil" 
+                  className="avatar-img" 
+                />
+              </button>
 
-                <button 
-                  className="dropdown-item logout" 
-                  onClick={() => {
-                    setIsProfileOpen(false);
-                    handleLogout();
-                  }}
-                >
-                  Kijelentkezés
-                </button>
-              </div>
-            )}
-          </div>
+              {isProfileOpen && (
+                <div className="profile-dropdown">
+                  <div className="dropdown-user-info">
+                    <div 
+                      className="dropdown-avatar-wrapper" 
+                      onClick={() => {
+                        setIsPreviewOpen(true);
+                        setIsProfileOpen(false); // becsukja a lenyíló menüt a nagyítás megnyitásakor
+                      }}
+                      title="Kattints a nagyításhoz"
+                    >
+                      <img 
+                        src={userPhoto || userIcon} 
+                        alt="Profil nagy" 
+                        className="dropdown-avatar-large" 
+                      />
+                    </div>
+                    <div className="dropdown-name">{userFullName || currentUser.email}</div>
+                    <span className={`role-pill ${userRole} dropdown-role`}>
+                      {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
+                    </span>
+                  </div>
+
+                  <button 
+                    className="dropdown-item" 
+                    onClick={() => fileInputRef.current.click()}
+                  >
+                    <i className="bi bi-camera" style={{ marginRight: '8px' }}></i>
+                    Profilkép módosítása
+                  </button>
+
+                  <button 
+                    className="dropdown-item logout" 
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      handleLogout();
+                    }}
+                  >
+                    Kijelentkezés
+                  </button>
+                </div>
+              )}
+       </div>
+          
         </div>
       </header>
 
       {/* 2. Középre zárt fő tartalom */}
-      <main className="content-area ${activeTab === 'stats' ? 'stats-active' : ''}">
+      <main className={`content-area ${activeTab === 'stats' ? 'stats-active' : ''}`}>
         {/* Navigációs fülek mindenkinek */}
         <nav className="tabs-nav">
           <button
@@ -598,6 +690,28 @@ function App() {
           <AdminStats history={history} />
         )}
       </main>
+    {/* Profilkép nagyított kör alakú előnézete */}
+   {isPreviewOpen && (
+     <div className="avatar-modal-overlay" onClick={() => setIsPreviewOpen(false)}>
+       <div className="avatar-modal-content" onClick={(e) => e.stopPropagation()}>
+         <button 
+           className="avatar-modal-close" 
+           onClick={() => setIsPreviewOpen(false)}
+           title="Bezárás"
+         >
+           <i className="bi bi-x-lg"></i>
+         </button>
+         <div className="avatar-modal-circle">
+           <img 
+             src={userPhoto || userIcon} 
+             alt="Profil nagyítva" 
+             className="avatar-modal-img" 
+           />
+         </div>
+         <span className="avatar-modal-name">{userFullName || currentUser.email}</span>
+       </div>
+     </div>
+   )}
     </div>
   );
 }

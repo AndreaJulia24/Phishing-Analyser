@@ -88,10 +88,6 @@ function AdminStats({ history }) {
             <span className="live-badge">
               <span className="live-dot"></span> Live Now
             </span>
-            <div className="header-actions">
-              <button className="icon-tiny-btn" title="Nézet"><i className="bi bi-list-ul"></i></button>
-              <button className="icon-tiny-btn" title="Szűrők"><i className="bi bi-sliders"></i></button>
-            </div>
           </div>
 
           <div className="soc-campaign-list">
