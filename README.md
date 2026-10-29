@@ -1,8 +1,12 @@
 # 🛡️ Phishing Analyser & Cybersecurity Operations Platform
 
+> 🌐 **Éles weboldal (Live Demo):** [https://phishing-analyser-mu.vercel.app](https://phishing-analyser-mu.vercel.app)
+
+---
+
 A comprehensive, hybrid, Explainable AI (XAI) phishing detection and cybersecurity platform designed to analyze suspicious web addresses (URLs), text messages (SMS), incoming emails, and international or premium-rate telephone numbers in real time.
 
-The system relies on rule-based, deterministic heuristics (White-Box methodology) combined with natural language processing. In addition to computing a normalized composite risk score ($0\text{--}100$), it generates itemized, multilingual explanations detailing all activated security indicators with zero-reload UI synchronization and Role-Based Access Control (RBAC).
+The system relies on rule-based, deterministic heuristics (White-Box methodology) combined with natural language processing. In addition to computing a normalized composite risk score ($0\text{--}100$), it generates itemized, multilingual explanations detailing all activated security indicators with zero-reload UI synchronization, Role-Based Access Control (RBAC), and serverless cloud deployment.
 
 ---
 
@@ -43,24 +47,29 @@ The system relies on rule-based, deterministic heuristics (White-Box methodology
 * **Aggregated Threat Score:** Synthesizes header anomalies, body semantics, and embedded hyperlinks into a unified risk score.
 
 ### 5. Explainable AI (XAI) & Threat Classification
-* **Normalized Metric:** Scaled from $0\text{--}100\text{ points}$ with detailed category breakdowns (URL, Text, Phone, Sender).
-* **Safe (Sigur / Biztonságos):** $0\text{--}30\text{ points}$ (Green badge)
-* **Suspicious (Suspect / Gyanús):** $31\text{--}70\text{ points}$ (Yellow badge)
-* **Phishing (Adathalász):** $71\text{--}100\text{ points}$ (Red badge)
-* **Traceable Reasoning:** Transparent, bulleted XAI explanations detailing why each rule fired.
+* **Score-First Normalization:** Scaled from $0\text{--}100\text{ points}$ with detailed category breakdowns (URL, Text, Phone, Sender).
+* **Safe (Biztonságos / Sigur):** $0\text{--}30\text{ points}$ (Green indicator badge)
+* **Suspicious (Gyanús / Suspect):** $31\text{--}70\text{ points}$ (Yellow indicator badge)
+* **Phishing (Adathalász / Phishing):** $71\text{--}100\text{ points}$ (Red indicator badge)
+* **Traceable Reasoning:** Transparent, bulleted XAI explanations detailing why each heuristic rule fired.
 
 ### 6. Trilingual Internationalization (HU, EN, RO)
-* Full client-side localization managed via `i18next` (Hungarian, English, Romanian).
+* Full client-side localization managed via `i18next` with real-time UI synchronization across Hungarian, English, and Romanian.
 * Dynamic backend XAI translation dictionary (`messages.js`) returning localized diagnostic findings.
-* **Zero-Reload Dynamic Re-evaluation:** Switching languages re-analyzes displayed inspection cards on the fly without page reloads.
-* Localized CSV exports using UTF-8 BOM encoding for complete spreadsheet compatibility.
+* **Zero-Reload Dynamic Re-evaluation:** Switching languages dynamically re-evaluates active inspection cards and SOC dashboard feeds without page reloads.
+* Localized CSV exports using UTF-8 BOM encoding for complete character fidelity in external spreadsheet tools (Microsoft Excel, LibreOffice).
 
-### 7. User Management, Audit Logs & SOC Dashboard
-* **Firebase Authentication & Firestore:** Authentication, profile picture uploading with client-side canvas compression, and persistent scan logs.
-* **Role-Based Access Control (RBAC):**
-  * **End User:** Real-time analyzer, interactive 30-question cybersecurity awareness quiz with localized randomization, and personal scan history.
-  * **Administrator:** Complete audit trail with record deletion, global CSV export, and a Cyber Operations Center (SOC Dashboard featuring an interactive SVG radar dial, real-time Security Score gauge, and threat ratio metrics).
-* **Responsive Box-Model UI:** Light/Dark theme toggle and mobile-optimized layouts with tailored touch targets and padding.
+### 7. User Authentication & Role-Based Access Control (RBAC)
+* **Secondary Auth Registration Lifecycle:** New registrations utilize an isolated secondary Firebase Auth instance (`secondaryAuth`). Accounts are created and stored without automatically signing in the client, cleanly enforcing the strict workflow: `Register` ➔ `Redirect to Login with Success Banner` ➔ `Sign In` ➔ `Dashboard`.
+* **Automatic Administrator Recognition:** Users with `admin` in their email address (e.g., `user_admin@example.com`) or designated via the Firestore `role: 'admin'` field are automatically granted Administrator privileges upon sign-in.
+* **Granular Role Privileges:**
+  * **End User (`role: 'user'`):** Real-time analyzer, interactive 30-question cybersecurity awareness quiz with localized randomization, personal scan history, and personal CSV export. The administrative SOC Dashboard tab is strictly hidden.
+  * **Administrator (`role: 'admin'`):** Complete system audit trail with individual and bulk record deletion, global CSV export, and access to the Cyber Operations Center (SOC Dashboard).
+* **Cyber Operations Center (SOC Dashboard):**
+  * Interactive SVG radar dial mapping threats into categorical nodes with dynamic proportional radii.
+  * Real-time Security Score gauge ($0\text{--}100$) and live intensity scale.
+  * Live inspection event feed with score-first multi-lingual classification tags (`Élő nézet` / `Live Now` / `În direct`).
+* **Responsive Box-Model UI:** Light/Dark theme toggle and mobile-optimized layouts with tailored touch targets, padding, and canvas-compressed profile image uploads.
 
 ---
 
@@ -68,17 +77,18 @@ The system relies on rule-based, deterministic heuristics (White-Box methodology
 
 ```text
 phishing-analyser/
-├── client/                     # Frontend (React 18, Vite, i18next, Firebase SDK)
+├── vercel.json                 # Vercel Monorepo / Multi-service orchestration configuration
+├── client/                     # Frontend Application (React 19, Vite, i18next, Firebase SDK)
 │   ├── src/
 │   │   ├── assets/             # SVG and PNG icons, illustrations
 │   │   ├── data/
 │   │   │   └── quizData.json   # 30 trilingual cybersecurity questions & explanations
 │   │   ├── AdminStats.jsx      # SOC operations center & SVG radar dial dashboard (Admin)
-│   │   ├── AdminStats.css      # SOC dashboard layout and responsive breakpoints
+│   │   ├── AdminStats.css      # SOC dashboard layout, radar dial, and responsive breakpoints
 │   │   ├── App.jsx             # Root container, routing, state sync & analyzer UI
 │   │   ├── App.css             # Main stylesheet, Box Model & media queries
-│   │   ├── Auth.jsx            # Authentication & registration forms
-│   │   ├── firebase.js         # Firebase Auth & Firestore client configuration
+│   │   ├── Auth.jsx            # Authentication, registration flow & secondaryAuth handling
+│   │   ├── firebase.js         # Firebase Auth, secondaryAuth & Firestore client instances
 │   │   ├── i18n.js             # i18next translation resources (HU, EN, RO)
 │   │   ├── LightMode.css       # Light theme style overrides
 │   │   ├── Quiz.jsx            # Interactive awareness quiz engine
@@ -86,7 +96,7 @@ phishing-analyser/
 │   │   └── main.jsx            # React application entry point
 │   ├── index.html
 │   └── package.json
-├── server/                     # Backend (Node.js, Express REST API)
+├── server/                     # Backend API (Node.js, Express REST API, Serverless export)
 │   ├── data/
 │   │   ├── phone_fraud.json    # High-risk dialing zones & fraud classifications
 │   │   └── suspicious_keywords.json # Lexicons for psychological & financial indicators
@@ -99,7 +109,42 @@ phishing-analyser/
 
 ---
 
-## 🛠️ Installation & Setup
+## ☁️ Cloud Deployment Architecture (Vercel Full-Stack)
+
+The platform is designed to be deployed as a unified full-stack project on **Vercel** with zero-configuration multi-service routing:
+
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "client": {
+      "root": "client",
+      "framework": "vite"
+    },
+    "server": {
+      "root": "server",
+      "framework": "express"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": { "service": "server" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "service": "client" }
+    }
+  ]
+}
+```
+
+* **Frontend Routing:** Incoming web traffic (`/(.*)`) is routed directly to the optimized static build of the Vite client.
+* **API Routing:** REST API requests (`/api/(.*)`) are routed seamlessly to the Express service, running as serverless fluid compute with automatic port abstraction and instant response times.
+
+---
+
+## 🛠️ Installation & Setup (Local Development)
 
 ### Prerequisites
 * **Node.js** (v18.0.0 or higher recommended)
@@ -119,6 +164,8 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
 
+*(Note: In production deployments on Vercel, the same environment variables are configured in the Vercel Dashboard, omitting `VITE_API_URL` to allow relative origin routing).*
+
 ### 2. Start the Backend API
 Open a terminal and navigate to the `server/` directory:
 
@@ -127,7 +174,7 @@ cd server
 npm install
 node index.js
 ```
-The backend server runs on `http://localhost:5001`.
+The backend server runs locally on `http://localhost:5001`.
 
 ### 3. Start the Frontend Client
 Open a second terminal and navigate to the `client/` directory:
@@ -162,5 +209,7 @@ The test runner validates the following scenarios:
 ## 🔒 Security & Implementation Standards
 
 * **Deterministic White-Box Architecture:** Eliminates unexplainable black-box classification errors through verifiable heuristic matrices.
+* **Secondary Auth Lifecycle Security:** Protects user sessions by ensuring that registration creates the Firestore profile without polluting the primary client auth session.
+* **Score-First Dynamic Translation:** Eliminates display anomalies by deriving verdict classifications primarily from normalized score metrics before mapping localized language keys.
 * **Client-Side Image Compression:** Profile photos are resized and compressed via the HTML5 Canvas API prior to transmission, saving Firestore storage bandwidth.
 * **Standards-Compliant UTF-8 BOM CSV Exports:** Data exports are prepended with an explicit byte order mark to ensure special character fidelity in external spreadsheet applications.
