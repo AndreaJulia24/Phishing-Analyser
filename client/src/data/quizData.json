@@ -1,422 +1,1268 @@
-[
-  {
-    "id": 1,
-    "type": "URL",
-    "scenario": "A kapott link: https://secure-login.paypal.account-verify.info/update",
-    "question": "Melyik a tényleges fődomain, amely a webhelyet birtokolja?",
-    "options": [
-      "paypal.com",
-      "secure-login.paypal",
-      "account-verify.info",
-      "paypal.account-verify.info"
-    ],
-    "correctIndex": 2,
-    "explanation": "A domainhierarchiában a perjel (/) előtti utolsó két tag a valódi domain. A 'paypal' csak egy aldomain a támadó által regisztrált account-verify.info címen."
-  },
-  {
-    "id": 2,
-    "type": "SMS",
-    "scenario": "SMS érkezik: 'Csomagja érkezett! A kézbesítéshez erősítse meg címét és fizessen 850 Ft vámot: http://posta-kezbesites-info.top'",
-    "question": "Mi az elsődleges gyanús jel ebben az üzenetben?",
-    "options": [
-      "A 850 Ft-os összeg túl alacsony",
-      "A hivatalos posta nem használ szokatlan .top végződésű domaint és SMS-es fizetési linket",
-      "Az SMS-ben nincs feltüntetve a feladó keresztneve",
-      "A vámot mindig kizárólag készpénzben lehet fizetni"
-    ],
-    "correctIndex": 1,
-    "explanation": "A csomagküldős adathalászatok tipikusan olcsó, generikus TLD-ket (.top, .xyz) használnak, és sürgős fizetésre kényszerítenek bankkártyaadatok megszerzéséhez."
-  },
-  {
-    "id": 3,
-    "type": "Hívás",
-    "scenario": "Éjszaka egyetlen csörrenést kapsz egy +234-es (Nigéria) előhívóról, majd a hívás megszakad.",
-    "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást, és mit kell tenned?",
-    "options": [
-      "Man-in-the-Middle; azonnal jelszót kell cserélni",
-      "Wangiri csalás; semmiképp sem szabad visszahívni",
-      "SIM Swapping; értesíteni kell a szolgáltatót",
-      "Spear Phishing; SMS-ben vissza kell kérdezni"
-    ],
-    "correctIndex": 1,
-    "explanation": "A Wangiri (egy csörgés és leteszi) célja, hogy a kíváncsiságból visszahívó áldozatnak emelt díjas nemzetközi tarifát számlázzon ki."
-  },
-  {
-    "id": 4,
-    "type": "E-mail",
-    "scenario": "A feladó neve 'Netflix Support', de a nyers feladói e-mail cím: support@netfllix-billing-update.com.",
-    "question": "Milyen adathalász technikát figyelhetünk meg a címben?",
-    "options": [
-      "Typosquatting (elgépeléses megtévesztés duplázott 'l'-lel)",
-      "Cross-Site Scripting (XSS)",
-      "SQL Injection",
-      "DDoS támadás"
-    ],
-    "correctIndex": 0,
-    "explanation": "A támadó egy betű megkettőzésével (netfllix) próbálja elérni, hogy felületes olvasásnál eredetinek tűnjön a feladó."
-  },
-  {
-    "id": 5,
-    "type": "Alapok",
-    "scenario": "Egy weboldal címében a protokoll 'https://', és a böngésző lakat ikont mutat.",
-    "question": "Garantálja-e a lakat ikon, hogy a weboldal nem csaló adathalász felület?",
-    "options": [
-      "Igen, mert csak bejegyzett cégek kaphatnak tanúsítványt",
-      "Nem, a lakat csak a titkosított csatornát jelzi, a csalók is kérhetnek ingyenes SSL-t",
-      "Igen, a Google és a Microsoft azonnal tiltja a csaló SSL tanúsítványokat",
-      "Csak akkor, ha zöld színű a lakat"
-    ],
-    "correctIndex": 1,
-    "explanation": "A HTTPS és a lakat csak azt jelenti, hogy a kommunikáció közted és a szerver között titkosított, azt nem, hogy a szerver tulajdonosa megbízható."
-  },
-  {
-    "id": 6,
-    "type": "SMS",
-    "scenario": "SMS: 'Tisztelt Ügyfelünk! Az Ön bankszámláját biztonsági incidens miatt zároltuk. Kattintson ide a feloldáshoz: http://bank-hitelesites.net'",
-    "question": "Miért nem küld a bankod ilyen jellegű üzenetet?",
-    "options": [
-      "Mert a bankok csak postai levelet küldhetnek zárolás esetén",
-      "Mert a bankok nem mellékelnek közvetlen bejelentkezési linket biztonsági zárolásról szóló SMS-ben",
-      "Mert a bankok nem dolgoznak hétvégén",
-      "Mert az SMS nem támogatja a magyar ékezetes karaktereket"
-    ],
-    "correctIndex": 1,
-    "explanation": "A pénzintézetek szigorú biztonsági protokoll szerint sosem küldenek kattintható jelszóbekérő linket váratlan fiókzárolás ürügyén."
-  },
-  {
-    "id": 7,
-    "type": "URL",
-    "scenario": "Gyanús link egy fórumon: http://192.168.1.105/apple-id-verify/login.php",
-    "question": "Miért azonnal gyanús egy ilyen link hivatalos bejelentkezés esetén?",
-    "options": [
-      "Mert nem tartalmaz 'www' előtagot",
-      "Mert legitim szolgáltatók nem IP-címes linkeken léptetik be a felhasználókat",
-      "Mert a php kiterjesztést betiltották",
-      "Mert a portszám hiányzik a végéről"
-    ],
-    "correctIndex": 1,
-    "explanation": "A nyers IP-cím használata a domain név helyett klasszikus adathalász heurisztikai indikátor."
-  },
-  {
-    "id": 8,
-    "type": "E-mail",
-    "scenario": "E-mail érkezik a HR-től: 'Kérjük, nyissa meg a csatolt fizetesjegyzek.pdf.exe fájlt a friss bérezés megtekintéséhez.'",
-    "question": "Milyen veszélyt rejt ez a fájl?",
-    "options": [
-      "Semmilyet, mert a PDF formátum biztonságos",
-      "Kettős kiterjesztésű trójai/futtatható malware (.exe)",
-      "A fájl mérete túl kicsi lesz",
-      "A Windows automatikusan letörli a PDF-eket"
-    ],
-    "correctIndex": 1,
-    "explanation": "A kettős kiterjesztés (double extension) célja a felhasználó megtévesztése: valójában egy futtatható kártékony program (.exe)."
-  },
-  {
-    "id": 9,
-    "type": "Alapok",
-    "scenario": "Mi a legbiztonságosabb teendő, ha gyanús belépési linket kapsz egy szolgáltató nevében?",
-    "question": "Hogyan érdemes megnyitni a szolgáltatást?",
-    "options": [
-      "A linkre kattintva inkognitó ablakban",
-      "Közvetlenül a böngészőbe beírva a hivatalos domaint vagy a hivatalos mobilapplikáción keresztül",
-      "A linket továbbítva egy ismerősnek ellenőrzésre",
-      "A link megnyitása után azonnali jelszóváltoztatással"
-    ],
-    "correctIndex": 1,
-    "explanation": "Mindig közvetlenül, kézzel beírt hivatalos címen vagy alkalmazásban kell belépni, megkerülve a kapott linket."
-  },
-  {
-    "id": 10,
-    "type": "URL",
-    "scenario": "Link vizsgálata: http://facebook.com@attacker-site.com/login",
-    "question": "Hová navigál a böngésző a fenti URL megnyitásakor?",
-    "options": [
-      "A facebook.com szerverére",
-      "Az attacker-site.com szerverére",
-      "Hibaüzenetet ad, mert két domaint tartalmaz",
-      "A Google kezdőlapra"
-    ],
-    "correctIndex": 1,
-    "explanation": "Az '@' jel előtti rész autentikációs felhasználónévként értelmeződik az URL specifikáció szerint, a valós célgép az '@' utáni domain (attacker-site.com)."
-  },
-  {
-    "id": 11,
-    "type": "SMS",
-    "scenario": "SMS: 'Anya, elhagytam a telefonom, ez az új számom! Sürgősen utalj 150.000 Ft-ot albérletre erre a számlaszámra...'",
-    "question": "Hogyan hívják ezt az egyre elterjedtebb csalási formát?",
-    "options": [
-      "Whaling támadás",
-      "Hi Mum / Szia Anya csalás (családi megszemélyesítés)",
-      "DDoS zsarolás",
-      "Ransomware terjesztés"
-    ],
-    "correctIndex": 1,
-    "explanation": "A 'Szia Anya' csalás során a támadók gyermeknek adják ki magukat, és sürgősségre hivatkozva azonnali pénzátutalást kérnek."
-  },
-  {
-    "id": 12,
-    "type": "Hívás",
-    "scenario": "Egy telefonáló a bankod csalásmegelőzési osztályának adja ki magát, és arra kér, hogy telepítsd az 'AnyDesk' vagy 'TeamViewer' programot a számlád védelmében.",
-    "question": "Mi a telefonáló valódi célja?",
-    "options": [
-      "A telefonod vírusirtóval való felszerelése",
-      "Távoli hozzáférés megszerzése az eszközödhöz és a netbankodhoz",
-      "A mobilhálózat sávszélességének növelése",
-      "A bankkártya lejárati idejének ellenőrzése"
-    ],
-    "correctIndex": 1,
-    "explanation": "A távoli asztal alkalmazásokkal a csalók átveszik az irányítást a gép felett, és maguk indítanak utalásokat a belépett netbankból."
-  },
-  {
-    "id": 13,
-    "type": "E-mail",
-    "scenario": "Egy levélben az áll: 'Fizessen 500 dollár értékű Bitcoint 48 órán belül, különben a webkamerájával készült kompromittáló felvételeket elküldjük az ismerőseinek.'",
-    "question": "Mi az ilyen típusú támadás neve és valóságtartalma?",
-    "options": [
-      "Sextortion átverés; általában tömeges kamu levél valódi felvételek nélkül",
-      "Zero-day exploit; a kamera biztosan felvette",
-      "Man-in-the-Browser; azonnal fizetni kell",
-      "Rootkit fertőzés"
-    ],
-    "correctIndex": 0,
-    "explanation": "A sextortion zsarolólevelek szinte kivétel nélkül sablon üzenetek korábbi adatszivárgásokból szerzett jelszórészletekkel, valós videó nélkül."
-  },
-  {
-    "id": 14,
-    "type": "Alapok",
-    "scenario": "Melyik kétfaktoros hitelesítési (2FA) forma nyújtja a legmagasabb védelmet adathalászat ellen?",
-    "question": "Válaszd ki a legbiztonságosabb módszert:",
-    "options": [
-      "SMS-ben kapott numerikus kód",
-      "E-mailben érkező megerősítő kód",
-      "Hardveres biztonsági kulcs (FIDO2 / U2F YubiKey)",
-      "Biztonsági kérdés (pl. anyja leánykori neve)"
-    ],
-    "correctIndex": 2,
-    "explanation": "A FIDO2 hardverkulcsok közvetlenül a domainhez kötik a hitelesítést, így ha adathalász oldalra írod be az adatokat, a kulcs nem adja át a tokent."
-  },
-  {
-    "id": 15,
-    "type": "URL",
-    "scenario": "Az URL-ben az alábbi karakterek találhatók: http://www.google.com%2Flogin%2Ephp@evil-site.com",
-    "question": "Milyen kódolást használt a támadó az URL egy részének elfedésére?",
-    "options": [
-      "Base64 kódolás",
-      "URL / Hexadecimális százalékos kódolás (%xx)",
-      "AES-256 titkosítás",
-      "MD5 hash"
-    ],
-    "correctIndex": 1,
-    "explanation": "A %2F és %2E a perjel (/) és a pont (.) URL-kódolt változatai, amivel a heurisztikus szűrőket és a felhasználó szemét próbálják megtéveszteni."
-  },
-  {
-    "id": 16,
-    "type": "SMS",
-    "scenario": "SMS érkezik a közműszolgáltató nevében: 'Fizesse be elmaradását, különben ma kikapcsoljuk az áramot!'",
-    "question": "Milyen pszichológiai manipulációs elvet (Social Engineering) alkalmaz ez a támadás?",
-    "options": [
-      "Kíváncsiságkeltés",
-      "Sürgősség és félelemkeltés (Urgency & Fear)",
-      "Kölcsönösség (Reciprocity)",
-      "Társadalmi bizonyíték (Social Proof)"
-    ],
-    "correctIndex": 1,
-    "explanation": "A sürgősség és a retorziótól való félelem kikapcsolja a racionális ellenőrzést, gyors cselekvésre kényszerítve az áldozatot."
-  },
-  {
-    "id": 17,
-    "type": "Alapok",
-    "scenario": "Egy ismeretlen feladótól érkező Word dokumentum megnyitásakor egy sárga sáv jelenik meg: 'A tartalom megtekintéséhez engedélyezze a makrókat.'",
-    "question": "Mi történik, ha engedélyezed a makrókat?",
-    "options": [
-      "Gyorsabban fog betölteni a dokumentum",
-      "Káros beágyazott VBA kód (letöltő malware) futhat le a számítógépeden",
-      "Automatikusan elmenti a fájlt a felhőbe",
-      "Megváltozik a betűtípus"
-    ],
-    "correctIndex": 1,
-    "explanation": "A kártékony Office makrók a fertőzések egyik leggyakoribb forrásai; azonnal letölthetnek háttérben futó zsarolóvírust vagy kémprogramot."
-  },
-  {
-    "id": 18,
-    "type": "URL",
-    "scenario": "Egy orosz karaktert (cirill 'а') tartalmaz a latin 'a' helyett egy domain: http://ebаy.com (punycode: xn--eby-7cd.com)",
-    "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást?",
-    "options": [
-      "Homoglif / IDN adathalászat",
-      "Buffer Overflow támadás",
-      "DNS mérgezés",
-      "Clickjacking"
-    ],
-    "correctIndex": 0,
-    "explanation": "Az IDN (Internationalized Domain Name) homoglif támadás lényege, hogy más ábécék szemre azonos karaktereivel hoznak létre megtévesztő címet."
-  },
-  {
-    "id": 19,
-    "type": "Hívás",
-    "scenario": "A telefonodon bejövő hívásként a saját bankod pontos ügyfélszolgálati telefonszáma jelenik meg a kijelzőn.",
-    "question": "Biztos lehetsz benne, hogy valóban a bank hív?",
-    "options": [
-      "Igen, mert a telefonszámok nem hamisíthatók",
-      "Nem, a hívószám-kijelzés (Caller ID) könnyen hamisítható (CLI Spoofing)",
-      "Csak akkor, ha a szolgáltató neve is ki van írva",
-      "Igen, ha a hívás belföldi"
-    ],
-    "correctIndex": 1,
-    "explanation": "A Caller ID Spoofing technológiával VoIP hívásoknál bármilyen tetszőleges feladói telefonszám megjeleníthető az áldozat kijelzőjén."
-  },
-  {
-    "id": 20,
-    "type": "E-mail",
-    "scenario": "A cég vezérigazgatója nevében e-mailt kap a könyvelő, hogy azonnal utaljon át 10 millió forintot egy új partnernek szigorúan titkos szerződésre hivatkozva.",
-    "question": "Mi az ilyen típusú célzott támadás neve?",
-    "options": [
-      "BEC (Business Email Compromise) / CEO Fraud",
-      "Adware fertőzés",
-      "SQL Injection",
-      "Brute-force támadás"
-    ],
-    "correctIndex": 0,
-    "explanation": "A BEC (üzleti e-mail kompromittálás) során vezetői pozícióval élnek vissza, kihasználva a hierarchiát és a sürgősséget."
-  },
-  {
-    "id": 21,
-    "type": "Alapok",
-    "scenario": "Egy webáruházban látod a keresett 400.000 Ft-os okostelefont 45.000 Ft-ért, de kizárólag előreutalással lehet fizetni egy magánszámlára.",
-    "question": "Mi a helyzet legvalószínűbb oka?",
-    "options": [
-      "Raktárkisöprés és akció",
-      "Csaló áruház (kamu webshop) előreutalásos csalással",
-      "Gyári hibás termék",
-      "Személyre szabott kuponkedvezmény"
-    ],
-    "correctIndex": 1,
-    "explanation": "A valós piaci ártól kirívóan eltérő ár és a biztonságos fizetési módok (utánvét, kártya) hiánya a kamu webáruházak ismertetőjele."
-  },
-  {
-    "id": 22,
-    "type": "URL",
-    "scenario": "A link így néz ki: https://login.microsoftonline.com.attacker.org/oauth2",
-    "question": "Hányadik szintű domain (subdomain) itt a 'microsoftonline' szó?",
-    "options": [
-      "Fődomain (TLD)",
-      "Második szintű domain (SLD)",
-      "Harmadik szintű aldomain (subdomain)",
-      "Nem része a domainnek"
-    ],
-    "correctIndex": 2,
-    "explanation": "A domain a végéről épül fel: .org (1. szint), attacker (2. szint), microsoftonline (3. szint), login (4. szint). A tulajdonos az attacker.org."
-  },
-  {
-    "id": 23,
-    "type": "SMS",
-    "scenario": "SMS: 'Gratulálunk! Az Ön telefonszáma 5.000.000 Ft-ot nyert a Nemzeti Lottón. A nyeremény átvételéhez küldje el a személyi igazolványát.'",
-    "question": "Mi a célja az ilyen üzenetnek, ha sosem lottóztál?",
-    "options": [
-      "Személyazonosság-lopás (Identity Theft) hivatalos okmányok megszerzésével",
-      "A lottózó reklámkampánya",
-      "Rendszerhiba a telefontársaságnál",
-      "Adóbevallási kötelezettség"
-    ],
-    "correctIndex": 0,
-    "explanation": "A kamu nyereményjátékok célja a személyes okmányok megszerzése, amikkel a csalók hiteleket vagy online számlákat nyithatnak az áldozat nevében."
-  },
-  {
-    "id": 24,
-    "type": "Alapok",
-    "scenario": "Egy ismeretlen feladó által küldött e-mailben van egy 'Leiratkozás' gomb egy nyilvánvaló spam levél alján.",
-    "question": "Biztonságos-e rákattintani a leiratkozásra egy agresszív adathalász levélben?",
-    "options": [
-      "Igen, mert a törvény kötelezi őket a leiratkozásra",
-      "Nem, mert a kattintással megerősíted, hogy az e-mail címed aktív, és még több támadás érkezik",
-      "Igen, a levélszemét azonnal törlődik a szerverről",
-      "Mindegy, nincs hatása"
-    ],
-    "correctIndex": 1,
-    "explanation": "Csaló, rosszindulatú spamek esetén a 'leiratkozás' link gyakran kártékony oldalra visz, vagy jelzi a spammernek, hogy a postafiók aktív."
-  },
-  {
-    "id": 25,
-    "type": "E-mail",
-    "scenario": "Egy e-mail szövegében a link szövege kékkel alá van húzva: 'https://otpbank.hu', de ha fölé viszed az egeret, a böngésző sávjában 'http://csalo-oldal.hu' látható.",
-    "question": "Hogyan működik ez a megtévesztés a HTML-ben?",
-    "options": [
-      "A megjelenített szöveg független a href attribútumban lévő tényleges célcímtől",
-      "A böngésző rosszul fordítja le a linket",
-      "Ez egy automatikus átirányítás a bank oldaláról",
-      "A vírusirtó módosította a linket"
-    ],
-    "correctIndex": 0,
-    "explanation": "HTML-ben az `<a href='cél'>látható szöveg</a>` struktúra miatt a látható felirat bármi lehet, a böngésző a href attribútumban megadott címre ugrik."
-  },
-  {
-    "id": 26,
-    "type": "Hívás",
-    "scenario": "A hívó felajánlja, hogy segít visszaszerezni a korábbi kriptovaluta befektetési csalásban elvesztett pénzedet, ha előre kifizetsz 10% sikerdíjat.",
-    "question": "Milyen csalási sémáról van szó?",
-    "options": [
-      "Recovery Scam (újraáldozattá tevés)",
-      "Pharming",
-      "Watering Hole támadás",
-      "Evil Twin támadás"
-    ],
-    "correctIndex": 0,
-    "explanation": "A Recovery Scam lényege, hogy a már egyszer megkárosított embereket újra célba veszik a pénz visszaszerzésének hamis ígéretével."
-  },
-  {
-    "id": 27,
-    "type": "URL",
-    "scenario": "Link: http://google.com.translate.goog/url?q=https://malicious-site.com",
-    "question": "Mire használják a támadók a legitim szolgáltatások (pl. Google Translate) linkjeit?",
-    "options": [
-      "Keresőoptimalizálásra (SEO)",
-      "Nyílt átirányításra (Open Redirect) és a biztonsági szűrők megkerülésére",
-      "A szerverek túlterhelésére",
-      "A weboldal nyelvének lefordítására"
-    ],
-    "correctIndex": 1,
-    "explanation": "A támadók megbízható szolgáltatások átirányító funkcióit használják fel, hogy az e-mail szűrők átengedjék a linket."
-  },
-  {
-    "id": 28,
-    "type": "Alapok",
-    "scenario": "Mit tesz a jelszókezelő (Password Manager), ha egy jól sikerült klónozott adathalász oldalon jársz?",
-    "question": "Hogyan véd a jelszókezelő az adathalászat ellen?",
-    "options": [
-      "Figyelmeztető hangot ad ki",
-      "Nem ajánlja fel az automatikus kitöltést, mert a domain nem egyezik a mentettel",
-      "Automatikusan letiltja a weboldalt a tűzfalban",
-      "Titkosított jelszót generál a támadónak"
-    ],
-    "correctIndex": 1,
-    "explanation": "A jelszókezelő a pontos domain nevet figyeli; ha a cím akár egy betűben is eltér (pl. paypaI a paypal helyett), nem hajlandó beilleszteni a jelszót."
-  },
-  {
-    "id": 29,
-    "type": "SMS",
-    "scenario": "SMS: 'A Netflix előfizetését felfüggesztettük elutasított kártyás fizetés miatt. 24 órán belül frissítse: netflix-payment.cc'",
-    "question": "Melyik gyanús elem utal leginkább csalásra a fentiek közül?",
-    "options": [
-      "A 24 órás határidő és a szokatlan (.cc) végződésű nem hivatalos domain",
-      "A Netflix neve kisbetűvel van írva",
-      "Az SMS szövege túl rövid",
-      "Nem szerepel benne a bankszámlaszám"
-    ],
-    "correctIndex": 0,
-    "explanation": "A streaming platformok a saját hivatalos domainjükön keresztül kezelik a számlázást, nem külső országkódos (.cc) generikus webcímeken."
-  },
-  {
-    "id": 30,
-    "type": "Alapok",
-    "scenario": "Mi a legfontosabb első lépés, ha észreveszed, hogy a bankkártyaadataidat egy adathalász weboldalon adtad meg?",
-    "question": "Mit kell tenned az első percekben?",
-    "options": [
-      "Újraindítani a számítógépet",
-      "Azonnal zárolni vagy fagyasztani a kártyát a banki alkalmazásban vagy telefonos ügyfélszolgálaton",
-      "Feljelentést tenni a rendőrségen",
-      "Törölni a böngészési előzményeket és a cookie-kat"
-    ],
-    "correctIndex": 1,
-    "explanation": "A kártya azonnali letiltása az egyetlen lépés, ami megakadályozza a jogosulatlan pénzlevonást az adatok megszerzése után."
-  }
-]
+{
+  "hu": [
+    {
+      "id": 1,
+      "type": "URL",
+      "scenario": "A kapott link: https://secure-login.paypal.account-verify.info/update",
+      "question": "Melyik a tényleges fődomain, amely a webhelyet birtokolja?",
+      "options": [
+        "paypal.com",
+        "secure-login.paypal",
+        "account-verify.info",
+        "paypal.account-verify.info"
+      ],
+      "correctIndex": 2,
+      "explanation": "A domainhierarchiában a perjel (/) előtti utolsó két tag a valódi domain. A 'paypal' csak egy aldomain a támadó által regisztrált account-verify.info címen."
+    },
+    {
+      "id": 2,
+      "type": "SMS",
+      "scenario": "SMS érkezik: 'Csomagja érkezett! A kézbesítéshez erősítse meg címét és fizessen 850 Ft vámot: http://posta-kezbesites-info.top'",
+      "question": "Mi az elsődleges gyanús jel ebben az üzenetben?",
+      "options": [
+        "A 850 Ft-os összeg túl alacsony",
+        "A hivatalos posta nem használ szokatlan .top végződésű domaint és SMS-es fizetési linket",
+        "Az SMS-ben nincs feltüntetve a feladó keresztneve",
+        "A vámot mindig kizárólag készpénzben lehet fizetni"
+      ],
+      "correctIndex": 1,
+      "explanation": "A csomagküldős adathalászatok tipikusan olcsó, generikus TLD-ket (.top, .xyz) használnak, és sürgős fizetésre kényszerítenek bankkártyaadatok megszerzéséhez."
+    },
+    {
+      "id": 3,
+      "type": "Hívás",
+      "scenario": "Éjszaka egyetlen csörrenést kapsz egy +234-es (Nigéria) előhívóról, majd a hívás megszakad.",
+      "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást, és mit kell tenned?",
+      "options": [
+        "Man-in-the-Middle; azonnal jelszót kell cserélni",
+        "Wangiri csalás; semmiképp sem szabad visszahívni",
+        "SIM Swapping; értesíteni kell a szolgáltatót",
+        "Spear Phishing; SMS-ben vissza kell kérdezni"
+      ],
+      "correctIndex": 1,
+      "explanation": "A Wangiri (egy csörgés és leteszi) célja, hogy a kíváncsiságból visszahívó áldozatnak emelt díjas nemzetközi tarifát számlázzon ki."
+    },
+    {
+      "id": 4,
+      "type": "E-mail",
+      "scenario": "A feladó neve 'Netflix Support', de a nyers feladói e-mail cím: support@netfllix-billing-update.com.",
+      "question": "Milyen adathalász technikát figyelhetünk meg a címben?",
+      "options": [
+        "Typosquatting (elgépeléses megtévesztés duplázott 'l'-lel)",
+        "Cross-Site Scripting (XSS)",
+        "SQL Injection",
+        "DDoS támadás"
+      ],
+      "correctIndex": 0,
+      "explanation": "A támadó egy betű megkettőzésével (netfllix) próbálja elérni, hogy felületes olvasásnál eredetinek tűnjön a feladó."
+    },
+    {
+      "id": 5,
+      "type": "Alapok",
+      "scenario": "Egy weboldal címében a protokoll 'https://', és a böngésző lakat ikont mutat.",
+      "question": "Garantálja-e a lakat ikon, hogy a weboldal nem csaló adathalász felület?",
+      "options": [
+        "Igen, mert csak bejegyzett cégek kaphatnak tanúsítványt",
+        "Nem, a lakat csak a titkosított csatornát jelzi, a csalók is kérhetnek ingyenes SSL-t",
+        "Igen, a Google és a Microsoft azonnal tiltja a csaló SSL tanúsítványokat",
+        "Csak akkor, ha zöld színű a lakat"
+      ],
+      "correctIndex": 1,
+      "explanation": "A HTTPS és a lakat csak azt jelenti, hogy a kommunikáció közted és a szerver között titkosított, azt nem, hogy a szerver tulajdonosa megbízható."
+    },
+    {
+      "id": 6,
+      "type": "SMS",
+      "scenario": "SMS: 'Tisztelt Ügyfelünk! Az Ön bankszámláját biztonsági incidens miatt zároltuk. Kattintson ide a feloldáshoz: http://bank-hitelesites.net'",
+      "question": "Miért nem küld a bankod ilyen jellegű üzenetet?",
+      "options": [
+        "Mert a bankok csak postai levelet küldhetnek zárolás esetén",
+        "Mert a bankok nem mellékelnek közvetlen bejelentkezési linket biztonsági zárolásról szóló SMS-ben",
+        "Mert a bankok nem dolgoznak hétvégén",
+        "Mert az SMS nem támogatja a magyar ékezetes karaktereket"
+      ],
+      "correctIndex": 1,
+      "explanation": "A pénzintézetek szigorú biztonsági protokoll szerint sosem küldenek kattintható jelszóbekérő linket váratlan fiókzárolás ürügyén."
+    },
+    {
+      "id": 7,
+      "type": "URL",
+      "scenario": "Gyanús link egy fórumon: http://192.168.1.105/apple-id-verify/login.php",
+      "question": "Miért azonnal gyanús egy ilyen link hivatalos bejelentkezés esetén?",
+      "options": [
+        "Mert nem tartalmaz 'www' előtagot",
+        "Mert legitim szolgáltatók nem IP-címes linkeken léptetik be a felhasználókat",
+        "Mert a php kiterjesztést betiltották",
+        "Mert a portszám hiányzik a végéről"
+      ],
+      "correctIndex": 1,
+      "explanation": "A nyers IP-cím használata a domain név helyett klasszikus adathalász heurisztikai indikátor."
+    },
+    {
+      "id": 8,
+      "type": "E-mail",
+      "scenario": "E-mail érkezik a HR-től: 'Kérjük, nyissa meg a csatolt fizetesjegyzek.pdf.exe fájlt a friss bérezés megtekintéséhez.'",
+      "question": "Milyen veszélyt rejt ez a fájl?",
+      "options": [
+        "Semmilyet, mert a PDF formátum biztonságos",
+        "Kettős kiterjesztésű trójai/futtatható malware (.exe)",
+        "A fájl mérete túl kicsi lesz",
+        "A Windows automatikusan letörli a PDF-eket"
+      ],
+      "correctIndex": 1,
+      "explanation": "A kettős kiterjesztés (double extension) célja a felhasználó megtévesztése: valójában egy futtatható kártékony program (.exe)."
+    },
+    {
+      "id": 9,
+      "type": "Alapok",
+      "scenario": "Mi a legbiztonságosabb teendő, ha gyanús belépési linket kapsz egy szolgáltató nevében?",
+      "question": "Hogyan érdemes megnyitni a szolgáltatást?",
+      "options": [
+        "A linkre kattintva inkognitó ablakban",
+        "Közvetlenül a böngészőbe beírva a hivatalos domaint vagy a hivatalos mobilapplikáción keresztül",
+        "A linket továbbítva egy ismerősnek ellenőrzésre",
+        "A link megnyitása után azonnali jelszóváltoztatással"
+      ],
+      "correctIndex": 1,
+      "explanation": "Mindig közvetlenül, kézzel beírt hivatalos címen vagy alkalmazásban kell belépni, megkerülve a kapott linket."
+    },
+    {
+      "id": 10,
+      "type": "URL",
+      "scenario": "Link vizsgálata: http://facebook.com@attacker-site.com/login",
+      "question": "Hová navigál a böngésző a fenti URL megnyitásakor?",
+      "options": [
+        "A facebook.com szerverére",
+        "Az attacker-site.com szerverére",
+        "Hibaüzenetet ad, mert két domaint tartalmaz",
+        "A Google kezdőlapra"
+      ],
+      "correctIndex": 1,
+      "explanation": "Az '@' jel előtti rész autentikációs felhasználónévként értelmeződik az URL specifikáció szerint, a valós célgép az '@' utáni domain (attacker-site.com)."
+    },
+    {
+      "id": 11,
+      "type": "SMS",
+      "scenario": "SMS: 'Anya, elhagytam a telefonom, ez az új számom! Sürgősen utalj 150.000 Ft-ot albérletre erre a számlaszámra...'",
+      "question": "Hogyan hívják ezt az egyre elterjedtebb csalási formát?",
+      "options": [
+        "Whaling támadás",
+        "Hi Mum / Szia Anya csalás (családi megszemélyesítés)",
+        "DDoS zsarolás",
+        "Ransomware terjesztés"
+      ],
+      "correctIndex": 1,
+      "explanation": "A 'Szia Anya' csalás során a támadók gyermeknek adják ki magukat, és sürgősségre hivatkozva azonnali pénzátutalást kérnek."
+    },
+    {
+      "id": 12,
+      "type": "Hívás",
+      "scenario": "Egy telefonáló a bankod csalásmegelőzési osztályának adja ki magát, és arra kér, hogy telepítsd az 'AnyDesk' vagy 'TeamViewer' programot a számlád védelmében.",
+      "question": "Mi a telefonáló valódi célja?",
+      "options": [
+        "A telefonod vírusirtóval való felszerelése",
+        "Távoli hozzáférés megszerzése az eszközödhöz és a netbankodhoz",
+        "A mobilhálózat sávszélességének növelése",
+        "A bankkártya lejárati idejének ellenőrzése"
+      ],
+      "correctIndex": 1,
+      "explanation": "A távoli asztal alkalmazásokkal a csalók átveszik az irányítást a gép felett, és maguk indítanak utalásokat a belépett netbankból."
+    },
+    {
+      "id": 13,
+      "type": "E-mail",
+      "scenario": "Egy levélben az áll: 'Fizessen 500 dollár értékű Bitcoint 48 órán belül, különben a webkamerájával készült kompromittáló felvételeket elküldjük az ismerőseinek.'",
+      "question": "Mi az ilyen típusú támadás neve és valóságtartalma?",
+      "options": [
+        "Sextortion átverés; általában tömeges kamu levél valódi felvételek nélkül",
+        "Zero-day exploit; a kamera biztosan felvette",
+        "Man-in-the-Browser; azonnal fizetni kell",
+        "Rootkit fertőzés"
+      ],
+      "correctIndex": 0,
+      "explanation": "A sextortion zsarolólevelek szinte kivétel nélkül sablon üzenetek korábbi adatszivárgásokból szerzett jelszórészletekkel, valós videó nélkül."
+    },
+    {
+      "id": 14,
+      "type": "Alapok",
+      "scenario": "Melyik kétfaktoros hitelesítési (2FA) forma nyújtja a legmagasabb védelmet adathalászat ellen?",
+      "question": "Válaszd ki a legbiztonságosabb módszert:",
+      "options": [
+        "SMS-ben kapott numerikus kód",
+        "E-mailben érkező megerősítő kód",
+        "Hardveres biztonsági kulcs (FIDO2 / U2F YubiKey)",
+        "Biztonsági kérdés (pl. anyja leánykori neve)"
+      ],
+      "correctIndex": 2,
+      "explanation": "A FIDO2 hardverkulcsok közvetlenül a domainhez kötik a hitelesítést, így ha adathalász oldalra írod be az adatokat, a kulcs nem adja át a tokent."
+    },
+    {
+      "id": 15,
+      "type": "URL",
+      "scenario": "Az URL-ben az alábbi karakterek találhatók: http://www.google.com%2Flogin%2Ephp@evil-site.com",
+      "question": "Milyen kódolást használt a támadó az URL egy részének elfedésére?",
+      "options": [
+        "Base64 kódolás",
+        "URL / Hexadecimális százalékos kódolás (%xx)",
+        "AES-256 titkosítás",
+        "MD5 hash"
+      ],
+      "correctIndex": 1,
+      "explanation": "A %2F és %2E a perjel (/) és a pont (.) URL-kódolt változatai, amivel a heurisztikus szűrőket és a felhasználó szemét próbálják megtéveszteni."
+    },
+    {
+      "id": 16,
+      "type": "SMS",
+      "scenario": "SMS érkezik a közműszolgáltató nevében: 'Fizesse be elmaradását, különben ma kikapcsoljuk az áramot!'",
+      "question": "Milyen pszichológiai manipulációs elvet (Social Engineering) alkalmaz ez a támadás?",
+      "options": [
+        "Kíváncsiságkeltés",
+        "Sürgősség és félelemkeltés (Urgency & Fear)",
+        "Kölcsönösség (Reciprocity)",
+        "Társadalmi bizonyíték (Social Proof)"
+      ],
+      "correctIndex": 1,
+      "explanation": "A sürgősség és a retorziótól való félelem kikapcsolja a racionális ellenőrzést, gyors cselekvésre kényszerítve az áldozatot."
+    },
+    {
+      "id": 17,
+      "type": "Alapok",
+      "scenario": "Egy ismeretlen feladótól érkező Word dokumentum megnyitásakor egy sárga sáv jelenik meg: 'A tartalom megtekintéséhez engedélyezze a makrókat.'",
+      "question": "Mi történik, ha engedélyezed a makrókat?",
+      "options": [
+        "Gyorsabban fog betölteni a dokumentum",
+        "Káros beágyazott VBA kód (letöltő malware) futhat le a számítógépeden",
+        "Automatikusan elmenti a fájlt a felhőbe",
+        "Megváltozik a betűtípus"
+      ],
+      "correctIndex": 1,
+      "explanation": "A kártékony Office makrók a fertőzések egyik leggyakoribb forrásai; azonnal letölthetnek háttérben futó zsarolóvírust vagy kémprogramot."
+    },
+    {
+      "id": 18,
+      "type": "URL",
+      "scenario": "Egy orosz karaktert (cirill 'а') tartalmaz a latin 'a' helyett egy domain: http://ebаy.com (punycode: xn--eby-7cd.com)",
+      "question": "Hogyan nevezi a szakirodalom ezt a típusú támadást?",
+      "options": [
+        "Homoglif / IDN adathalászat",
+        "Buffer Overflow támadás",
+        "DNS mérgezés",
+        "Clickjacking"
+      ],
+      "correctIndex": 0,
+      "explanation": "Az IDN (Internationalized Domain Name) homoglif támadás lényege, hogy más ábécék szemre azonos karaktereivel hoznak létre megtévesztő címet."
+    },
+    {
+      "id": 19,
+      "type": "Hívás",
+      "scenario": "A telefonodon bejövő hívásként a saját bankod pontos ügyfélszolgálati telefonszáma jelenik meg a kijelzőn.",
+      "question": "Biztos lehetsz benne, hogy valóban a bank hív?",
+      "options": [
+        "Igen, mert a telefonszámok nem hamisíthatók",
+        "Nem, a hívószám-kijelzés (Caller ID) könnyen hamisítható (CLI Spoofing)",
+        "Csak akkor, ha a szolgáltató neve is ki van írva",
+        "Igen, ha a hívás belföldi"
+      ],
+      "correctIndex": 1,
+      "explanation": "A Caller ID Spoofing technológiával VoIP hívásoknál bármilyen tetszőleges feladói telefonszám megjeleníthető az áldozat kijelzőjén."
+    },
+    {
+      "id": 20,
+      "type": "E-mail",
+      "scenario": "A cég vezérigazgatója nevében e-mailt kap a könyvelő, hogy azonnal utaljon át 10 millió forintot egy új partnernek szigorúan titkos szerződésre hivatkozva.",
+      "question": "Mi az ilyen típusú célzott támadás neve?",
+      "options": [
+        "BEC (Business Email Compromise) / CEO Fraud",
+        "Adware fertőzés",
+        "SQL Injection",
+        "Brute-force támadás"
+      ],
+      "correctIndex": 0,
+      "explanation": "A BEC (üzleti e-mail kompromittálás) során vezetői pozícióval élnek vissza, kihasználva a hierarchiát és a sürgősséget."
+    },
+    {
+      "id": 21,
+      "type": "Alapok",
+      "scenario": "Egy webáruházban látod a keresett 400.000 Ft-os okostelefont 45.000 Ft-ért, de kizárólag előreutalással lehet fizetni egy magánszámlára.",
+      "question": "Mi a helyzet legvalószínűbb oka?",
+      "options": [
+        "Raktárkisöprés és akció",
+        "Csaló áruház (kamu webshop) előreutalásos csalással",
+        "Gyári hibás termék",
+        "Személyre szabott kuponkedvezmény"
+      ],
+      "correctIndex": 1,
+      "explanation": "A valós piaci ártól kirívóan eltérő ár és a biztonságos fizetési módok (utánvét, kártya) hiánya a kamu webáruházak ismertetőjele."
+    },
+    {
+      "id": 22,
+      "type": "URL",
+      "scenario": "A link így néz ki: https://login.microsoftonline.com.attacker.org/oauth2",
+      "question": "Hányadik szintű domain (subdomain) itt a 'microsoftonline' szó?",
+      "options": [
+        "Fődomain (TLD)",
+        "Második szintű domain (SLD)",
+        "Harmadik szintű aldomain (subdomain)",
+        "Nem része a domainnek"
+      ],
+      "correctIndex": 2,
+      "explanation": "A domain a végéről épül fel: .org (1. szint), attacker (2. szint), microsoftonline (3. szint), login (4. szint). A tulajdonos az attacker.org."
+    },
+    {
+      "id": 23,
+      "type": "SMS",
+      "scenario": "SMS: 'Gratulálunk! Az Ön telefonszáma 5.000.000 Ft-ot nyert a Nemzeti Lottón. A nyeremény átvételéhez küldje el a személyi igazolványát.'",
+      "question": "Mi a célja az ilyen üzenetnek, ha sosem lottóztál?",
+      "options": [
+        "Személyazonosság-lopás (Identity Theft) hivatalos okmányok megszerzésével",
+        "A lottózó reklámkampánya",
+        "Rendszerhiba a telefontársaságnál",
+        "Adóbevallási kötelezettség"
+      ],
+      "correctIndex": 0,
+      "explanation": "A kamu nyereményjátékok célja a személyes okmányok megszerzése, amikkel a csalók hiteleket vagy online számlákat nyithatnak az áldozat nevében."
+    },
+    {
+      "id": 24,
+      "type": "Alapok",
+      "scenario": "Egy ismeretlen feladó által küldött e-mailben van egy 'Leiratkozás' gomb egy nyilvánvaló spam levél alján.",
+      "question": "Biztonságos-e rákattintani a leiratkozásra egy agresszív adathalász levélben?",
+      "options": [
+        "Igen, mert a törvény kötelezi őket a leiratkozásra",
+        "Nem, mert a kattintással megerősíted, hogy az e-mail címed aktív, és még több támadás érkezik",
+        "Igen, a levélszemét azonnal törlődik a szerverről",
+        "Mindegy, nincs hatása"
+      ],
+      "correctIndex": 1,
+      "explanation": "Csaló, rosszindulatú spamek esetén a 'leiratkozás' link gyakran kártékony oldalra visz, vagy jelzi a spammernek, hogy a postafiók aktív."
+    },
+    {
+      "id": 25,
+      "type": "E-mail",
+      "scenario": "Egy e-mail szövegében a link szövege kékkel alá van húzva: 'https://otpbank.hu', de ha fölé viszed az egeret, a böngésző sávjában 'http://csalo-oldal.hu' látható.",
+      "question": "Hogyan működik ez a megtévesztés a HTML-ben?",
+      "options": [
+        "A megjelenített szöveg független a href attribútumban lévő tényleges célcímtől",
+        "A böngésző rosszul fordítja le a linket",
+        "Ez egy automatikus átirányítás a bank oldaláról",
+        "A vírusirtó módosította a linket"
+      ],
+      "correctIndex": 0,
+      "explanation": "HTML-ben az `<a href='cél'>látható szöveg</a>` struktúra miatt a látható felirat bármi lehet, a böngésző a href attribútumban megadott címre ugrik."
+    },
+    {
+      "id": 26,
+      "type": "Hívás",
+      "scenario": "A hívó felajánlja, hogy segít visszaszerezni a korábbi kriptovaluta befektetési csalásban elvesztett pénzedet, ha előre kifizetsz 10% sikerdíjat.",
+      "question": "Milyen csalási sémáról van szó?",
+      "options": [
+        "Recovery Scam (újraáldozattá tevés)",
+        "Pharming",
+        "Watering Hole támadás",
+        "Evil Twin támadás"
+      ],
+      "correctIndex": 0,
+      "explanation": "A Recovery Scam lényege, hogy a már egyszer megkárosított embereket újra célba veszik a pénz visszaszerzésének hamis ígéretével."
+    },
+    {
+      "id": 27,
+      "type": "URL",
+      "scenario": "Link: http://google.com.translate.goog/url?q=https://malicious-site.com",
+      "question": "Mire használják a támadók a legitim szolgáltatások (pl. Google Translate) linkjeit?",
+      "options": [
+        "Keresőoptimalizálásra (SEO)",
+        "Nyílt átirányításra (Open Redirect) és a biztonsági szűrők megkerülésére",
+        "A szerverek túlterhelésére",
+        "A weboldal nyelvének lefordítására"
+      ],
+      "correctIndex": 1,
+      "explanation": "A támadók megbízható szolgáltatások átirányító funkcióit használják fel, hogy az e-mail szűrők átengedjék a linket."
+    },
+    {
+      "id": 28,
+      "type": "Alapok",
+      "scenario": "Mit tesz a jelszókezelő (Password Manager), ha egy jól sikerült klónozott adathalász oldalon jársz?",
+      "question": "Hogyan véd a jelszókezelő az adathalászat ellen?",
+      "options": [
+        "Figyelmeztető hangot ad ki",
+        "Nem ajánlja fel az automatikus kitöltést, mert a domain nem egyezik a mentettel",
+        "Automatikusan letiltja a weboldalt a tűzfalban",
+        "Titkosított jelszót generál a támadónak"
+      ],
+      "correctIndex": 1,
+      "explanation": "A jelszókezelő a pontos domain nevet figyeli; ha a cím akár egy betűben is eltér (pl. paypaI a paypal helyett), nem hajlandó beilleszteni a jelszót."
+    },
+    {
+      "id": 29,
+      "type": "SMS",
+      "scenario": "SMS: 'A Netflix előfizetését felfüggesztettük elutasított kártyás fizetés miatt. 24 órán belül frissítse: netflix-payment.cc'",
+      "question": "Melyik gyanús elem utal leginkább csalásra a fentiek közül?",
+      "options": [
+        "A 24 órás határidő és a szokatlan (.cc) végződésű nem hivatalos domain",
+        "A Netflix neve kisbetűvel van írva",
+        "Az SMS szövege túl rövid",
+        "Nem szerepel benne a bankszámlaszám"
+      ],
+      "correctIndex": 0,
+      "explanation": "A streaming platformok a saját hivatalos domainjükön keresztül kezelik a számlázást, nem külső országkódos (.cc) generikus webcímeken."
+    },
+    {
+      "id": 30,
+      "type": "Alapok",
+      "scenario": "Mi a legfontosabb első lépés, ha észreveszed, hogy a bankkártyaadataidat egy adathalász weboldalon adtad meg?",
+      "question": "Mit kell tenned az első percekben?",
+      "options": [
+        "Újraindítani a számítógépet",
+        "Azonnal zárolni vagy fagyasztani a kártyát a banki alkalmazásban vagy telefonos ügyfélszolgálaton",
+        "Feljelentést tenni a rendőrségen",
+        "Törölni a böngészési előzményeket és a cookie-kat"
+      ],
+      "correctIndex": 1,
+      "explanation": "A kártya azonnali letiltása az egyetlen lépés, ami megakadályozza a jogosulatlan pénzlevonást az adatok megszerzése után."
+    }
+  ],
+  "en": [
+    {
+      "id": 1,
+      "type": "URL",
+      "scenario": "Received link: https://secure-login.paypal.account-verify.info/update",
+      "question": "Which is the actual primary domain that owns the website?",
+      "options": [
+        "paypal.com",
+        "secure-login.paypal",
+        "account-verify.info",
+        "paypal.account-verify.info"
+      ],
+      "correctIndex": 2,
+      "explanation": "In domain hierarchy, the last two labels before the slash (/) constitute the registered domain. 'paypal' is merely a subdomain on attacker-owned account-verify.info."
+    },
+    {
+      "id": 2,
+      "type": "SMS",
+      "scenario": "Incoming SMS: 'Your parcel has arrived! Please confirm your address and pay 850 HUF customs duty to proceed: http://posta-kezbesites-info.top'",
+      "question": "What is the primary red flag in this message?",
+      "options": [
+        "The 850 HUF fee is too low",
+        "The official postal service does not use suspicious .top domains or SMS payment links",
+        "The sender's first name is missing from the SMS",
+        "Customs fees must always be paid exclusively in cash"
+      ],
+      "correctIndex": 1,
+      "explanation": "Parcel delivery phishing typically employs cheap, generic TLDs (.top, .xyz) and creates false urgency to harvest payment card details."
+    },
+    {
+      "id": 3,
+      "type": "Call",
+      "scenario": "Late at night, you receive a single ring from a +234 (Nigeria) country code, after which the call immediately terminates.",
+      "question": "What is this type of fraud called in cybersecurity, and what should you do?",
+      "options": [
+        "Man-in-the-Middle; change passwords immediately",
+        "Wangiri scam; do not call back under any circumstances",
+        "SIM Swapping; contact your mobile operator",
+        "Spear Phishing; reply via SMS asking who called"
+      ],
+      "correctIndex": 1,
+      "explanation": "Wangiri ('one ring and drop') fraud aims to lure curious victims into calling back expensive premium-rate international numbers."
+    },
+    {
+      "id": 4,
+      "type": "Email",
+      "scenario": "The sender display name is 'Netflix Support', but the raw sender address is support@netfllix-billing-update.com.",
+      "question": "What phishing technique is observed in the sender address?",
+      "options": [
+        "Typosquatting (visual deception using a doubled 'l')",
+        "Cross-Site Scripting (XSS)",
+        "SQL Injection",
+        "DDoS Attack"
+      ],
+      "correctIndex": 0,
+      "explanation": "The attacker duplicates a letter (netfllix) so that upon quick inspection the domain looks authentic."
+    },
+    {
+      "id": 5,
+      "type": "Basics",
+      "scenario": "A website URL starts with 'https://' and the web browser displays a padlock icon.",
+      "question": "Does the padlock icon guarantee that the website is not a fraudulent phishing site?",
+      "options": [
+        "Yes, because only verified and registered businesses receive SSL certificates",
+        "No, the padlock only indicates encrypted transmission; scammers can also obtain free SSL certificates",
+        "Yes, Google and Microsoft immediately revoke fraudulent SSL certificates",
+        "Only if the padlock icon is green"
+      ],
+      "correctIndex": 1,
+      "explanation": "HTTPS and the padlock mean communication between you and the server is encrypted, not that the operator of the server is trustworthy."
+    },
+    {
+      "id": 6,
+      "type": "SMS",
+      "scenario": "SMS: 'Dear Customer! Your bank account has been suspended due to a security incident. Click here to unlock: http://bank-hitelesites.net'",
+      "question": "Why would your bank never send such a message?",
+      "options": [
+        "Because banks are legally required to send paper letters for suspensions",
+        "Because banks do not include clickable login links in security alert SMS messages",
+        "Because banks do not operate on weekends",
+        "Because SMS does not support accented characters"
+      ],
+      "correctIndex": 1,
+      "explanation": "Financial institutions enforce strict security protocols and never distribute direct login links via SMS when alerting about account restrictions."
+    },
+    {
+      "id": 7,
+      "type": "URL",
+      "scenario": "Suspicious link on a forum: http://192.168.1.105/apple-id-verify/login.php",
+      "question": "Why is such a link immediately suspicious for an official login portal?",
+      "options": [
+        "Because it lacks the 'www' prefix",
+        "Because legitimate services do not authenticate users on raw IP address links",
+        "Because the php extension has been deprecated",
+        "Because the port number is missing at the end"
+      ],
+      "correctIndex": 1,
+      "explanation": "Direct numeric IP addresses instead of recognized domain names are a classic heuristic phishing indicator."
+    },
+    {
+      "id": 8,
+      "type": "Email",
+      "scenario": "An email arrives from HR: 'Please open the attached payslip.pdf.exe to view your updated salary package.'",
+      "question": "What threat does this file pose?",
+      "options": [
+        "None, because the PDF format is safe",
+        "A double-extension Trojan / executable malware (.exe)",
+        "The file size will be too small to read",
+        "Windows automatically deletes all PDF files"
+      ],
+      "correctIndex": 1,
+      "explanation": "A double extension (.pdf.exe) tricks users into believing it is a document, while it is actually an executable malicious application."
+    },
+    {
+      "id": 9,
+      "type": "Basics",
+      "scenario": "What is the safest procedure when you receive a suspicious login link claiming to be from a provider?",
+      "question": "How should you access the online service safely?",
+      "options": [
+        "By clicking the link inside an incognito/private browser window",
+        "By typing the official domain directly into the browser address bar or using the official mobile app",
+        "By forwarding the link to a friend for verification",
+        "By opening the link and immediately changing your password"
+      ],
+      "correctIndex": 1,
+      "explanation": "Always navigate directly by manually typing the official domain or opening the official app, bypassing any supplied links."
+    },
+    {
+      "id": 10,
+      "type": "URL",
+      "scenario": "Inspecting link: http://facebook.com@attacker-site.com/login",
+      "question": "Where does the browser navigate upon opening this URL?",
+      "options": [
+        "To the facebook.com server",
+        "To the attacker-site.com server",
+        "It throws an error because two domains are present",
+        "To the Google homepage"
+      ],
+      "correctIndex": 1,
+      "explanation": "Under the URL specification, text before '@' represents user authentication credentials; the actual host destination is attacker-site.com."
+    },
+    {
+      "id": 11,
+      "type": "SMS",
+      "scenario": "SMS: 'Hi Mum, I dropped my phone, this is my new number! Urgent: please transfer $500 for rent to this account...'",
+      "question": "What is this increasingly widespread scam called?",
+      "options": [
+        "Whaling attack",
+        "Hi Mum / Family Impersonation scam",
+        "DDoS extortion",
+        "Ransomware distribution"
+      ],
+      "correctIndex": 1,
+      "explanation": "In 'Hi Mum' scams, attackers impersonate a child in distress to manipulate parents into sending immediate emergency funds."
+    },
+    {
+      "id": 12,
+      "type": "Call",
+      "scenario": "A caller claims to represent your bank's anti-fraud department and asks you to install 'AnyDesk' or 'TeamViewer' to protect your funds.",
+      "question": "What is the caller's actual objective?",
+      "options": [
+        "To install antivirus software on your phone",
+        "To obtain remote access to your device and online banking interface",
+        "To improve your cellular network bandwidth",
+        "To check the expiration date of your payment card"
+      ],
+      "correctIndex": 1,
+      "explanation": "Remote access software allows criminals to take over your screen, hijack online banking sessions, and initiate unauthorized transfers."
+    },
+    {
+      "id": 13,
+      "type": "Email",
+      "scenario": "An email demands: 'Pay $500 in Bitcoin within 48 hours, or compromising webcam footage will be sent to your contacts.'",
+      "question": "What is the nature and terminology of this attack?",
+      "options": [
+        "Sextortion scam; mass spam campaign with zero actual recorded footage",
+        "Zero-day exploit; the camera definitely recorded the user",
+        "Man-in-the-Browser; payment must be sent immediately",
+        "Rootkit infection"
+      ],
+      "correctIndex": 0,
+      "explanation": "Sextortion emails are mass-generated template scams leveraging leaked legacy passwords to intimidate victims without any actual footage."
+    },
+    {
+      "id": 14,
+      "type": "Basics",
+      "scenario": "Which two-factor authentication (2FA) method offers the strongest defense against phishing attacks?",
+      "question": "Select the most resilient method:",
+      "options": [
+        "Numeric codes received via SMS",
+        "Verification codes sent over email",
+        "Hardware security keys (FIDO2 / U2F YubiKey)",
+        "Security questions (e.g., mother's maiden name)"
+      ],
+      "correctIndex": 2,
+      "explanation": "FIDO2 security keys cryptographically bind credentials to the origin domain; tokens will never be released to a phishing mirror site."
+    },
+    {
+      "id": 15,
+      "type": "URL",
+      "scenario": "The URL contains the following encoded sequence: http://www.google.com%2Flogin%2Ephp@evil-site.com",
+      "question": "What encoding scheme did the attacker use to disguise parts of the URL?",
+      "options": [
+        "Base64 encoding",
+        "URL / Hexadecimal percent-encoding (%xx)",
+        "AES-256 encryption",
+        "MD5 hash"
+      ],
+      "correctIndex": 1,
+      "explanation": "%2F and %2E represent percent-encoded slashes (/) and dots (.), used to obscure URL structure from users and basic security filters."
+    },
+    {
+      "id": 16,
+      "type": "SMS",
+      "scenario": "An SMS claims to be your electric utility: 'Pay outstanding bill today or your electricity will be disconnected immediately!'",
+      "question": "What psychological social engineering trigger is being exploited?",
+      "options": [
+        "Curiosity",
+        "Urgency & Fear",
+        "Reciprocity",
+        "Social Proof"
+      ],
+      "correctIndex": 1,
+      "explanation": "Urgency and fear of punitive consequences shut down critical thinking, pushing the victim toward reckless, hasty action."
+    },
+    {
+      "id": 17,
+      "type": "Basics",
+      "scenario": "Opening a Word document from an unknown sender displays a yellow banner: 'Enable Macros to view protected content.'",
+      "question": "What happens if you enable macros?",
+      "options": [
+        "The document layout renders faster",
+        "Malicious embedded VBA code (downloader malware) can execute on your system",
+        "The file is automatically saved to cloud backup",
+        "The document font style changes"
+      ],
+      "correctIndex": 1,
+      "explanation": "Malicious Office macros are prominent malware distribution vectors, capable of silently downloading spyware or ransomware."
+    },
+    {
+      "id": 18,
+      "type": "URL",
+      "scenario": "A domain uses a Cyrillic character ('а') instead of Latin 'a': http://ebаy.com (punycode: xn--eby-7cd.com)",
+      "question": "What terminology describes this visual spoofing attack?",
+      "options": [
+        "Homoglyph / IDN Phishing",
+        "Buffer Overflow Attack",
+        "DNS Poisoning",
+        "Clickjacking"
+      ],
+      "correctIndex": 0,
+      "explanation": "Internationalized Domain Name (IDN) homoglyph attacks exploit lookalike glyphs across alphabets to visually imitate legitimate domains."
+    },
+    {
+      "id": 19,
+      "type": "Call",
+      "scenario": "An incoming telephone call displays your bank's verified customer service phone number on your screen.",
+      "question": "Can you be certain that the bank is genuinely calling you?",
+      "options": [
+        "Yes, because telephone numbers cannot be faked",
+        "No, Caller ID can be easily spoofed via VoIP services (CLI Spoofing)",
+        "Only if the operator name is also displayed",
+        "Yes, provided the call originates domestically"
+      ],
+      "correctIndex": 1,
+      "explanation": "Caller ID spoofing allows VoIP callers to display arbitrary telephone numbers on the recipient's handset."
+    },
+    {
+      "id": 20,
+      "type": "Email",
+      "scenario": "An accountant receives an urgent directive purportedly from the CEO ordering an immediate transfer of $50,000 for a confidential contract.",
+      "question": "What is this targeted attack called?",
+      "options": [
+        "BEC (Business Email Compromise) / CEO Fraud",
+        "Adware infection",
+        "SQL Injection",
+        "Brute-force attack"
+      ],
+      "correctIndex": 0,
+      "explanation": "BEC attacks impersonate senior executives to exploit corporate authority, secrecy, and time pressure."
+    },
+    {
+      "id": 21,
+      "type": "Basics",
+      "scenario": "An online store lists a flagship $1,200 smartphone for $120, but only permits payment via wire transfer to a private account.",
+      "question": "What is the most probable explanation?",
+      "options": [
+        "End-of-season inventory liquidation",
+        "Fraudulent storefront (fake webshop) running an advance-fee scam",
+        "Factory refurbished defective unit",
+        "Personalized discount voucher applied"
+      ],
+      "correctIndex": 1,
+      "explanation": "Prices drastically detached from market value combined with an absence of secure payment gateways (cards, escrow) indicate scam stores."
+    },
+    {
+      "id": 22,
+      "type": "URL",
+      "scenario": "The link reads: https://login.microsoftonline.com.attacker.org/oauth2",
+      "question": "What level of subdomain is the term 'microsoftonline' in this hierarchy?",
+      "options": [
+        "Top-level domain (TLD)",
+        "Second-level domain (SLD)",
+        "Third-level subdomain",
+        "It is not part of the domain name"
+      ],
+      "correctIndex": 2,
+      "explanation": "Parsing from right to left: .org (TLD), attacker (SLD), microsoftonline (third-level subdomain). The true owner is attacker.org."
+    },
+    {
+      "id": 23,
+      "type": "SMS",
+      "scenario": "SMS: 'Congratulations! Your number won $50,000 in the National Lottery. Send your identity card photo to claim the prize.'",
+      "question": "What is the objective of this scam if you never entered any lottery?",
+      "options": [
+        "Identity Theft to open unauthorized credit accounts or loans",
+        "Standard lottery marketing campaign",
+        "Telecom carrier billing synchronization error",
+        "Mandatory tax reporting compliance"
+      ],
+      "correctIndex": 0,
+      "explanation": "Fake lottery notifications harvest identity documents, enabling criminals to impersonate victims for loans or financial accounts."
+    },
+    {
+      "id": 24,
+      "type": "Basics",
+      "scenario": "At the bottom of an obvious unsolicited phishing email, there is an 'Unsubscribe' button.",
+      "question": "Is it safe to click unsubscribe in an aggressive phishing email?",
+      "options": [
+        "Yes, legal regulations compel senders to remove your address",
+        "No, clicking confirms your email address is active, triggering additional attacks",
+        "Yes, the junk email is instantly deleted from mail servers",
+        "It makes no difference whatsoever"
+      ],
+      "correctIndex": 1,
+      "explanation": "In fraudulent emails, unsubscribe links either lead to malware landing pages or flag the inbox as active for further targeted attacks."
+    },
+    {
+      "id": 25,
+      "type": "Email",
+      "scenario": "An email shows hyperlinked blue text 'https://mybank.com', but hovering reveals destination 'http://phish-login.net'.",
+      "question": "How does this visual deception work in HTML?",
+      "options": [
+        "The displayed anchor text is independent of the destination defined in the href attribute",
+        "The web browser misinterprets the link",
+        "It represents an automated redirect from the bank's portal",
+        "Antivirus software altered the hyperlink"
+      ],
+      "correctIndex": 0,
+      "explanation": "In HTML `<a href='target'>label</a>`, the visible text can state anything; the browser navigates to the address specified in href."
+    },
+    {
+      "id": 26,
+      "type": "Call",
+      "scenario": "A caller offers to recover funds lost in a prior cryptocurrency investment scam if you pay a 10% retainer fee in advance.",
+      "question": "What fraudulent scheme is being conducted?",
+      "options": [
+        "Recovery Scam (re-victimization fraud)",
+        "Pharming",
+        "Watering Hole attack",
+        "Evil Twin attack"
+      ],
+      "correctIndex": 0,
+      "explanation": "Recovery scams re-target previous fraud victims with false promises of fund recovery to extract further payments."
+    },
+    {
+      "id": 27,
+      "type": "URL",
+      "scenario": "Link: http://google.com.translate.goog/url?q=https://malicious-site.com",
+      "question": "Why do attackers route traffic through legitimate services like Google Translate?",
+      "options": [
+        "To improve Search Engine Optimization (SEO)",
+        "For Open Redirection to bypass security domain filters",
+        "To overload destination web servers",
+        "To translate website content into local languages"
+      ],
+      "correctIndex": 1,
+      "explanation": "Attackers exploit open redirection mechanisms on trusted services to deceive email scanners and security gateways."
+    },
+    {
+      "id": 28,
+      "type": "Basics",
+      "scenario": "How does a Password Manager behave when you arrive at a convincing lookalike phishing login page?",
+      "question": "How does the password manager protect against credential theft?",
+      "options": [
+        "It emits an audio warning sound",
+        "It refuses to auto-fill credentials because the domain does not match the stored entry",
+        "It automatically blacklists the IP on your network firewall",
+        "It generates encrypted dummy passwords for the attacker"
+      ],
+      "correctIndex": 1,
+      "explanation": "Password managers strictly match exact domain origins; if a domain varies by even a single letter, credentials will not be populated."
+    },
+    {
+      "id": 29,
+      "type": "SMS",
+      "scenario": "SMS: 'Your Netflix subscription has been suspended due to card rejection. Update within 24 hours: netflix-payment.cc'",
+      "question": "Which indicator points most strongly to fraud?",
+      "options": [
+        "The 24-hour urgency and the unofficial generic (.cc) domain extension",
+        "Netflix is written with lowercase letters",
+        "The SMS message body is too short",
+        "The bank account number is omitted"
+      ],
+      "correctIndex": 0,
+      "explanation": "Subscription providers manage billing on their official primary domains, never on generic country-code (.cc) lookalike URLs."
+    },
+    {
+      "id": 30,
+      "type": "Basics",
+      "scenario": "What is the critical first step if you realize you entered your debit card details on a phishing site?",
+      "question": "What must you do within the initial minutes?",
+      "options": [
+        "Restart your computer",
+        "Immediately lock or freeze your card via the mobile banking app or hotline",
+        "File a police report",
+        "Clear your browser history and cache cookies"
+      ],
+      "correctIndex": 1,
+      "explanation": "Locking the payment card immediately prevents unauthorized transactions before the fraudsters can exploit the harvested credentials."
+    }
+  ],
+  "ro": [
+    {
+      "id": 1,
+      "type": "URL",
+      "scenario": "Link primit: https://secure-login.paypal.account-verify.info/update",
+      "question": "Care este domeniul principal real care deține site-ul?",
+      "options": [
+        "paypal.com",
+        "secure-login.paypal",
+        "account-verify.info",
+        "paypal.account-verify.info"
+      ],
+      "correctIndex": 2,
+      "explanation": "În ierarhia domeniilor, ultimele două segmente dinaintea barei (/) formează domeniul real. 'paypal' este doar un subdomeniu creat pe adresa atacatorului account-verify.info."
+    },
+    {
+      "id": 2,
+      "type": "SMS",
+      "scenario": "SMS primit: 'Coletul dvs. a sosit! Confirmați adresa și achitați taxa vamală de 15 RON: http://posta-kezbesites-info.top'",
+      "question": "Care este principalul semnal de alarmă în acest mesaj?",
+      "options": [
+        "Suma de 15 RON este prea mică",
+        "Poșta oficială nu folosește domenii neobișnuite de tip .top și link-uri SMS pentru plată",
+        "În SMS nu este specificat prenumele expeditorului",
+        "Taxa vamală se achită exclusiv în numerar"
+      ],
+      "correctIndex": 1,
+      "explanation": "Campaniile de phishing cu livrări folosesc domenii generice ieftine (.top, .xyz) și invocă urgența pentru a fura datele cardurilor bancare."
+    },
+    {
+      "id": 3,
+      "type": "Apel",
+      "scenario": "Noaptea primești un singur apel scurt de la un număr cu prefixul +234 (Nigeria), apoi apelul se întrerupe imediat.",
+      "question": "Cum se numește acest tip de atac și ce ar trebui să faci?",
+      "options": [
+        "Man-in-the-Middle; trebuie schimbate parolele imediat",
+        "Frauda Wangiri; nu trebuie să reapeli sub nicio formă",
+        "SIM Swapping; trebuie notificat operatorul mobil",
+        "Spear Phishing; trebuie să întrebi prin SMS cine a sunat"
+      ],
+      "correctIndex": 1,
+      "explanation": "Atacul Wangiri ('un apel scurt') urmărește determinarea victimei să sune înapoi la un număr internațional cu suprataxă foarte scump."
+    },
+    {
+      "id": 4,
+      "type": "E-mail",
+      "scenario": "Numele expeditorului este 'Netflix Support', dar adresa reală de e-mail este: support@netfllix-billing-update.com.",
+      "question": "Ce tehnică de înșelăciune se observă în adresa expeditorului?",
+      "options": [
+        "Typosquatting (inducere în eroare prin dublarea literei 'l')",
+        "Cross-Site Scripting (XSS)",
+        "SQL Injection",
+        "Atac DDoS"
+      ],
+      "correctIndex": 0,
+      "explanation": "Atacatorul dublează o literă (netfllix) mizând pe neatenția utilizatorului la citirea rapidă a numelui de domeniu."
+    },
+    {
+      "id": 5,
+      "type": "General",
+      "scenario": "Adresa unui site web începe cu 'https://' și browserul afișează pictograma unui lacăt.",
+      "question": "Garantează pictograma lacătului că site-ul web nu este o pagină de phishing?",
+      "options": [
+        "Da, deoarece doar companiile înregistrate primesc certificate digitale",
+        "Nu, lacătul indică doar o conexiune criptată; atacatorii pot obține certificate SSL gratuite",
+        "Da, Google și Microsoft blochează instant certificatele necinstite",
+        "Doar dacă lacătul este de culoare verde"
+      ],
+      "correctIndex": 1,
+      "explanation": "HTTPS și lacătul arată doar că transmisia datelor dintre tine și server este criptată, nu și faptul că proprietarul serverului este de încredere."
+    },
+    {
+      "id": 6,
+      "type": "SMS",
+      "scenario": "SMS: 'Stimate Client! Contul dvs. bancar a fost blocat din motive de securitate. Apăsați aici pentru deblocare: http://bank-hitelesites.net'",
+      "question": "De ce banca ta nu ar trimite niciodată un astfel de mesaj?",
+      "options": [
+        "Pentru că băncile trimit doar scrisori poștale la blocarea contului",
+        "Pentru că băncile nu includ link-uri directe de autentificare în SMS-urile de alertă",
+        "Pentru că băncile nu lucrează în weekend",
+        "Pentru că SMS-ul nu suportă caractere cu diacritice"
+      ],
+      "correctIndex": 1,
+      "explanation": "Instituțiile financiare respectă protocoale stricte și nu trimit niciodată link-uri directe pe care să introduci parole în urma unor blocări neașteptate."
+    },
+    {
+      "id": 7,
+      "type": "URL",
+      "scenario": "Link suspect pe un forum: http://192.168.1.105/apple-id-verify/login.php",
+      "question": "De ce este suspect un astfel de link pentru o autentificare oficială?",
+      "options": [
+        "Pentru că nu conține prefixul 'www'",
+        "Pentru că serviciile legitime nu autentifică utilizatorii pe link-uri directe cu adrese IP",
+        "Pentru că extensia php a fost interzisă",
+        "Pentru că lipsește numărul portului la final"
+      ],
+      "correctIndex": 1,
+      "explanation": "Utilizarea unei adrese IP numerice în locul unui nume de domeniu oficial este un indicator clasic de fraudă informatică."
+    },
+    {
+      "id": 8,
+      "type": "E-mail",
+      "scenario": "Primești un e-mail de la HR: 'Vă rugăm să deschideți fișierul fluturas_salariu.pdf.exe pentru a vedea noul salariu.'",
+      "question": "Ce pericol ascunde acest fișier?",
+      "options": [
+        "Niciunul, formatul PDF este complet sigur",
+        "Un malware executabil cu dublă extensie (.exe)",
+        "Fișierul este prea mic pentru a fi deschis",
+        "Windows șterge automat orice fișier PDF"
+      ],
+      "correctIndex": 1,
+      "explanation": "Dubla extensie (.pdf.exe) păcălește utilizatorul făcându-l să creadă că e un document, când în realitate este un program malițios executabil."
+    },
+    {
+      "id": 9,
+      "type": "General",
+      "scenario": "Ce ar trebui să faci dacă primești un link suspect de autentificare în numele unui furnizor de servicii?",
+      "question": "Cum este cel mai sigur să accesezi serviciul?",
+      "options": [
+        "Deschizând link-ul într-o fereastră incognito",
+        "Tastând direct domeniul oficial în bara browserului sau prin aplicația mobilă oficială",
+        "Trimițând link-ul unui prieten pentru verificare",
+        "Deschizând link-ul și schimbând imediat parola"
+      ],
+      "correctIndex": 1,
+      "explanation": "Autentificarea trebuie efectuată întotdeauna accesând manual site-ul oficial sau aplicația dedicată, ignorând link-ul primit."
+    },
+    {
+      "id": 10,
+      "type": "URL",
+      "scenario": "Examinare link: http://facebook.com@attacker-site.com/login",
+      "question": "Unde va naviga browserul dacă deschizi link-ul de mai sus?",
+      "options": [
+        "Pe serverul facebook.com",
+        "Pe serverul attacker-site.com",
+        "Va afișa o eroare deoarece conține două domenii",
+        "Pe pagina principală Google"
+      ],
+      "correctIndex": 1,
+      "explanation": "Conform standardului URL, textul dinaintea caracterului '@' este interpretat ca nume de utilizator; destinația reală este attacker-site.com."
+    },
+    {
+      "id": 11,
+      "type": "SMS",
+      "scenario": "SMS: 'Bună mamă, mi-am pierdut telefonul, acesta e noul meu număr! Trimite urgent 1500 lei pentru chirie în acest cont...'",
+      "question": "Cum se numește această metodă de fraudă tot mai frecventă?",
+      "options": [
+        "Atac Whaling",
+        "Înșelăciunea 'Bună Mamă' (uzurparea identității unui membru al familiei)",
+        "Șantaj DDoS",
+        "Răspândire de Ransomware"
+      ],
+      "correctIndex": 1,
+      "explanation": "În frauda 'Bună Mamă', atacatorii pretind că sunt copiii victimei și invocă o urgență pentru a obține transferuri financiare rapide."
+    },
+    {
+      "id": 12,
+      "type": "Apel",
+      "scenario": "O persoană pretinde că sună de la securitatea băncii tale și îți cere să instalezi 'AnyDesk' sau 'TeamViewer' pentru a-ți proteja contul.",
+      "question": "Care este adevăratul scop al apelantului?",
+      "options": [
+        "Să instaleze un antivirus pe telefonul tău",
+        "Să preia controlul de la distanță asupra dispozitivului și contului tău bancar",
+        "Să crească viteza rețelei mobile",
+        "Să verifice data de expirare a cardului"
+      ],
+      "correctIndex": 1,
+      "explanation": "Aplicațiile de control la distanță permit infractorilor să preia controlul ecranului și să inițieze tranzacții neautorizate din aplicațiile tale bancare."
+    },
+    {
+      "id": 13,
+      "type": "E-mail",
+      "scenario": "Un mesaj susține: 'Plătește 500$ în Bitcoin în 48 de ore, altfel vom trimite contactelor tale filmări compromițătoare făcute cu camera ta web.'",
+      "question": "Care este denumirea și realitatea acestui atac?",
+      "options": [
+        "Șantaj de tip Sextortion; de obicei e un spam trimis în masă fără imagini reale",
+        "Exploit Zero-day; camera a filmat cu siguranță",
+        "Man-in-the-Browser; trebuie plătit imediat",
+        "Infecție cu Rootkit"
+      ],
+      "correctIndex": 0,
+      "explanation": "E-mailurile de tip sextortion sunt șabloane trimise automat pe baza unor baze de date cu parole vechi scurse, fără a deține vreo filmare reală."
+    },
+    {
+      "id": 14,
+      "type": "General",
+      "scenario": "Care metodă de autentificare în doi pași (2FA) oferă cea mai puternică protecție împotriva phishing-ului?",
+      "question": "Selectează cea mai sigură metodă:",
+      "options": [
+        "Codul numeric primit prin SMS",
+        "Codul de confirmare trimis prin e-mail",
+        "Cheia hardware de securitate (FIDO2 / U2F YubiKey)",
+        "Întrebarea de securitate (ex: numele de fată al mamei)"
+      ],
+      "correctIndex": 2,
+      "explanation": "Cheile FIDO2 leagă criptografic sesiunea de domeniul real din browser; codurile nu pot fi trimise către o pagină clonată de phishing."
+    },
+    {
+      "id": 15,
+      "type": "URL",
+      "scenario": "Link-ul conține următoarea secvență: http://www.google.com%2Flogin%2Ephp@evil-site.com",
+      "question": "Ce metodă de codare a folosit atacatorul pentru a ascunde părți din URL?",
+      "options": [
+        "Codare Base64",
+        "Codare URL / Hexazecimală procentuală (%xx)",
+        "Criptare AES-256",
+        "Hash MD5"
+      ],
+      "correctIndex": 1,
+      "explanation": "%2F și %2E reprezintă bara (/) și punctul (.) codate în format URL procentual pentru a păcăli filtrele și utilizatorii."
+    },
+    {
+      "id": 16,
+      "type": "SMS",
+      "scenario": "SMS de la furnizorul de utilități: 'Plătiți factura restantă sau curentul va fi deconectat astăzi!'",
+      "question": "Ce principiu de manipulare psihologică (Social Engineering) este utilizat?",
+      "options": [
+        "Stârnirea curiozității",
+        "Urgență și inducere de teamă (Urgency & Fear)",
+        "Reciprocitate",
+        "Validare socială (Social Proof)"
+      ],
+      "correctIndex": 1,
+      "explanation": "Senzația de urgență și frica de deconectare blochează gândirea critică, forțând utilizatorul să execute acțiuni impulsive."
+    },
+    {
+      "id": 17,
+      "type": "General",
+      "scenario": "La deschiderea unui fișier Word de la un expeditor necunoscut apare o bară galbenă: 'Activați macrocomenzile pentru a citi conținutul.'",
+      "question": "Ce se întâmplă dacă activezi macrocomenzile?",
+      "options": [
+        "Documentul se va încărca mai rapid",
+        "Poate rula cod VBA malițios (downloader de malware) pe computerul tău",
+        "Fișierul se salvează automat în cloud",
+        "Se schimbă stilul fontului"
+      ],
+      "correctIndex": 1,
+      "explanation": "Macrocomenzile malițioase din Office reprezintă o metodă frecventă prin care se descarcă viruși spion sau ransomware în fundal."
+    },
+    {
+      "id": 18,
+      "type": "URL",
+      "scenario": "Un domeniu conține litera 'а' din alfabetul chirilic în locul literei latine 'a': http://ebаy.com (punycode: xn--eby-7cd.com)",
+      "question": "Cum numește literatura de specialitate acest tip de atac?",
+      "options": [
+        "Phishing omoglif / IDN",
+        "Atac Buffer Overflow",
+        "Otrăvire DNS",
+        "Clickjacking"
+      ],
+      "correctIndex": 0,
+      "explanation": "Atacul omoglif IDN exploatează caractere identice vizual din alfabete diferite pentru a înregistra adrese web înșelătoare."
+    },
+    {
+      "id": 19,
+      "type": "Apel",
+      "scenario": "Pe ecranul telefonului apare exact numărul oficial al departamentului de relații cu clienții al băncii tale.",
+      "question": "Poți fi absolut sigur că te sună într-adevăr banca?",
+      "options": [
+        "Da, deoarece numerele de telefon nu pot fi falsificate",
+        "Nu, numărul afișat (Caller ID) poate fi ușor falsificat prin VoIP (CLI Spoofing)",
+        "Doar dacă pe ecran este afișat și numele operatorului",
+        "Da, dacă apelul este național"
+      ],
+      "correctIndex": 1,
+      "explanation": "Prin tehnologia Caller ID Spoofing, apelanții VoIP pot alege orice număr de telefon doresc să fie afișat pe ecranul destinatarului."
+    },
+    {
+      "id": 20,
+      "type": "E-mail",
+      "scenario": "Contabilul primește un e-mail în numele directorului general prin care se cere un transfer urgent de 50.000 € pentru un contract secret.",
+      "question": "Cum se numește acest tip de atac țintit?",
+      "options": [
+        "BEC (Business Email Compromise) / CEO Fraud",
+        "Infecție Adware",
+        "SQL Injection",
+        "Atac Brute-force"
+      ],
+      "correctIndex": 0,
+      "explanation": "Atacurile BEC folosesc identitatea conducerii pentru a profita de ierarhie, confidențialitate și urgență în efectuarea transferurilor."
+    },
+    {
+      "id": 21,
+      "type": "General",
+      "scenario": "Găsești un magazin online unde un telefon de 1.000 € costă doar 100 €, dar plata se poate face exclusiv prin transfer bancar către o persoană fizică.",
+      "question": "Care este explicația cea mai probabilă?",
+      "options": [
+        "Lichidare de stoc de sezon",
+        "Magazin fraudulos (fake webshop) creat pentru a încasa bani în avans",
+        "Produs recondiționat cu defecte de fabrică",
+        "Reducere personalizată prin cupon"
+      ],
+      "correctIndex": 1,
+      "explanation": "Prețurile nerealist de mici și lipsa modalităților sigure de plată (card, ramburs) indică un magazin fals creat pentru înșelăciune."
+    },
+    {
+      "id": 22,
+      "type": "URL",
+      "scenario": "Link-ul arată astfel: https://login.microsoftonline.com.attacker.org/oauth2",
+      "question": "La ce nivel de subdomeniu se află cuvântul 'microsoftonline' în această structură?",
+      "options": [
+        "Domeniu principal (TLD)",
+        "Domeniu de nivel secundar (SLD)",
+        "Subdomeniu de nivelul al treilea",
+        "Nu face parte din numele de domeniu"
+      ],
+      "correctIndex": 2,
+      "explanation": "Citind de la dreapta la stânga: .org (nivel 1), attacker (nivel 2), microsoftonline (nivel 3). Proprietarul legitim este attacker.org."
+    },
+    {
+      "id": 23,
+      "type": "SMS",
+      "scenario": "SMS: 'Felicitări! Numărul dvs. a câștigat 100.000 € la Loteria Națională. Trimiteți poza cărții de identitate pentru a ridica premiul.'",
+      "question": "Care este scopul unui astfel de mesaj dacă nu ai jucat niciodată la loto?",
+      "options": [
+        "Furtul de identitate pentru obținerea de credite sau conturi online",
+        "O campanie promoțională a loteriei",
+        "Eroare de sistem la operatorul de telefonie",
+        "O formalitate fiscală obligatorie"
+      ],
+      "correctIndex": 0,
+      "explanation": "Loterille false urmăresc obținerea de copii ale actelor de identitate pentru deschiderea de conturi sau obținerea de credite pe numele victimei."
+    },
+    {
+      "id": 24,
+      "type": "General",
+      "scenario": "La sfârșitul unui e-mail evident de phishing există un buton de 'Dezabonare'.",
+      "question": "Este sigur să apeși pe dezabonare într-un e-mail agresiv de phishing?",
+      "options": [
+        "Da, legea îi obligă să îți șteargă adresa",
+        "Nu, apăsarea confirmă că adresa ta este activă și va atrage și mai multe atacuri",
+        "Da, mesajele spam se șterg imediat de pe server",
+        "Nu are nicio importanță"
+      ],
+      "correctIndex": 1,
+      "explanation": "În mesajele malițioase, link-ul de dezabonare fie conduce către pagini infectate, fie confirmă atacatorilor că adresa este validă și citită."
+    },
+    {
+      "id": 25,
+      "type": "E-mail",
+      "scenario": "Textul afișat cu albastru în e-mail este 'https://bancata.ro', dar dacă treci cu cursorul peste el apare 'http://phish-site.net'.",
+      "question": "Cum funcționează această înșelăciune în codul HTML?",
+      "options": [
+        "Textul vizibil este complet independent de adresa reală definită în atributul href",
+        "Browserul traduce greșit link-ul",
+        "Este o redirecționare automată a băncii",
+        "Antivirusul a modificat adresa link-ului"
+      ],
+      "correctIndex": 0,
+      "explanation": "În eticheta HTML `<a href='adresa_reala'>text_vizibil</a>`, textul poate fi oricare, însă navigatorul deschide destinația specificată în href."
+    },
+    {
+      "id": 26,
+      "type": "Apel",
+      "scenario": "O persoană te contactează și promite să recupereze banii pierduți într-o schemă frauduloasă anterioară dacă achiți un avans de 10%.",
+      "question": "Ce tip de schemă frauduloasă este aceasta?",
+      "options": [
+        "Recovery Scam (re-victimizarea persoanelor păgubite)",
+        "Pharming",
+        "Atac Watering Hole",
+        "Atac Evil Twin"
+      ],
+      "correctIndex": 0,
+      "explanation": "Schemele de recuperare vizează persoanele care au fost deja victime ale unei fraude, cerând plăți în avans sub promisiunea falsă a restituirii banilor."
+    },
+    {
+      "id": 27,
+      "type": "URL",
+      "scenario": "Link: http://google.com.translate.goog/url?q=https://malicious-site.com",
+      "question": "De ce folosesc atacatorii servicii cunoscute precum Google Translate în link-uri?",
+      "options": [
+        "Pentru optimizare pe motoarele de căutare (SEO)",
+        "Pentru redirecționare deschisă (Open Redirect) și ocolirea filtrelor de securitate",
+        "Pentru supraîncărcarea serverelor",
+        "Pentru a traduce conținutul paginii în limba utilizatorului"
+      ],
+      "correctIndex": 1,
+      "explanation": "Atacatorii folosesc redirecționările de pe site-uri legitime pentru ca filtrele de e-mail să considere link-ul de încredere."
+    },
+    {
+      "id": 28,
+      "type": "General",
+      "scenario": "Ce face un administrator de parole (Password Manager) atunci când ajungi pe o pagină clonată de phishing?",
+      "question": "Cum protejează administratorul de parole împotriva furtului de conturi?",
+      "options": [
+        "Emite un semnal sonor de avertizare",
+        "Nu completează automat datele deoarece domeniul din adresă nu corespunde cu cel salvat",
+        "Blochează automat site-ul în firewall",
+        "Generează o parolă falsă pentru atacator"
+      ],
+      "correctIndex": 1,
+      "explanation": "Administratorul de parole analizează riguros domeniul web; dacă adresa diferă chiar și printr-o singură literă, refuză completarea parolei."
+    },
+    {
+      "id": 29,
+      "type": "SMS",
+      "scenario": "SMS: 'Abonamentul Netflix a fost suspendat din cauza respingerii cardului. Actualizați în 24h: netflix-payment.cc'",
+      "question": "Care este indiciul cel mai evident de fraudă din mesaj?",
+      "options": [
+        "Termenul urgent de 24 de ore și domeniul neoficial cu extensia .cc",
+        "Numele Netflix este scris cu litere mici",
+        "Mesajul text este prea scurt",
+        "Lipsește numărul contului bancar"
+      ],
+      "correctIndex": 0,
+      "explanation": "Platformele de streaming folosesc doar domeniile lor oficiale pentru plăți, niciodată adrese generice sau suspecte cu extensii precum .cc."
+    },
+    {
+      "id": 30,
+      "type": "General",
+      "scenario": "Care este cel mai important prim pas dacă realizezi că ai introdus datele cardului bancar pe o pagină de phishing?",
+      "question": "Ce trebuie să faci în primele minute?",
+      "options": [
+        "Să repornești computerul",
+        "Să blochezi imediat cardul din aplicația bancară sau la numărul de urgență al băncii",
+        "Să depui o plângere la poliție",
+        "Să ștergi istoricul și cookie-urile browserului"
+      ],
+      "correctIndex": 1,
+      "explanation": "Blocarea imediată a cardului bancar este singura măsură eficientă care împiedică retragerile neautorizate de bani."
+    }
+  ]
+}

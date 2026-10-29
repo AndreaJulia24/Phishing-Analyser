@@ -100,6 +100,27 @@ i18n
           placeholderLastName: "Kovács",
           placeholderFirstName: "Anna",
           placeholderEmail: "pelda@email.com",
+
+          // Kvíz szövegek
+          quizLoading: "Kvíz betöltése...",
+          quizTitle: "Biztonsági és Adathalász Kvíz",
+          quizBored: "Unatkozol?",
+          quizTestYourKnowledge: "Teszteld a tudásod az adathalászat és a digitális biztonság terén!",
+          quizSubtitleDesc: "A kvíz során a válaszaid alapján megtudhatod, mennyire vagy kész a digitális világ kockázataira.",
+          quizQuestion: "Kérdés:",
+          quizCorrect: "Helyes válasz!",
+          quizIncorrect: "Helytelen!",
+          quizViewResult: "Eredmény megtekintése",
+          quizNext: "Következő kérdés",
+          quizCompleted: "Kvíz befejezve!",
+          quizAchievedScore: "Elért pontszám:",
+          quizScore10Title: "🏆 Hibátlan teljesítmény!",
+          quizScore10Desc: "Magabiztosan átlátsz még a legagyafúrtabb csalási kísérleteken is.",
+          quizScore7to9Title: "👍 Jó eredmény!",
+          quizScore7to9Desc: "A legtöbb alapvető trükköt felismered, de a kifinomultabb támadásoknál érdemes figyelmesnek lenni.",
+          quizScoreLowTitle: "⚠️ Érdemes még gyakorolni!",
+          quizScoreLowDesc: "Az adathalászok leggyakoribb csapdái könnyen megtéveszthetnek.",
+          quizRestartWithNew: "Új kvíz indítása (Új kérdésekkel)"
         }
       },
       en: {
@@ -190,6 +211,27 @@ i18n
           placeholderLastName: "Smith",
           placeholderFirstName: "Jane",
           placeholderEmail: "example@email.com",
+
+          // Kvíz szövegek
+          quizLoading: "Loading quiz...",
+          quizTitle: "Security & Phishing Quiz",
+          quizBored: "Bored?",
+          quizTestYourKnowledge: "Test your knowledge on phishing and digital safety!",
+          quizSubtitleDesc: "Based on your answers, you'll discover how prepared you are for digital world threats.",
+          quizQuestion: "Question:",
+          quizCorrect: "Correct answer!",
+          quizIncorrect: "Incorrect!",
+          quizViewResult: "View Result",
+          quizNext: "Next question",
+          quizCompleted: "Quiz completed!",
+          quizAchievedScore: "Achieved score:",
+          quizScore10Title: "🏆 Flawless performance!",
+          quizScore10Desc: "You confidently see through even the most elaborate fraud attempts.",
+          quizScore7to9Title: "👍 Good job!",
+          quizScore7to9Desc: "You recognize most basic tricks, but stay alert for more sophisticated attacks.",
+          quizScoreLowTitle: "⚠️ More practice needed!",
+          quizScoreLowDesc: "The most common phishing traps could easily mislead you.",
+          quizRestartWithNew: "Restart Quiz (With new questions)"
         }
       },
       ro: {
@@ -226,7 +268,7 @@ i18n
           pointsUnit: "puncte",
 
           // Elemzési eredmény kártya
-          verdictPrefix: "Verdict",
+          verdictPrefix: "Clasificare",
           xaiTitle: "Explicație XAI (Reguli declanșate și justificări):",
           urlRisk: "Risc URL:",
           phoneRisk: "Risc telefon:",
@@ -280,6 +322,27 @@ i18n
           placeholderLastName: "Popescu",
           placeholderFirstName: "Ana",
           placeholderEmail: "exemplu@email.com",
+
+          // Kvíz szövegek
+          quizLoading: "Se încarcă chestionarul...",
+          quizTitle: "Chestionar de Securitate și Phishing",
+          quizBored: "Te plictisești?",
+          quizTestYourKnowledge: "Testează-ți cunoștințele în materie de phishing și securitate digitală!",
+          quizSubtitleDesc: "În urma răspunsurilor, vei afla cât de pregătit ești pentru riscurile din lumea digitală.",
+          quizQuestion: "Întrebare:",
+          quizCorrect: "Răspuns corect!",
+          quizIncorrect: "Incorect!",
+          quizViewResult: "Vezi rezultatul",
+          quizNext: "Următoarea întrebare",
+          quizCompleted: "Chestionar finalizat!",
+          quizAchievedScore: "Scor obținut:",
+          quizScore10Title: "🏆 Performanță impecabilă!",
+          quizScore10Desc: "Recunoști cu încredere chiar și cele mai sofisticate tentative de fraudă.",
+          quizScore7to9Title: "👍 Rezultat bun!",
+          quizScore7to9Desc: "Identifici majoritatea trucurilor de bază, dar fii atent la atacurile avansate.",
+          quizScoreLowTitle: "⚠️ Necesită mai multă practică!",
+          quizScoreLowDesc: "Cele mai comune capcane de phishing te pot induce ușor în eroare.",
+          quizRestartWithNew: "Reia chestionarul (Cu întrebări noi)"
         }
       }
     }

@@ -1401,3 +1401,14 @@
 .auth-switch-btn:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+  .content-area,
+  .content-area.stats-active {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px auto 0 auto !important; /* kis felső külső margó */
+    padding: 0 12px 30px 12px !important; /* 0 helyett 12px oldalsó padding a szélhez tapadás ellen */
+    box-sizing: border-box !important;
+  }
+}
