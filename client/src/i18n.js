@@ -68,10 +68,10 @@ i18n
           emptyHistory: "Még nem érkezett vizsgálat a rendszerbe.",
 
           // Statisztika / Dashboard
-          dashboardTitle: "Dashboard",
+          dashboardTitle: "Vezérlőpult",
           dashboardSubtitle: "Kiberbiztonsági Műveleti Központ & Adathalászat Elemző",
-          liveNow: "Live Now",
-          securityScore: "Security Score",
+          liveNow: "Élő nézet",
+          securityScore: "Biztonsági pontszám",
           riskRatio: "Kockázati arány",
           urgentText: "Sürgető szöveg",
           quickCheck: "Gyors ellenőrzés",

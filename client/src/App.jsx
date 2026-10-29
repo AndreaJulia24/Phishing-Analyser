@@ -192,6 +192,12 @@ function App() {
     }
   }, [currentUser, userRole]);
 
+  useEffect(() => {
+    if (userRole && userRole !== 'admin' && activeTab === 'stats') {
+      setActiveTab('analyser');
+    }
+  }, [userRole, activeTab]);
+
   // ======== SEGÉDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
   const getVerdictText = (verdict) => {
     if (!verdict) return '';
@@ -512,13 +518,15 @@ function App() {
             {t('tabAnalyser')}
           </button>
 
-          <button
-            className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
-            onClick={() => setActiveTab('tips')}
-          >
-            <i className="bi bi-patch-question"></i>
-            {t('tabQuiz')}
-          </button>
+          {userRole !== 'admin' && (
+            <button
+              className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
+              onClick={() => setActiveTab('tips')}
+            >
+              <i className="bi bi-patch-question"></i>
+              {t('tabQuiz')}
+            </button>
+          )}
 
           <button
             className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
@@ -530,13 +538,15 @@ function App() {
               : `${t('tabHistoryUser')} (${history.length})`}
           </button>
 
-          <button
-            className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
-            onClick={() => setActiveTab('stats')}
-          >
-            <i className="bi bi-bar-chart-line"></i>
-            {t('tabStats')}
-          </button>
+          {userRole === 'admin' && (
+            <button
+              className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
+              onClick={() => setActiveTab('stats')}
+            >
+              <i className="bi bi-bar-chart-line"></i>
+              {t('tabStats')}
+            </button>
+          )}
         </nav>
 
         {/* 1. TAB: Elemző szekció */}
@@ -764,7 +774,7 @@ function App() {
         )}
 
         {/* 4. TAB: Statisztika szekció */}
-        {activeTab === 'stats' && (
+        {activeTab === 'stats' && userRole === 'admin' && (
           <AdminStats history={history} />
         )}
       </main>
