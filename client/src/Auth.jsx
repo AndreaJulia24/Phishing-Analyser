@@ -46,7 +46,7 @@ function Auth({ onLoginSuccess }) {
           uid: user.uid,
           email: user.email,
           fullName: fullName,
-          role: 'user',
+          role: email.toLowerCase().includes('admin') ? 'admin' : 'user',
           createdAt: new Date().toISOString()
         });
 
@@ -61,15 +61,16 @@ function Auth({ onLoginSuccess }) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Lekérjük a Firestore-ból a tényleges szerepkört és nevet (hogy az admin azonnal admin legyen)
-        let role = 'user';
+        // Lekérjük a Firestore-ból a tényleges szerepkört és nevet (az email-alapú admin automatikusan érvényesül)
+        const isEmailAdmin = (user.email || '').toLowerCase().includes('admin');
+        let role = isEmailAdmin ? 'admin' : 'user';
         let fullName = user.displayName || user.email;
 
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
-            role = data.role || 'user';
+            if (!isEmailAdmin && data.role) role = data.role;
             if (data.fullName) fullName = data.fullName;
           }
         } catch (docErr) {

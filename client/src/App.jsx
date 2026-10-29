@@ -71,7 +71,8 @@ function App() {
       if (user) {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
-          const role = userDoc.exists() ? (userDoc.data().role || 'user') : 'user';
+          const isEmailAdmin = (user.email || '').toLowerCase().includes('admin');
+          const role = isEmailAdmin ? 'admin' : (userDoc.exists() ? (userDoc.data().role || 'user') : 'user');
           const fullName = userDoc.exists() && userDoc.data().fullName ? userDoc.data().fullName : (user.displayName || user.email);
           const photo = userDoc.exists() && userDoc.data().photoURL ? userDoc.data().photoURL : null;
           
@@ -511,15 +512,13 @@ function App() {
             {t('tabAnalyser')}
           </button>
 
-          {userRole !== 'admin' && (
-            <button
-              className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
-              onClick={() => setActiveTab('tips')}
-            >
-              <i className="bi bi-patch-question"></i>
-              {t('tabQuiz')}
-            </button>
-          )}
+          <button
+            className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tips')}
+          >
+            <i className="bi bi-patch-question"></i>
+            {t('tabQuiz')}
+          </button>
 
           <button
             className={`tab-btn ${activeTab === 'history' ? 'active' : ''}`}
@@ -531,15 +530,13 @@ function App() {
               : `${t('tabHistoryUser')} (${history.length})`}
           </button>
 
-          {userRole === 'admin' && (
-            <button
-              className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
-              onClick={() => setActiveTab('stats')}
-            >
-              <i className="bi bi-bar-chart-line"></i>
-              {t('tabStats')}
-            </button>
-          )}
+          <button
+            className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`}
+            onClick={() => setActiveTab('stats')}
+          >
+            <i className="bi bi-bar-chart-line"></i>
+            {t('tabStats')}
+          </button>
         </nav>
 
         {/* 1. TAB: Elemző szekció */}
@@ -767,7 +764,7 @@ function App() {
         )}
 
         {/* 4. TAB: Statisztika szekció */}
-        {activeTab === 'stats' && userRole === 'admin' && (
+        {activeTab === 'stats' && (
           <AdminStats history={history} />
         )}
       </main>
