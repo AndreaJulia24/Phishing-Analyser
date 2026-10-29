@@ -30,6 +30,7 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 // Külön bejelentkező / regisztrációs oldal komponens
 import Auth from './Auth';
 import Quiz from './Quiz.jsx';
+import AdminStats from './AdminStats.jsx';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
 
@@ -591,6 +592,10 @@ function App() {
               </div>
             )}
           </section>
+        )}
+        {/* 4. TAB: Statisztika szekcio -- adminhoz */}
+        {activeTab === 'stats' && userRole === 'admin' && (
+          <AdminStats history={history} />
         )}
       </main>
     </div>
