@@ -484,6 +484,10 @@ app.post('/api/analyze', (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+// Helyi futtatáskor (node index.js) elindítjuk a szervert.
+// Vercelen az exportált app-ot a platform futtatja szerverless függvényként.
+if (require.main === module) app.listen(PORT, () => {
     console.log(`Backend szerver fut a http://localhost:${PORT} cimen [HU, EN, RO támogatással]`);
 });
+
+module.exports = app;

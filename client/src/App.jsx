@@ -33,7 +33,9 @@ import Auth from './Auth';
 import Quiz from './Quiz.jsx';
 import AdminStats from './AdminStats.jsx';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || `${window.location.protocol}//${window.location.hostname}:5001`;
+// Élesben (Vercel) a frontend és az API ugyanazon a domainen fut, ezért üres alap-URL-t használunk (relatív /api/... hívás).
+// Fejlesztéskor a helyi backendet hívjuk az 5001-es porton.
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : `${window.location.protocol}//${window.location.hostname}:5001`);
 
 function App() {
   const { t, i18n } = useTranslation();
