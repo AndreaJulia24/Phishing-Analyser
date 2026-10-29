@@ -1412,3 +1412,12 @@
     box-sizing: border-box !important;
   }
 }
+.success-banner {
+  color: #3fb950;
+  background: rgba(63, 185, 80, 0.15);
+  border: 1px solid rgba(63, 185, 80, 0.4);
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  margin-top: 14px;
+}

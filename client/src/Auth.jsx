@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { auth, db } from './firebase';
+import { auth, db, secondaryAuth } from './firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  updateProfile 
+  updateProfile,
+  signOut
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { useTranslation } from 'react-i18next';
 import encryptedIcon from './assets/icons/encrypted.png';
 
@@ -17,11 +18,13 @@ function Auth({ onLoginSuccess }) {
   const [lastName, setLastName] = useState('');
   const [firstName, setFirstName] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setSuccessMsg('');
     setLoading(true);
 
     try {
@@ -32,7 +35,8 @@ function Auth({ onLoginSuccess }) {
           return;
         }
 
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // Másodlagos Auth példánnyal hozzuk létre, hogy ne léptesse be automatikusan az aktuális klienst
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
         const user = userCredential.user;
         const fullName = `${lastName.trim()} ${firstName.trim()}`;
 
@@ -46,15 +50,34 @@ function Auth({ onLoginSuccess }) {
           createdAt: new Date().toISOString()
         });
 
-        if (onLoginSuccess) {
-          onLoginSuccess(user, 'user', fullName);
-        }
+        // Kijelentkeztetjük a másodlagos Auth példányból
+        await signOut(secondaryAuth);
+
+        // Visszaváltunk a Login űrlapra, a jelszót töröljük, és értesítést adunk
+        setPassword('');
+        setIsRegister(false);
+        setSuccessMsg(t('authRegisterSuccess'));
       } else {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // Lekérjük a Firestore-ból a tényleges szerepkört és nevet (hogy az admin azonnal admin legyen)
+        let role = 'user';
+        let fullName = user.displayName || user.email;
+
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            role = data.role || 'user';
+            if (data.fullName) fullName = data.fullName;
+          }
+        } catch (docErr) {
+          console.error('Hiba a felhasználói profil lekérésekor:', docErr);
+        }
+
         if (onLoginSuccess) {
-          onLoginSuccess(user, 'user', user.displayName || user.email);
+          onLoginSuccess(user, role, fullName);
         }
       }
     } catch (err) {
@@ -112,6 +135,7 @@ function Auth({ onLoginSuccess }) {
         </div>
 
         {errorMsg && <div className="error-banner">{errorMsg}</div>}
+        {successMsg && <div className="success-banner">{successMsg}</div>}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
@@ -178,7 +202,7 @@ function Auth({ onLoginSuccess }) {
               <button 
                 type="button" 
                 className="auth-switch-btn" 
-                onClick={() => { setIsRegister(false); setErrorMsg(''); }}
+                onClick={() => { setIsRegister(false); setErrorMsg(''); setSuccessMsg(''); }}
               >
                 {t('authLoginNow')}
               </button>
@@ -189,7 +213,7 @@ function Auth({ onLoginSuccess }) {
               <button 
                 type="button" 
                 className="auth-switch-btn" 
-                onClick={() => { setIsRegister(true); setErrorMsg(''); }}
+                onClick={() => { setIsRegister(true); setErrorMsg(''); setSuccessMsg(''); }}
               >
                 {t('authRegisterNow')}
               </button>
