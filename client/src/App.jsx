@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
+import './LightMode.css';
 
 
 import encryptedIcon from './assets/icons/encrypted.png';
@@ -9,7 +10,7 @@ import analyserIcon from './assets/icons/analyser.png';
 import exportIcon from './assets/icons/export.png';
 import binIcon from './assets/icons/bin.png';
 import sunIcon from './assets/icons/sun.png';
-//import moonIcon from './assets/icons/moon.png';
+import moonIcon from './assets/icons/moon.png';
 import userIcon from './assets/icons/user.png';
 
 // Firebase modulok
@@ -50,6 +51,7 @@ function App() {
   const [userPhoto, setUserPhoto] = useState(null);
   const fileInputRef = useRef(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false); //kephez felugro funkcio
+  const [theme, setTheme] = useState('dark'); // Alapértelmezett sötét mód
 
 
   // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
@@ -285,6 +287,19 @@ const handlePhotoUpload = (e) => {
     };
     reader.readAsDataURL(file);
   };
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }, []);
+
+  const toggleTheme = () => {
+      const nextTheme = theme === 'dark' ? 'light' : 'dark';
+      setTheme(nextTheme);
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      localStorage.setItem('theme', nextTheme);
+    };
 // Segédfüggvények
 
   const getBadgeStyle = (verdict) => {
@@ -326,9 +341,9 @@ const handlePhotoUpload = (e) => {
         </div>
 
         <div className="top-bar-right">
-          <button className="theme-toggle-btn" title="Váltás témára">
-            <img src={sunIcon} alt="Theme" className="theme-icon" />
-            <span>Világos mód</span>
+          <button className="theme-toggle-btn" title="Váltás témára" onClick={toggleTheme}>
+            {theme === 'dark' ? <img src={sunIcon} alt="Theme" className="theme-icon" /> : <img src={moonIcon} alt="Theme" className="theme-icon" />}
+            <span>{theme === 'dark' ? 'Világos mód' : 'Sötét mód'}</span>
           </button>
 
               <div className="lang-selector">

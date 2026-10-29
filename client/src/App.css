@@ -610,7 +610,7 @@
 }
 
 .dropdown-item.logout {
-  color: #f85149;
+  color: #c9d1d9;
   border-top: 1px solid #21262d;
 }
 
@@ -637,6 +637,24 @@
   border-radius: 50%;
   object-fit: cover;
   display: block;
+}
+
+.submit-btn {
+  align-self: flex-start;
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #1f6feb; /* Kiber-kék alapszín */
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #388bfd; 
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
 }
 
 /* Mobiltelefonok (max 480px) - Optimalizált reszponzív nézet */
@@ -900,6 +918,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 20%;
   display: block;
 }
 

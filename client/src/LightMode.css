@@ -1,0 +1,307 @@
+/* ==========================================
+            LIGHT MODE STYLES
+   ========================================== */
+
+/* Globális háttér és betűszínek */
+html[data-theme="light"],
+html[data-theme="light"] body,
+html[data-theme="light"] .layout-wrapper {
+  background-color: #f6f8fa !important;
+  color: #1f2328 !important;
+}
+
+/* Fejléc (Top Bar) */
+html[data-theme="light"] .top-bar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #d0d7de;
+}
+
+html[data-theme="light"] .top-bar-title {
+  color: #1f2328;
+}
+
+html[data-theme="light"] .theme-toggle-btn {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+html[data-theme="light"] .theme-toggle-btn:hover {
+  background-color: #eaeef2;
+}
+
+/* Nyelvválasztó */
+html[data-theme="light"] .lang-selector {
+  border-left-color: #d0d7de;
+  color: #57606a;
+}
+
+html[data-theme="light"] .lang-btn {
+  color: #57606a;
+}
+
+html[data-theme="light"] .lang-btn.active {
+  color: #0969da;
+  border-bottom-color: #0969da;
+}
+
+html[data-theme="light"] .lang-divider {
+  color: #d0d7de;
+}
+
+/* Profil avatar és lenyíló ablak */
+html[data-theme="light"] .profile-menu-container {
+  border-left-color: #d0d7de;
+}
+
+html[data-theme="light"] .profile-avatar-btn {
+  background-color: #eaeef2;
+  border-color: #d0d7de;
+}
+
+html[data-theme="light"] .profile-dropdown {
+  background-color: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+}
+
+html[data-theme="light"] .dropdown-user-info {
+  border-bottom-color: #d0d7de;
+}
+
+html[data-theme="light"] .dropdown-name {
+  color: #1f2328;
+}
+
+html[data-theme="light"] .dropdown-item {
+  color: #24292f;
+}
+
+html[data-theme="light"] .dropdown-item:hover {
+  background-color: #f3f4f6;
+}
+
+/* Navigációs fülek (Tabs) */
+html[data-theme="light"] .tabs-nav {
+  border-bottom-color: #d0d7de;
+}
+
+html[data-theme="light"] .tab-btn {
+  color: #57606a;
+}
+
+html[data-theme="light"] .tab-btn:hover {
+  color: #1f2328;
+}
+
+html[data-theme="light"] .tab-btn.active {
+  color: #0969da;
+  border-bottom-color: #0969da;
+}
+
+/* Elemző kártya és szövegdoboz */
+html[data-theme="light"] .analyser-card-section {
+  background-color: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 4px 16px rgba(140, 149, 159, 0.15);
+}
+
+html[data-theme="light"] .section-title {
+  color: #1f2328;
+}
+
+html[data-theme="light"] .quick-test-label {
+  color: #57606a;
+}
+
+html[data-theme="light"] .chip-btn {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+html[data-theme="light"] .chip-btn:hover {
+  background-color: #eaeef2;
+  border-color: #0969da;
+  color: #0969da;
+}
+
+html[data-theme="light"] .action-icon-btn {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+html[data-theme="light"] .action-icon-btn:hover {
+  background-color: #eaeef2;
+  border-color: #0969da;
+  color: #0969da;
+}
+
+html[data-theme="light"] .analyser-textarea {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+
+html[data-theme="light"] .analyser-textarea:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+}
+
+/* Előzmények táblázat */
+html[data-theme="light"] .history-title {
+  color: #1f2328;
+}
+
+html[data-theme="light"] .export-btn {
+  background-color: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+html[data-theme="light"] .export-btn:hover {
+  background-color: #eaeef2;
+  border-color: #0969da;
+}
+
+html[data-theme="light"] .history-table-wrapper {
+  background-color: #ffffff;
+  border-color: #d0d7de;
+}
+
+html[data-theme="light"] .history-table th {
+  background-color: #f6f8fa;
+  border-bottom-color: #d0d7de;
+  color: #57606a;
+}
+
+html[data-theme="light"] .history-table td {
+  border-bottom-color: #d0d7de;
+  color: #1f2328;
+}
+
+/* ==================================================================== 
+                    ADMIN STATS LIGHT MODE STYLES
+ ==================================================================== */
+
+/* 1. Külső konténer és fejlécek */
+html[data-theme="light"] .soc-dashboard-wrapper {
+  background-color: #ffffff !important;
+  border-color: #d0d7de !important;
+  box-shadow: 0 10px 30px rgba(140, 149, 159, 0.2) !important;
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .soc-title {
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .soc-subtitle {
+  color: #57606a !important;
+}
+
+/* 2. Bal oldali Live Now oszlop */
+html[data-theme="light"] .live-badge {
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .soc-campaign-card {
+  background-color: #f6f8fa !important;
+  border-color: #d0d7de !important;
+  box-shadow: 0 1px 3px rgba(140, 149, 159, 0.1) !important;
+}
+
+html[data-theme="light"] .soc-campaign-card:hover {
+  background-color: #eaeef2 !important;
+  border-color: #0969da !important;
+}
+
+html[data-theme="light"] .campaign-name {
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .campaign-time,
+html[data-theme="light"] .chevron {
+  color: #57606a !important;
+}
+
+html[data-theme="light"] .soc-campaign-list {
+  scrollbar-color: #d0d7de #f6f8fa !important;
+}
+
+html[data-theme="light"] .soc-campaign-list::-webkit-scrollbar-track {
+  background: #f6f8fa !important;
+}
+
+html[data-theme="light"] .soc-campaign-list::-webkit-scrollbar-thumb {
+  background: #d0d7de !important;
+  border-color: #afb8c1 !important;
+}
+
+html[data-theme="light"] .soc-campaign-list::-webkit-scrollbar-thumb:hover {
+  background: #0969da !important;
+}
+
+/* 3. Középső Radar és Buborékok */
+html[data-theme="light"] .dial-bg-ring {
+  stroke: #d0d7de !important;
+}
+
+html[data-theme="light"] .dial-tick {
+  stroke: #d0d7de !important;
+}
+
+html[data-theme="light"] .dial-tick.lit {
+  stroke: #0969da !important;
+  filter: drop-shadow(0 0 5px rgba(9, 105, 218, 0.4)) !important;
+}
+
+html[data-theme="light"] .threat-bubble {
+  background: radial-gradient(circle, #ffffff 0%, #f6f8fa 100%) !important;
+  border-color: rgba(9, 105, 218, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(140, 149, 159, 0.25) !important;
+}
+
+html[data-theme="light"] .threat-bubble:hover {
+  border-color: #0969da !important;
+  box-shadow: 0 0 16px rgba(9, 105, 218, 0.35) !important;
+}
+
+html[data-theme="light"] .bubble-pct {
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .bubble-name {
+  color: #57606a !important;
+}
+
+html[data-theme="light"] .threat-bubble.large {
+  border-color: #0969da !important;
+  background: radial-gradient(circle, #ffffff 0%, #eef2f6 100%) !important;
+}
+
+html[data-theme="light"] .threat-bubble.large .bubble-pct {
+  color: #0969da !important;
+}
+
+/* 4. Jobb oldali Security Score és Skála */
+html[data-theme="light"] .score-main {
+  color: #1f2328 !important;
+}
+
+html[data-theme="light"] .score-max {
+  color: #8c959f !important;
+}
+
+html[data-theme="light"] .score-label {
+  color: #57606a !important;
+}
+
+html[data-theme="light"] .scale-num {
+  color: #8c959f !important;
+}
+
+html[data-theme="light"] .scale-bars {
+  color: #0969da !important;
+}
