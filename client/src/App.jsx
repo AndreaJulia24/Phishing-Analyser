@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import './LightMode.css';
-
+import { useTranslation } from 'react-i18next';
 
 import encryptedIcon from './assets/icons/encrypted.png';
 import analyserIcon from './assets/icons/analyser.png';
@@ -50,9 +50,9 @@ function App() {
   const [isProfileOpen, setIsProfileOpen] = useState(false); 
   const [userPhoto, setUserPhoto] = useState(null);
   const fileInputRef = useRef(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false); //kephez felugro funkcio
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false); // kephez felugro funkcio
   const [theme, setTheme] = useState('dark'); // Alapértelmezett sötét mód
-
+  const { t, i18n } = useTranslation(); // i18n forditasra 
 
   // 1. Hitelesítési állapot figyelése indításkor és bejelentkezéskor
   useEffect(() => {
@@ -161,10 +161,28 @@ function App() {
     }
   };
 
-  // 4. CSV exportálás MINDKETTO szamara
- const handleExportCSV = async () => {
+  // ======== SEGEDFÜGGVÉNYEK A FORDÍTÁSHOZ ========
+  // Besorolás fordítása
+  const getVerdictText = (verdict) => {
+    if (verdict === 'Adathalász') return t('verdict_phishing');
+    if (verdict === 'Gyanús') return t('verdict_suspicious');
+    if (verdict === 'Biztonságos') return t('verdict_safe');
+    return verdict;
+  };
+
+  // Típus fordítása
+  const getTypeText = (type) => {
+    if (type === 'URL') return t('type_url');
+    if (type === 'Telefonszám') return t('type_phone');
+    if (type === 'SMS') return t('type_sms');
+    if (type === 'Szöveges üzenet' || type === 'Szöveg') return t('type_text');
+    return type;
+  };
+  // ==============================================
+
+  // 4. CSV exportálás
+  const handleExportCSV = async () => {
     try {
-      // A helyi history state-ből dolgozunk, így pontosan azt menti le, amit a felhasználó lát a képernyőn
       if (history.length === 0) {
         alert('Nincs exportálható előzmény!');
         return;
@@ -232,8 +250,8 @@ function App() {
     await signOut(auth);
   };
 
-// 6. Profilkép feltöltése és mentése Firestore-ba
-const handlePhotoUpload = (e) => {
+  // 6. Profilkép feltöltése és mentése Firestore-ba
+  const handlePhotoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -241,7 +259,6 @@ const handlePhotoUpload = (e) => {
     reader.onload = (event) => {
       const img = new Image();
       img.onload = async () => {
-        // Nagyobb, éles HD felbontás (500x500 px - tökéletes retina kijelzőkre is)
         const canvas = document.createElement('canvas');
         const MAX_SIZE = 500;
         let width = img.width;
@@ -263,12 +280,10 @@ const handlePhotoUpload = (e) => {
         canvas.height = height;
 
         const ctx = canvas.getContext('2d');
-        // Kisimítás bekapcsolása a maximális élességhez
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // 85%-os JPEG minőség (kristálytiszta, de csak ~60-80 KB)
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
 
         try {
@@ -295,12 +310,11 @@ const handlePhotoUpload = (e) => {
   }, []);
 
   const toggleTheme = () => {
-      const nextTheme = theme === 'dark' ? 'light' : 'dark';
-      setTheme(nextTheme);
-      document.documentElement.setAttribute('data-theme', nextTheme);
-      localStorage.setItem('theme', nextTheme);
-    };
-// Segédfüggvények
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    document.documentElement.setAttribute('data-theme', nextTheme);
+    localStorage.setItem('theme', nextTheme);
+  };
 
   const getBadgeStyle = (verdict) => {
     if (verdict === 'Adathalász') return { bg: '#ffeef0', border: '#f85149', text: '#da3633' };
@@ -337,101 +351,118 @@ const handlePhotoUpload = (e) => {
       <header className="top-bar">
         <div className="top-bar-left">
           <img src={encryptedIcon} alt="Shield Icon" className="top-bar-logo" />
-          <h1 className="top-bar-title">Adathalász elemző</h1>
+          <h1 className="top-bar-title">{t('appTitle')}</h1>
         </div>
 
         <div className="top-bar-right">
           <button className="theme-toggle-btn" title="Váltás témára" onClick={toggleTheme}>
             {theme === 'dark' ? <img src={sunIcon} alt="Theme" className="theme-icon" /> : <img src={moonIcon} alt="Theme" className="theme-icon" />}
-            <span>{theme === 'dark' ? 'Világos mód' : 'Sötét mód'}</span>
+            <span>{theme === 'dark' ? t('themeLight') : t('themeDark')}</span>
           </button>
 
-              <div className="lang-selector">
-                  <button className="lang-btn active">HU</button>
-                    <span className="lang-divider">|</span>
-                  <button className="lang-btn">EN</button>
-                    <span className="lang-divider">|</span>
-                  <button className="lang-btn">RO</button>
-                </div>
-                <div className="profile-menu-container">
-              {/* Rejtett fájlválasztó */}
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
-                accept="image/*" 
-                onChange={handlePhotoUpload} 
+          <div className="lang-selector">
+            <button 
+              type="button"
+              className={`lang-btn ${i18n.language && i18n.language.startsWith('hu') ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('hu')}
+            >
+              HU
+            </button>
+            <span className="lang-divider">|</span>
+            <button 
+              type="button"
+              className={`lang-btn ${i18n.language && i18n.language.startsWith('en') ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('en')}
+            >
+              EN
+            </button>
+            <span className="lang-divider">|</span>
+            <button 
+              type="button"
+              className={`lang-btn ${i18n.language && i18n.language.startsWith('ro') ? 'active' : ''}`}
+              onClick={() => i18n.changeLanguage('ro')}
+            >
+              RO
+            </button>
+          </div>
+
+          <div className="profile-menu-container">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              accept="image/*" 
+              onChange={handlePhotoUpload} 
+            />
+
+            <button 
+              className="profile-avatar-btn" 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              title="Profil menü"
+            >
+              <img 
+                src={userPhoto || userIcon} 
+                alt="Profil" 
+                className="avatar-img" 
               />
+            </button>
 
-              <button 
-                className="profile-avatar-btn" 
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                title="Profil menü"
-              >
-                <img 
-                  src={userPhoto || userIcon} 
-                  alt="Profil" 
-                  className="avatar-img" 
-                />
-              </button>
-
-              {isProfileOpen && (
-                <div className="profile-dropdown">
-                  <div className="dropdown-user-info">
-                    <div 
-                      className="dropdown-avatar-wrapper" 
-                      onClick={() => {
-                        setIsPreviewOpen(true);
-                        setIsProfileOpen(false); // becsukja a lenyíló menüt a nagyítás megnyitásakor
-                      }}
-                      title="Kattints a nagyításhoz"
-                    >
-                      <img 
-                        src={userPhoto || userIcon} 
-                        alt="Profil nagy" 
-                        className="dropdown-avatar-large" 
-                      />
-                    </div>
-                    <div className="dropdown-name">{userFullName || currentUser.email}</div>
-                    <span className={`role-pill ${userRole} dropdown-role`}>
-                      {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
-                    </span>
-                  </div>
-
-                  <button 
-                    className="dropdown-item" 
-                    onClick={() => fileInputRef.current.click()}
-                  >
-                    <i className="bi bi-camera" style={{ marginRight: '8px' }}></i>
-                    Profilkép módosítása
-                  </button>
-
-                  <button 
-                    className="dropdown-item logout" 
+            {isProfileOpen && (
+              <div className="profile-dropdown">
+                <div className="dropdown-user-info">
+                  <div 
+                    className="dropdown-avatar-wrapper" 
                     onClick={() => {
+                      setIsPreviewOpen(true);
                       setIsProfileOpen(false);
-                      handleLogout();
                     }}
+                    title="Kattints a nagyításhoz"
                   >
-                    Kijelentkezés
-                  </button>
+                    <img 
+                      src={userPhoto || userIcon} 
+                      alt="Profil nagy" 
+                      className="dropdown-avatar-large" 
+                    />
+                  </div>
+                  <div className="dropdown-name">{userFullName || currentUser.email}</div>
+                  <span className={`role-pill ${userRole} dropdown-role`}>
+                    {userRole === 'admin' ? 'Admin' : 'Felhasználó'}
+                  </span>
                 </div>
-              )}
-       </div>
-          
+
+                <button 
+                  className="dropdown-item" 
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  <i className="bi bi-camera" style={{ marginRight: '8px' }}></i>
+                  {t('changePhoto')}
+                </button>
+
+                <button 
+                  className="dropdown-item logout" 
+                  onClick={() => {
+                    setIsProfileOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  {t('logout')}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
       {/* 2. Középre zárt fő tartalom */}
       <main className={`content-area ${activeTab === 'stats' ? 'stats-active' : ''}`}>
-        {/* Navigációs fülek mindenkinek */}
+        {/* Navigációs fülek */}
         <nav className="tabs-nav">
           <button
             className={`tab-btn ${activeTab === 'analyser' ? 'active' : ''}`}
             onClick={() => setActiveTab('analyser')}
           >
             <i className="bi bi-shield-check"></i>
-            Elemző
+            {t('tabAnalyser')}
           </button>
 
           {userRole !== 'admin' && (
@@ -439,8 +470,8 @@ const handlePhotoUpload = (e) => {
               className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`}
               onClick={() => setActiveTab('tips')}
             >
-            <i className="bi bi-patch-question"></i>
-              Biztonsági Kvíz
+              <i className="bi bi-patch-question"></i>
+              {t('tabQuiz')}
             </button>
           )}
 
@@ -449,7 +480,9 @@ const handlePhotoUpload = (e) => {
             onClick={() => { setActiveTab('history'); fetchHistory(); }}
           >
             <i className="bi bi-clock-history"></i>
-            {userRole === 'admin' ? `Összes vizsgálat (${history.length})` : `Saját előzményeim (${history.length})`}
+            {userRole === 'admin'
+              ? `${t('tabHistoryAdmin')} (${history.length})`
+              : `${t('tabHistoryUser')} (${history.length})`}
           </button>
 
           {userRole === 'admin' && (
@@ -458,7 +491,7 @@ const handlePhotoUpload = (e) => {
               onClick={() => setActiveTab('stats')}
             >
               <i className="bi bi-bar-chart-line"></i>
-              Statisztika
+              {t('tabStats')}
             </button>
           )}
         </nav>
@@ -469,32 +502,32 @@ const handlePhotoUpload = (e) => {
             <div className="section-header-row">
               <h2 className="section-title">
                 <img src={analyserIcon} alt="Analyser" className="ui-icon-tab" />
-                Adathalászat és Csalás Elemző
+                {t('analyserTitle')}
               </h2>
             </div>
 
             <div className="quick-test-bar">
-              <span className="quick-test-label">Próbáld ki egy mintával:</span>
+              <span className="quick-test-label">{t('quickTest')}</span>
               <button 
                 type="button" 
                 className="chip-btn"
                 onClick={() => setInputText('https://secure-login.paypal.account-verify.info/update')}
               >
-                <i className="bi bi-link-45deg"></i> Gyanús URL
+                <i className="bi bi-link-45deg"></i> {t('sampleUrl')}
               </button>
               <button 
                 type="button" 
                 className="chip-btn"
                 onClick={() => setInputText('SÜRGŐS! A bankszámláját zároltuk gyanús tranzakció miatt. Lépjen be azonnal: http://otp-biztonsag-ellenorzes.com')}
               >
-                <i className="bi bi-chat-left-dots"></i> Csaló SMS
+                <i className="bi bi-chat-left-dots"></i> {t('sampleSms')}
               </button>
               <button 
                 type="button" 
                 className="chip-btn"
                 onClick={() => setInputText('+234 801 234 5678')}
               >
-                <i className="bi bi-telephone-x"></i> Nemzetközi hívószám
+                <i className="bi bi-telephone-x"></i> {t('samplePhone')}
               </button>
             </div>
 
@@ -504,7 +537,7 @@ const handlePhotoUpload = (e) => {
                   <button 
                     type="button" 
                     className="action-icon-btn" 
-                    title="Beillesztés vágólapról"
+                    title="Beillesztés"
                     onClick={async () => {
                       try {
                         const text = await navigator.clipboard.readText();
@@ -514,16 +547,16 @@ const handlePhotoUpload = (e) => {
                       }
                     }}
                   >
-                    <i className="bi bi-clipboard"></i> Beillesztés
+                    <i className="bi bi-clipboard"></i> {t('pasteBtn')}
                   </button>
                   {inputText && (
                     <button 
                       type="button" 
                       className="action-icon-btn clear" 
-                      title="Szövegmező törlése"
+                      title="Törlés"
                       onClick={() => setInputText('')}
                     >
-                      <i className="bi bi-x-lg"></i> Törlés
+                      <i className="bi bi-x-lg"></i> {t('clearBtn')}
                     </button>
                   )}
                 </div>
@@ -532,13 +565,13 @@ const handlePhotoUpload = (e) => {
               <textarea
                 className="analyser-textarea"
                 rows={4}
-                placeholder="Másolj be egy ellenőrizendő URL-t, SMS-t, e-mail szöveget vagy gyanús nemzetközi telefonszámot..."
+                placeholder={t('placeholder')}
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
               />
 
               <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Elemzés folyamatban...' : 'Vizsgálat indítása'}
+                {loading ? t('analyzing') : t('submitBtn')}
               </button>
             </form>
 
@@ -556,16 +589,16 @@ const handlePhotoUpload = (e) => {
                 <div className="result-card-header">
                   <div>
                     <h3 style={{ margin: 0, color: getBadgeStyle(result.verdict).text }}>
-                      Besorolás: {result.verdict}
+                      {t('verdictPrefix')}: {getVerdictText(result.verdict)}
                     </h3>
                     <div style={{ marginTop: '6px' }}>
                       <span className={getTypeBadgeClass(result.type)}>
-                        {result.type}
+                        {getTypeText(result.type)}
                       </span>
                     </div>
                   </div>
                   <span style={{ fontSize: '1.35rem', fontWeight: '700', color: getBadgeStyle(result.verdict).text }}>
-                    {result.risk_score} / 100 pont
+                    {result.risk_score} / 100 {t('pointsUnit')}
                   </span>
                 </div>
 
@@ -573,28 +606,28 @@ const handlePhotoUpload = (e) => {
                   <div className="breakdown-container">
                     {result.breakdown.phone_score !== undefined && result.breakdown.phone_score > 0 && (
                       <span className="breakdown-pill">
-                        Telefonszám kockázat: <strong>{result.breakdown.phone_score} pont</strong>
+                        {t('phoneRisk')} <strong>{result.breakdown.phone_score} {t('pointsUnit')}</strong>
                       </span>
                     )}
                     {result.breakdown.url_score !== undefined && result.breakdown.url_score > 0 && (
                       <span className="breakdown-pill">
-                        URL kockázat: <strong>{result.breakdown.url_score} pont</strong>
+                        {t('urlRisk')} <strong>{result.breakdown.url_score} {t('pointsUnit')}</strong>
                       </span>
                     )}
                     {result.breakdown.text_score !== undefined && result.breakdown.text_score > 0 && (
                       <span className="breakdown-pill">
-                        Szöveges kockázat: <strong>{result.breakdown.text_score} pont</strong>
+                        {t('textRisk')} <strong>{result.breakdown.text_score} {t('pointsUnit')}</strong>
                       </span>
                     )}
                     {result.breakdown.sender_score !== undefined && result.breakdown.sender_score > 0 && (
                       <span className="breakdown-pill">
-                        Feladói kockázat: <strong>{result.breakdown.sender_score} pont</strong>
+                        {t('senderRisk')} <strong>{result.breakdown.sender_score} {t('pointsUnit')}</strong>
                       </span>
                     )}
                   </div>
                 )}
 
-                <h4 className="xai-title">XAI Magyarázat (Aktivált szabályok és indoklások):</h4>
+                <h4 className="xai-title">{t('xaiTitle')}</h4>
                 <ul className="xai-list">
                   {result.flags.map((flag, idx) => (
                     <li key={idx}>{flag}</li>
@@ -608,125 +641,113 @@ const handlePhotoUpload = (e) => {
         {/* 2. TAB: KVÍZ TAB (End-User) */}
         {activeTab === 'tips' && <Quiz />}
 
-        {/* 3. TAB: Előzmények (Admin: összes, End-User: saját) */}
+        {/* 3. TAB: ELŐZMÉNYEK TÁBLÁZAT */}
         {activeTab === 'history' && (
-          <section className="history-section">
+          <div className="history-section">
             <div className="history-header">
-              <h3 className="history-title">
-                {userRole === 'admin' ? 'Összes vizsgálat (Adminisztrátori napló)' : 'Korábbi vizsgálataim'}
-              </h3>
-              {history.length > 0 && (
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  {/* Export gomb: mind az Adminnak, mind az end usernek elérhető */}
-                  <button className="export-btn" onClick={handleExportCSV}>
-                    <img src={exportIcon} alt="Export" className="export-btn-icon" />
-                    Exportálás CSV-be
+              <h2 className="history-title">
+                {userRole === 'admin' ? t('historyTitleAdmin') : t('historyTitleUser')}
+              </h2>
+              <div className="history-actions">
+                <button type="button" className="export-btn" onClick={handleExportCSV}>
+                  <i className="bi bi-box-arrow-up"></i> {t('exportCsvBtn')}
+                </button>
+                {userRole === 'admin' && (
+                  <button type="button" className="clear-btn" onClick={handleClearAllHistory}>
+                    {t('clearLogBtn')}
                   </button>
-
-                  {/* Teljes napló törlése:  csak Adminnak */}
-                  {userRole === 'admin' && (
-                    <button className="clear-btn" onClick={handleClearAllHistory}>
-                      Napló ürítése
-                    </button>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {history.length === 0 ? (
-              <div className="history-table-wrapper empty-state">
-                Még nem érkezett vizsgálat a rendszerbe.
-              </div>
-            ) : (
-              <div className={`history-table-wrapper ${history.length >= 30 ? 'scrollable-table' : ''}`}>
-                <table className="history-table">
-                  <thead>
+            <div className="history-table-wrapper">
+              <table className="history-table">
+                <thead>
+                  <tr>
+                    <th>{t('colTime')}</th>
+                    <th>{t('colType')}</th>
+                    <th>{t('colTarget')}</th>
+                    <th>{t('colScore')}</th>
+                    <th>{t('colVerdict')}</th>
+                    <th>{t('colUser')}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.length === 0 ? (
                     <tr>
-                      <th>Idő</th>
-                      <th>Típus</th>
-                      <th>Vizsgált tartalom</th>
-                      <th>Pontszám</th>
-                      <th>Besorolás</th>
-                      <th>Felhasználó</th>
-                      {userRole === 'admin' && <th style={{ textAlign: 'center', width: '45px' }}></th>}
+                      <td colSpan="7" style={{ textAlign: 'center', padding: '24px' }}>
+                        {t('emptyHistory')}
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {history.map((item) => (
-                      <tr key={item.id}>
-                        <td style={{ color: '#8b949e', whiteSpace: 'nowrap' }}>{item.timestamp}</td>
+                  ) : (
+                    history.map((item, idx) => (
+                      <tr key={item.id || idx}>
+                        <td>{item.timestamp || item.time || '-'}</td>
+                        <td>{getTypeText(item.type)}</td>
+                        <td className="truncate-target" title={item.target_data}>
+                          {item.target_data}
+                        </td>
+                        <td><strong>{item.risk_score}</strong></td>
                         <td>
-                          <span className={getTypeBadgeClass(item.type)}>
-                            {item.type}
+                          <span className={`status-badge ${item.verdict === 'Adathalász' ? 'danger' : item.verdict === 'Gyanús' ? 'warning' : 'safe'}`}>
+                            {getVerdictText(item.verdict)}
                           </span>
                         </td>
-                        <td className="truncate-text">{item.target_data}</td>
-                        <td style={{ fontWeight: '700' }}>{item.risk_score}</td>
                         <td>
-                          <span
-                            style={{
-                              padding: '3px 10px',
-                              borderRadius: '12px',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                              display: 'inline-block',
-                              backgroundColor: getBadgeStyle(item.verdict).bg,
-                              color: getBadgeStyle(item.verdict).text,
-                              border: `1px solid ${getBadgeStyle(item.verdict).border}`
-                            }}
-                          >
-                            {item.verdict}
+                          <span className="user-tag">
+                            {item.userName || item.user || t('guestUser')}
                           </span>
                         </td>
-                        <td style={{ color: '#58a6ff', fontSize: '0.85rem' }}>
-                          {item.userName || item.userEmail || 'Vendég'}
-                        </td>
-                        {userRole === 'admin' && (
-                          <td style={{ textAlign: 'center' }}>
+                        <td>
+                          {userRole === 'admin' && (
                             <button
-                              className="delete-row-btn"
-                              title="Bejegyzés törlése"
+                              type="button"
+                              className="trash-btn"
+                              title="Törlés"
                               onClick={() => handleDeleteItem(item.id)}
                             >
-                              <img src={binIcon} alt="Törlés" style={{ width: '16px', height: '16px', display: 'block' }} />
+                              <i className="bi bi-trash"></i>
                             </button>
-                          </td>
-                        )}
+                          )}
+                        </td>
                       </tr>
-                      ))}
-                    </tbody>
-                </table>
-              </div>
-            )}
-          </section>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
-        {/* 4. TAB: Statisztika szekcio -- adminhoz */}
+
+        {/* 4. TAB: Statisztika szekció */}
         {activeTab === 'stats' && userRole === 'admin' && (
           <AdminStats history={history} />
         )}
       </main>
-    {/* Profilkép nagyított kör alakú előnézete */}
-   {isPreviewOpen && (
-     <div className="avatar-modal-overlay" onClick={() => setIsPreviewOpen(false)}>
-       <div className="avatar-modal-content" onClick={(e) => e.stopPropagation()}>
-         <button 
-           className="avatar-modal-close" 
-           onClick={() => setIsPreviewOpen(false)}
-           title="Bezárás"
-         >
-           <i className="bi bi-x-lg"></i>
-         </button>
-         <div className="avatar-modal-circle">
-           <img 
-             src={userPhoto || userIcon} 
-             alt="Profil nagyítva" 
-             className="avatar-modal-img" 
-           />
-         </div>
-         <span className="avatar-modal-name">{userFullName || currentUser.email}</span>
-       </div>
-     </div>
-   )}
+
+      {/* Profilkép nagyított kör alakú előnézete */}
+      {isPreviewOpen && (
+        <div className="avatar-modal-overlay" onClick={() => setIsPreviewOpen(false)}>
+          <div className="avatar-modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="avatar-modal-close" 
+              onClick={() => setIsPreviewOpen(false)}
+              title="Bezárás"
+            >
+              <i className="bi bi-x-lg"></i>
+            </button>
+            <div className="avatar-modal-circle">
+              <img 
+                src={userPhoto || userIcon} 
+                alt="Profil nagyítva" 
+                className="avatar-modal-img" 
+              />
+            </div>
+            <span className="avatar-modal-name">{userFullName || currentUser.email}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

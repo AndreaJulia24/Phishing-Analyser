@@ -1,89 +1,72 @@
 import { useState } from 'react';
-import { auth, secondaryAuth, db } from './firebase';
+import { auth, db } from './firebase';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
-  signOut
+  updateProfile 
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+import { useTranslation } from 'react-i18next';
 import encryptedIcon from './assets/icons/encrypted.png';
 
 function Auth({ onLoginSuccess }) {
+  const { t, i18n } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
-  const [lastName, setLastName] = useState('');
-  const [firstName, setFirstName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccessMsg('');
+    setErrorMsg('');
     setLoading(true);
 
     try {
       if (isRegister) {
         if (!lastName.trim() || !firstName.trim()) {
-          setError('Kérlek add meg a vezeték- és keresztnevedet is!');
+          setErrorMsg('Kérlek add meg a vezeték- és keresztnevedet!');
           setLoading(false);
           return;
         }
 
-        // 1. Felhasználó létrehozása a MÁSODLAGOS Auth-ban -> a főoldal és az App nem érzékeli, nem lép be!
-        const userCred = await createUserWithEmailAndPassword(secondaryAuth, email, password);
-        const newUser = userCred.user;
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
         const fullName = `${lastName.trim()} ${firstName.trim()}`;
-        const assignedRole = email.toLowerCase().includes('admin') ? 'admin' : 'user';
 
-        // 2. Mentés a Firestore-ba
-        await setDoc(doc(db, 'users', newUser.uid), {
-          email: newUser.email,
+        await updateProfile(user, { displayName: fullName });
+
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
           fullName: fullName,
-          role: assignedRole,
+          role: 'user',
           createdAt: new Date().toISOString()
         });
 
-        // 3. A másodlagos Auth-ot leállítjuk
-        await signOut(secondaryAuth);
-
-        // 4. Mezők ürítése és zöld sikerüzenet (helyben marad a regisztrációs fülön!)
-        setLastName('');
-        setFirstName('');
-        setEmail('');
-        setPassword('');
-        setSuccessMsg('Sikeres regisztráció! Kérlek, kattints az alábbi "Lépj be itt" gombra a bejelentkezéshez.');
-      } else {
-        // Normál bejelentkezés a fő Auth példányon
-        const userCred = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCred.user;
-
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        let role = 'user';
-        let fullName = user.email;
-
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          role = data.role || 'user';
-          if (data.fullName) {
-            fullName = data.fullName;
-          }
+        if (onLoginSuccess) {
+          onLoginSuccess(user, 'user', fullName);
         }
+      } else {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
 
-        onLoginSuccess(user, role, fullName);
+        if (onLoginSuccess) {
+          onLoginSuccess(user, 'user', user.displayName || user.email);
+        }
       }
     } catch (err) {
       console.error(err);
-      if (err.code === 'auth/email-already-in-use') {
-        setError('Ez az e-mail cím már regisztrálva van!');
-      } else if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-        setError('Hibás e-mail cím vagy jelszó!');
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        setErrorMsg('Hibás e-mail cím vagy jelszó!');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setErrorMsg('Ez az e-mail cím már regisztrálva van!');
       } else if (err.code === 'auth/weak-password') {
-        setError('A jelszónak legalább 6 karakterből kell állnia!');
+        setErrorMsg('A jelszónak legalább 6 karakterből kell állnia!');
       } else {
-        setError('Hiba a hitelesítés során: ' + err.message);
+        setErrorMsg('Hiba történt a művelet során. Próbáld újra később.');
       }
     } finally {
       setLoading(false);
@@ -93,131 +76,124 @@ function Auth({ onLoginSuccess }) {
   return (
     <div className="auth-page-container">
       <div className="auth-card">
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <img src={encryptedIcon} alt="Shield Icon" style={{ width: '48px', height: '48px' }} />
-          <h2 style={{ margin: '10px 0 4px 0', color: '#f0f6fc' }}>Phishing Analyser</h2>
-          <p style={{ margin: 0, color: '#8b949e', fontSize: '0.9rem' }}>
-            {isRegister ? 'Hozz létre egy új fiókot a folytatáshoz' : 'Jelentkezz be a fiókodba'}
+        {/* Jobb felső diszkrét nyelvi választógombok a kártyán BELÜL */}
+        <div className="auth-lang-selector">
+          <button 
+            type="button"
+            className={`auth-lang-btn ${i18n.language && i18n.language.startsWith('hu') ? 'active' : ''}`}
+            onClick={() => i18n.changeLanguage('hu')}
+          >
+            HU
+          </button>
+          <span className="auth-lang-divider">|</span>
+          <button 
+            type="button"
+            className={`auth-lang-btn ${i18n.language && i18n.language.startsWith('en') ? 'active' : ''}`}
+            onClick={() => i18n.changeLanguage('en')}
+          >
+            EN
+          </button>
+          <span className="auth-lang-divider">|</span>
+          <button 
+            type="button"
+            className={`auth-lang-btn ${i18n.language && i18n.language.startsWith('ro') ? 'active' : ''}`}
+            onClick={() => i18n.changeLanguage('ro')}
+          >
+            RO
+          </button>
+        </div>
+
+        <div className="auth-header">
+          <img src={encryptedIcon} alt="Shield Icon" className="auth-icon" />
+          <h2 className="auth-title">Phishing Analyser</h2>
+          <p className="auth-subtitle">
+            {isRegister ? t('authRegisterSubtitle') : t('authLoginSubtitle')}
           </p>
         </div>
 
-        {error && <div className="error-banner" style={{ marginBottom: '16px' }}>{error}</div>}
-        
-        {successMsg && (
-          <div style={{
-            backgroundColor: '#0f2d1e',
-            border: '1px solid #238636',
-            color: '#3fb950',
-            padding: '12px',
-            borderRadius: '6px',
-            fontSize: '0.9rem',
-            marginBottom: '16px',
-            textAlign: 'center',
-            fontWeight: '600'
-          }}>
-            {successMsg}
-          </div>
-        )}
+        {errorMsg && <div className="error-banner">{errorMsg}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form className="auth-form" onSubmit={handleSubmit}>
           {isRegister && (
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label style={{ color: '#8b949e', fontSize: '0.85rem' }}>Vezetéknév</label>
+            <div className="auth-row-names">
+              <div className="auth-field">
+                <label className="auth-label">{t('authLastName')}</label>
                 <input 
                   type="text" 
-                  required 
-                  value={lastName} 
-                  onChange={(e) => setLastName(e.target.value)} 
-                  placeholder="Kovács"
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '6px',
-                    border: '1px solid #30363d',
-                    backgroundColor: '#0d1117',
-                    color: '#c9d1d9',
-                    marginTop: '4px'
-                  }}
+                  className="auth-input" 
+                  placeholder={t('placeholderLastName')}
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
                 />
               </div>
-              <div className="form-group" style={{ flex: 1 }}>
-                <label style={{ color: '#8b949e', fontSize: '0.85rem' }}>Keresztnév</label>
+
+              <div className="auth-field">
+                <label className="auth-label">{t('authFirstName')}</label>
                 <input 
                   type="text" 
-                  required 
-                  value={firstName} 
-                  onChange={(e) => setFirstName(e.target.value)} 
-                  placeholder="Anna"
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '6px',
-                    border: '1px solid #30363d',
-                    backgroundColor: '#0d1117',
-                    color: '#c9d1d9',
-                    marginTop: '4px'
-                  }}
+                  className="auth-input" 
+                  placeholder={t('placeholderFirstName')}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
                 />
               </div>
             </div>
           )}
 
-          <div className="form-group">
-            <label style={{ color: '#8b949e', fontSize: '0.85rem' }}>E-mail cím</label>
+          <div className="auth-field">
+            <label className="auth-label">{t('authEmail')}</label>
             <input 
               type="email" 
-              required 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="pelda@email.com"
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #30363d',
-                backgroundColor: '#0d1117',
-                color: '#c9d1d9',
-                marginTop: '4px'
-              }}
+              className="auth-input" 
+              placeholder={t('placeholderEmail')}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
-          <div className="form-group" style={{ marginTop: '14px' }}>
-            <label style={{ color: '#8b949e', fontSize: '0.85rem' }}>Jelszó</label>
+          <div className="auth-field">
+            <label className="auth-label">{t('authPassword')}</label>
             <input 
               type="password" 
-              required 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
+              className="auth-input" 
               placeholder="••••••••"
-              style={{
-                width: '100%',
-                padding: '10px',
-                borderRadius: '6px',
-                border: '1px solid #30363d',
-                backgroundColor: '#0d1117',
-                color: '#c9d1d9',
-                marginTop: '4px'
-              }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="submit-btn" 
-            style={{ marginTop: '20px', width: '100%' }}
-          >
-            {loading ? 'Feldolgozás...' : (isRegister ? 'Regisztráció' : 'Bejelentkezés')}
+          <button type="submit" className="auth-submit-btn" disabled={loading}>
+            {loading ? '...' : (isRegister ? t('authRegisterBtn') : t('authLoginBtn'))}
           </button>
         </form>
 
-        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.85rem', color: '#8b949e' }}>
+        <div className="auth-footer">
           {isRegister ? (
-            <span>Már van fiókod? <button type="button" onClick={() => { setIsRegister(false); setError(''); setSuccessMsg(''); }} style={{ background: 'none', border: 'none', color: '#58a6ff', cursor: 'pointer', textDecoration: 'underline' }}>Lépj be itt</button></span>
+            <p>
+              {t('authHaveAccount')}{' '}
+              <button 
+                type="button" 
+                className="auth-switch-btn" 
+                onClick={() => { setIsRegister(false); setErrorMsg(''); }}
+              >
+                {t('authLoginNow')}
+              </button>
+            </p>
           ) : (
-            <span>Még nincs fiókod? <button type="button" onClick={() => { setIsRegister(true); setError(''); setSuccessMsg(''); }} style={{ background: 'none', border: 'none', color: '#58a6ff', cursor: 'pointer', textDecoration: 'underline' }}>Regisztrálj most</button></span>
+            <p>
+              {t('authNoAccount')}{' '}
+              <button 
+                type="button" 
+                className="auth-switch-btn" 
+                onClick={() => { setIsRegister(true); setErrorMsg(''); }}
+              >
+                {t('authRegisterNow')}
+              </button>
+            </p>
           )}
         </div>
       </div>
