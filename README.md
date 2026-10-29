@@ -1,165 +1,166 @@
 # 🛡️ Phishing Analyser & Cybersecurity Operations Platform
 
-Egy teljes körű, hibrid, magyarázható (XAI – Explainable AI) adathalászat-detektáló és kiberbiztonsági platform, amely valós időben elemzi a gyanús webcímeket (URL), szöveges üzeneteket (SMS), beérkező e-maileket, valamint nemzetközi és prémium tarifás hívószámokat.
+A comprehensive, hybrid, Explainable AI (XAI) phishing detection and cybersecurity platform designed to analyze suspicious web addresses (URLs), text messages (SMS), incoming emails, and international or premium-rate telephone numbers in real time.
 
-A rendszer szabályalapú, determinisztikus heurisztikákra (White-Box) és természetes nyelvfeldolgozásra épül. Nem csupán egy összesített $0\text{--}100$ közötti normalizált kockázati pontszámot (`risk_score`) kalkulál, hanem tételes, többnyelvű indoklást nyújt az aktivált biztonsági indikátorokról, mindezt valós idejű, aszinkron szinkronizációval és szerepkör-alapú jogosultságkezeléssel (RBAC).
-
----
-
-## 🚀 Főbb funkciók és modulok
-
-### 1. URL Strukturális & Technikai Elemzés ($P_1\text{--}P_7$)
-- **$P_1$ – Hossz vizsgálata:** Hosszú, obfuszkált URL-címek kiszűrése normalizált skálán.
-- **$P_2$ – Domain hossz:** Szokatlanul hosszú regisztrált domainek ellenőrzése.
-- **$P_3$ – Aldomain halmozás:** Többszörös és manipulatív aldomain-struktúrák észlelése.
-- **$P_4$ – Adathalász kulcsszavak:** Kiberbiztonsági szótár alapú vizsgálat az URL-ben (`login`, `verify`, `paypal`, `secure`, stb.).
-- **$P_5$ – Közvetlen IP-cím:** Domain helyett közvetlen IPv4-cím használatának felismerése.
-- **$P_6$ – Speciális karakterek:** Szokatlan karaktergyakoriság (`@`, `-`, `_`, `%`, `?`).
-- **$P_7$ – Titkosítás ellenőrzése:** Hiányzó HTTPS / SSL titkosítás azonnali büntetése.
-
-### 2. Szemantikai & Pszichológiai Szövegelemzés ($T_1\text{--}T_9$)
-- **$T_1$ – Üzenethossz:** Karakter- és szóméret normalizált kiértékelése.
-- **$T_2$ – Sürgető hangnem:** Időnyomásra és haladéktalan cselekvésre utaló kifejezések felismerése.
-- **$T_3$ – Félelemkeltés:** Fiókfelfüggesztéssel, büntetéssel és fenyegetéssel kapcsolatos kifejezések azonosítása.
-- **$T_4$ – Hatósági / Banki tekintély:** Hivatalos szervek, felügyelet vagy biztonsági csapat megszemélyesítése.
-- **$T_5$ – Pénzügyi direktívák:** Számlazárolással, utalással és kártyaműveletekkel kapcsolatos felszólítások.
-- **$T_6$ – Cselekvésre ösztönzés (CTA):** Közvetlen kattintásra ösztönző minták felismerése.
-- **$T_7$ – Adathalászat és jelszószerzés:** Hitelesítő adatok és személyes információk bekérésének észlelése.
-- **$T_8$ – Agresszív formázás:** Szokatlanul magas nagybetű-arány (CAPS LOCK) detektálása.
-- **$T_9$ – Beágyazott elemek vizsgálata:** Szövegből kinyert linkek és telefonszámok mélyelemzése és súlyozott beolvasztása az összkockázatba.
-
-### 3. Nemzetközi & Prémium Telefonszám Elemzés ($PH_1\text{--}PH_6$)
-- **$PH_1$ – Magas kockázatú zónák:** Kockázatos hívószámok és VoIP zónák azonosítása külső adatbázisból (`phone_fraud.json`, pl. +234 Nigéria).
-- **$PH_2$ – Prémium tarifák:** Emelt díjas előhívók (`0900`, `+40900`, `+3690`) azonnali kiszűrése (Wangiri-védelem).
-- **$PH_3$ – Formátumjelzés:** Nemzetközi formátumjelző (`+`) hiányának detektálása.
-- **$PH_4$ – Hossz-eltérés:** A szabványos ITU E.164 formátumtól való számlenghossz-eltérés vizsgálata.
-- **$PH_5$ – Szintetikus mintázatok:** Ismétlődő számsorok és generált szekvenciák (`1234`, `0000`) felderítése.
-- **$PH_6$ – Nem-numerikus anomáliák:** Gyanús karakterek és formázási trükkök azonosítása.
-
-### 4. E-mail Fejléc & Typosquatting Elemzés
-- **From fejléc elemzés:** Feladó azonosítása és legitimációjának ellenőrzése.
-- **Typosquatting detektálás:** Vizuálisan hasonló, homoglif vagy karaktercserés hamisítások felismerése (pl. `paypaI` nagy `I` betűvel).
-- **Tárgymező vizsgálat:** Pánikkeltő, felkiáltójeles vagy csupa nagybetűs sürgetés szűrése.
-- **Kombinált kiértékelés:** A levéltörzs, a beágyazott linkek és a feladói heurisztikák súlyozott egyesítése.
-
-### 5. Explainable AI (XAI) & Kockázati Besorolások
-- Normalizált pontszám: $0\text{--}100\text{ pont}$ közötti skála részpontszám-bontással (URL, SMS/Szöveg, Telefon, Feladó).
-- **Biztonságos (Safe / Sigur):** $0\text{--}30\text{ pont}$ (Zöld kártya)
-- **Gyanús (Suspicious / Suspect):** $31\text{--}70\text{ pont}$ (Sárga kártya)
-- **Adathalász (Phishing):** $71\text{--}100\text{ pont}$ (Piros kártya)
-- Tételes, emberileg olvasható XAI szabálymagyarázatok az összes aktivált pontszámhoz.
-
-### 6. Háromnyelvű Nemzetköziesítés (HU, EN, RO)
-- Teljes UI lokalizáció `i18next` segítségével (magyar, angol, román).
-- A backend heurisztikus motor külön moduláris szótárból (`messages.js`) állítja elő az XAI indoklásokat az aktív nyelven.
-- **F5 nélküli valós idejű szinkronizáció:** Nyelvváltáskor a már kint lévő elemzési kártya is azonnal, élőben újraértékelődik és lefordul.
-- Többnyelvű CSV naplóexport UTF-8 BOM kódolással és lefordított fejlécekkel/értékekkel.
-
-### 7. Felhasználókezelés, Előzmények & SOC Dashboard
-- **Firebase Authentication & Firestore:** Bejelentkezés, regisztráció, profilkép feltöltés és tömörítés.
-- **Szerepkör-alapú hozzáférés (RBAC):**
-  - **Felhasználó (User):** Elemző funkció, interaktív Kiberbiztonsági Kvíz (30 kérdés véletlenszerű keveréssel mindhárom nyelven), saját vizsgálati előzmények.
-  - **Rendszergazda (Admin):** Teljes vizsgálati napló törlési joggal és globális CSV exporttal, valamint kiberbiztonsági SOC műveleti központ (Dashboard interaktív SVG radarral, Security Score mérővel és kockázati mutatókkal).
-- **Reszponzív dizájn & Témák:** Sötét és világos mód támogatása, valamint kifejezetten mobil képernyőkre (Box Model padding/margin) optimalizált felület.
+The system relies on rule-based, deterministic heuristics (White-Box methodology) combined with natural language processing. In addition to computing a normalized composite risk score ($0\text{--}100$), it generates itemized, multilingual explanations detailing all activated security indicators with zero-reload UI synchronization and Role-Based Access Control (RBAC).
 
 ---
 
-## 🏗️ Rendszerarchitektúra
+## 🚀 Key Modules & Capabilities
+
+### 1. URL Structural & Technical Heuristics ($P_1\text{--}P_7$)
+* $P_1$ **– URL Length Evaluation:** Flags obfuscated, excessively long web paths on a normalized scale.
+* $P_2$ **– Domain Length:** Detects atypically long registered domain names.
+* $P_3$ **– Subdomain Stacking:** Identifies deep and manipulative multi-level subdomain structures.
+* $P_4$ **– Phishing Keywords:** Dictionary-based matching against targeted keywords (`login`, `verify`, `paypal`, `secure`, etc.).
+* $P_5$ **– Raw IPv4 Address:** Flags links targeting direct IP addresses rather than standard domain names.
+* $P_6$ **– Special Character Density:** Analyzes abnormal frequencies of special characters (`@`, `-`, `_`, `%`, `?`).
+* $P_7$ **– Transport Security Check:** Immediately penalizes the absence of HTTPS / SSL encryption.
+
+### 2. Semantic & Psychological Text Analysis ($T_1\text{--}T_9$)
+* $T_1$ **– Message Length:** Evaluates normalized character and token counts.
+* $T_2$ **– Artificial Urgency:** Detects temporal pressure, deadlines, and demands for immediate action.
+* $T_3$ **– Coercion & Fear Induction:** Flags threats of account closure, suspension, and penalties.
+* $T_4$ **– Authority Impersonation:** Identifies impersonation of banks, law enforcement, and security teams.
+* $T_5$ **– Financial Directives:** Scans for keywords concerning balance holds, wire transfers, and billing.
+* $T_6$ **– Call-to-Action (CTA):** Detects prompts encouraging impulsive clicking or credential entry.
+* $T_7$ **– Credential Harvesting:** Identifies solicitations for sensitive data, passwords, and verification codes.
+* $T_8$ **– Aggressive Typography:** Calculates uppercase letter ratios (CAPS LOCK shouting).
+* $T_9$ **– Embedded Threat Recursion:** Extracts embedded links and phone numbers from raw text, submitting them to dedicated sub-analyzers and weighting them into the overall threat score.
+
+### 3. International & Toll Fraud Phone Verification ($PH_1\text{--}PH_6$)
+* $PH_1$ **– High-Risk Carrier/VoIP Zones:** Cross-references incoming country codes against an external fraud database (`phone_fraud.json`, e.g., +234 Nigeria).
+* $PH_2$ **– Premium-Rate Prefixes:** Blocks toll fraud and callback scam prefixes (`0900`, `+40900`, `+3690`, Wangiri protection).
+* $PH_3$ **– E.164 Format Compliance:** Checks for the presence of the international dialing prefix (`+`).
+* $PH_4$ **– Length Discrepancy:** Measures deviations from standard ITU telephone number lengths.
+* $PH_5$ **– Synthetic Patterns:** Identifies artificially generated sequences and repetitive digit blocks (`1234`, `0000`).
+* $PH_6$ **– Non-Numeric Anomalies:** Flags abnormal characters and masking techniques.
+
+### 4. Email Header Inspection & Typosquatting Detection
+* **Sender Header Inspection:** Extracts and verifies the legitimacy of the `From:` header.
+* **Typosquatting Detection:** Detects deceptive visual homoglyphs and character substitutions (e.g., `paypaI` using an uppercase `I` instead of a lowercase `l`).
+* **Subject Line Analysis:** Flags manipulative formatting, aggressive punctuation (`!`), and all-caps urgency.
+* **Aggregated Threat Score:** Synthesizes header anomalies, body semantics, and embedded hyperlinks into a unified risk score.
+
+### 5. Explainable AI (XAI) & Threat Classification
+* **Normalized Metric:** Scaled from $0\text{--}100\text{ points}$ with detailed category breakdowns (URL, Text, Phone, Sender).
+* **Safe (Sigur / Biztonságos):** $0\text{--}30\text{ points}$ (Green badge)
+* **Suspicious (Suspect / Gyanús):** $31\text{--}70\text{ points}$ (Yellow badge)
+* **Phishing (Adathalász):** $71\text{--}100\text{ points}$ (Red badge)
+* **Traceable Reasoning:** Transparent, bulleted XAI explanations detailing why each rule fired.
+
+### 6. Trilingual Internationalization (HU, EN, RO)
+* Full client-side localization managed via `i18next` (Hungarian, English, Romanian).
+* Dynamic backend XAI translation dictionary (`messages.js`) returning localized diagnostic findings.
+* **Zero-Reload Dynamic Re-evaluation:** Switching languages re-analyzes displayed inspection cards on the fly without page reloads.
+* Localized CSV exports using UTF-8 BOM encoding for complete spreadsheet compatibility.
+
+### 7. User Management, Audit Logs & SOC Dashboard
+* **Firebase Authentication & Firestore:** Authentication, profile picture uploading with client-side canvas compression, and persistent scan logs.
+* **Role-Based Access Control (RBAC):**
+  * **End User:** Real-time analyzer, interactive 30-question cybersecurity awareness quiz with localized randomization, and personal scan history.
+  * **Administrator:** Complete audit trail with record deletion, global CSV export, and a Cyber Operations Center (SOC Dashboard featuring an interactive SVG radar dial, real-time Security Score gauge, and threat ratio metrics).
+* **Responsive Box-Model UI:** Light/Dark theme toggle and mobile-optimized layouts with tailored touch targets and padding.
+
+---
+
+## 🏗️ System Architecture
 
 ```text
 phishing-analyser/
 ├── client/                     # Frontend (React 18, Vite, i18next, Firebase SDK)
 │   ├── src/
-│   │   ├── assets/             # SVG és PNG ikonok, illusztrációk
+│   │   ├── assets/             # SVG and PNG icons, illustrations
 │   │   ├── data/
-│   │   │   └── quizData.json   # 30 db 3-nyelvű kiberbiztonsági kérdés és magyarázat
-│   │   ├── AdminStats.jsx      # SOC műveleti központ és SVG radar dashboard (Admin)
-│   │   ├── AdminStats.css      # SOC dashboard stílusok és reszponzivitás
-│   │   ├── App.jsx             # Főalkalmazás, navigáció, állapotkezelés és elemző felület
-│   │   ├── App.css             # Általános elrendezés, Box Model és reszponzív stílusok
-│   │   ├── Auth.jsx            # Bejelentkező és regisztrációs felület
-│   │   ├── firebase.js         # Firebase Auth és Firestore konfiguráció
-│   │   ├── i18n.js             # i18next kliens oldali fordítási szótárak (HU, EN, RO)
-│   │   ├── LightMode.css       # Világos téma felülírásai
-│   │   ├── Quiz.jsx            # Interaktív tudatossági kvíz komponens
-│   │   ├── Quiz.css            # Kvíz animációk és opció stílusok
-│   │   └── main.jsx            # Belépési pont
+│   │   │   └── quizData.json   # 30 trilingual cybersecurity questions & explanations
+│   │   ├── AdminStats.jsx      # SOC operations center & SVG radar dial dashboard (Admin)
+│   │   ├── AdminStats.css      # SOC dashboard layout and responsive breakpoints
+│   │   ├── App.jsx             # Root container, routing, state sync & analyzer UI
+│   │   ├── App.css             # Main stylesheet, Box Model & media queries
+│   │   ├── Auth.jsx            # Authentication & registration forms
+│   │   ├── firebase.js         # Firebase Auth & Firestore client configuration
+│   │   ├── i18n.js             # i18next translation resources (HU, EN, RO)
+│   │   ├── LightMode.css       # Light theme style overrides
+│   │   ├── Quiz.jsx            # Interactive awareness quiz engine
+│   │   ├── Quiz.css            # Quiz animation and card styles
+│   │   └── main.jsx            # React application entry point
 │   ├── index.html
 │   └── package.json
 ├── server/                     # Backend (Node.js, Express REST API)
 │   ├── data/
-│   │   ├── phone_fraud.json    # Kockázatos nemzetközi körzetek és csalási indoklások
-│   │   └── suspicious_keywords.json # Pszichológiai és adathalász szótárak kategóriánként
-│   ├── index.js                # Express API szerver és determinisztikus heurisztikai motor
-│   ├── messages.js             # Többnyelvű XAI magyarázat-generátor modul (HU, EN, RO)
-│   ├── test_analyser.js        # Automatizált CLI unit teszt keretrendszer
+│   │   ├── phone_fraud.json    # High-risk dialing zones & fraud classifications
+│   │   └── suspicious_keywords.json # Lexicons for psychological & financial indicators
+│   ├── index.js                # Express API server & deterministic heuristic engine
+│   ├── messages.js             # Multilingual XAI explanation generator (HU, EN, RO)
+│   ├── test_analyser.js        # Automated CLI test suite
 │   └── package.json
 └── README.md
 ```
 
 ---
 
-## 🛠️ Telepítés és Futtatás
+## 🛠️ Installation & Setup
 
-### Előfeltételek
-- **Node.js** (v18 vagy újabb ajánlott)
-- **npm** csomagkezelő
-- Érvényes **Firebase Projekt** (Authentication és Firestore engedélyezve)
+### Prerequisites
+* **Node.js** (v18.0.0 or higher recommended)
+* **npm** package manager
+* An active **Firebase Project** (with Authentication and Firestore enabled)
 
-### 1. Környezeti változók beállítása (Frontend)
-Hozz létre a `client/` mappában egy `.env` fájlt az alábbi struktúrával:
+### 1. Configure Environment Variables (Frontend)
+Create a `.env` file inside the `client/` directory with the following structure:
 
 ```env
 VITE_API_URL=http://localhost:5001
-VITE_FIREBASE_API_KEY=a_te_firebase_api_kulcsod
-VITE_FIREBASE_AUTH_DOMAIN=a_projekted.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=a_projekted_id
-VITE_FIREBASE_STORAGE_BUCKET=a_projekted.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=sender_id
-VITE_FIREBASE_APP_ID=app_id
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-### 2. Backend indítása
-Nyiss egy terminált és lépj be a szerver könyvtárába:
+### 2. Start the Backend API
+Open a terminal and navigate to the `server/` directory:
 
 ```bash
 cd server
 npm install
 node index.js
 ```
-A szerver alapértelmezetten a `http://localhost:5001` címen fogadja a kéréseket.
+The backend server runs on `http://localhost:5001`.
 
-### 3. Frontend indítása
-Nyiss egy másik terminált és indítsd el a klienst:
+### 3. Start the Frontend Client
+Open a second terminal and navigate to the `client/` directory:
 
 ```bash
 cd client
 npm install
 npm run dev
 ```
-A felhasználói felület a `http://localhost:5173` címen érhető el a böngészőben.
+The application will be accessible at `http://localhost:5173`.
 
 ---
 
-## 🧪 Automatizált Unit Tesztek
+## 🧪 Automated Unit Testing
 
-A heurisztikai motor pontosságát és a többnyelvű válaszokat egy önálló automatizált tesztelő modul ellenőrzi. 
+The heuristic engine and its multilingual explanation outputs are validated using an automated CLI test suite.
 
-Miközben fut a backend szerver (`node index.js`), futtasd le a tesztcsomagot:
+Ensure the backend server is running (`node index.js`), then execute in a new terminal:
 
 ```bash
 node server/test_analyser.js
 ```
 
-A teszt az alábbi forgatókönyveket vizsgálja automatikusan:
-1. **Csaló banki SMS beágyazott HTTP linkkel (HU):** Ellenőrzi, hogy a beágyazott link súlyozottan megemeli-e az SMS kockázatát, elérve a gyanús/adathalász szintet.
-2. **Kockázatos nemzetközi szám (+234 Nigéria) (EN):** Ellenőrzi a körzetazonosítást és az angol nyelvű XAI zászlók generálását.
-3. **Tiszta, legitim URL (RO):** Ellenőrzi az alacsony pontszámot és a román nyelvű `Sigur` besorolást.
-4. **Közvetlen IP-cím alapú adathalász link (EN):** Ellenőrzi a technikai URL szabályok kumulatív pontszámítását és az XAI indoklási láncot.
+The test runner validates the following scenarios:
+1. **Phishing Bank SMS with Embedded HTTP Link (HU):** Verifies that the nested URL engine properly elevates text threat scores into the Suspicious/Phishing tier.
+2. **High-Risk Calling Code (+234 Nigeria) (EN):** Verifies country code extraction and English XAI rule activation.
+3. **Legitimate HTTPS Domain (RO):** Confirms low risk scoring with Romanian `Sigur` classification.
+4. **Direct IP-Based Phishing Portal (EN):** Assesses cumulative technical URL heuristics and diagnostic reasoning chains.
 
 ---
 
-## 🔒 Biztonsági és Adatkezelési Megfontolások
-- **Determinisztikus kiértékelés (White-Box):** A döntési folyamat minden lépése transzparens, ellenőrizhető és szabályokhoz kötött, kizárva a neurális hálók "feketedoboz" tévesztéseit.
-- **Kliensoldali képtömörítés:** A feltöltött profilképek még a hálózati küldés előtt Canvas API segítségével optimalizálásra kerülnek a Firestore adatbázis tehermentesítése érdekében.
-- **UTF-8 BOM CSV Export:** A táblázatos letöltések kompatibilisek a Microsoft Excel és egyéb irodai szoftverek speciális karakterkezelésével.
+## 🔒 Security & Implementation Standards
+
+* **Deterministic White-Box Architecture:** Eliminates unexplainable black-box classification errors through verifiable heuristic matrices.
+* **Client-Side Image Compression:** Profile photos are resized and compressed via the HTML5 Canvas API prior to transmission, saving Firestore storage bandwidth.
+* **Standards-Compliant UTF-8 BOM CSV Exports:** Data exports are prepended with an explicit byte order mark to ensure special character fidelity in external spreadsheet applications.
