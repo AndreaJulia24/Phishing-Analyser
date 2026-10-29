@@ -275,6 +275,7 @@
 
 .history-table {
   width: 100%;
+  min-width: 620px; /* Garancia a görgethetőségre mobilon oszlop-összenyomódás nélkül */
   border-collapse: collapse;
   text-align: left;
   font-size: 0.88rem;
@@ -428,8 +429,10 @@
    ========================================== */
 
 .layout-wrapper {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   margin: 0;
   padding: 0;
   display: flex;
@@ -663,207 +666,106 @@
   box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
 }
 
-/* Mobiltelefonok (max 480px) - Optimalizált reszponzív nézet */
-@media (max-width: 480px) {
-  /* 1. Kompakt, szellős fejléc */
-  .top-bar {
-    padding: 10px 14px;
-    gap: 8px;
-  }
+/* ==========================================
+   STÁTUSZ ÉS TÍPUS CÍMKÉK (BADGES & TAGS)
+   ========================================== */
 
-  .top-bar-left {
-    gap: 8px;
-    min-width: 0;
-  }
-
-  .top-bar-logo {
-    width: 24px;
-    height: 24px;
-  }
-
-  .top-bar-title {
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .top-bar-right {
-    gap: 8px;
-  }
-
-  .theme-toggle-btn {
-    padding: 5px 7px;
-  }
-
-  .theme-toggle-btn span {
-    display: none;
-  }
-
-  .lang-selector {
-    padding-left: 8px;
-    gap: 3px;
-    font-size: 0.75rem;
-  }
-
-  .lang-btn {
-    padding: 2px;
-  }
-
-  .profile-menu-container {
-    padding-left: 8px;
-  }
-
-  .profile-avatar-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .profile-dropdown {
-    right: -6px;
-    width: 210px;
-  }
-
-  /* 2. Horizontálisan simán csúsztatható (swipeable) fül-navigáció */
-  .tabs-nav {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none; /* Firefox */
-    gap: 6px;
-    padding-bottom: 4px;
-    margin-bottom: 16px;
-  }
-
-  .tabs-nav::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
-  }
-
-  .tab-btn {
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 8px 12px;
-    font-size: 0.82rem;
-    gap: 6px;
-  }
-
-  /* 3. Elemző kártya és beviteli mező méretezése */
-  .content-area {
-    margin: 14px auto 0 auto;
-    padding: 0 10px 24px 10px;
-  }
-
-  .analyser-card-section {
-    padding: 16px 14px;
-    border-radius: 10px;
-  }
-
-  .section-title {
-    font-size: 1.15rem;
-    margin-bottom: 14px;
-  }
-
-  .ui-icon-tab {
-    width: 20px;
-    height: 20px;
-    margin-right: 6px;
-  }
-
-  /* 4. Mintagombok tördelése */
-  .quick-test-bar {
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .quick-test-label {
-    width: 100%;
-    font-size: 0.8rem;
-    margin-bottom: 2px;
-  }
-
-  .chip-btn {
-    font-size: 0.76rem;
-    padding: 5px 10px;
-    border-radius: 12px;
-  }
-
-  .analyser-textarea {
-    font-size: 0.88rem;
-    min-height: 110px;
-    padding: 10px;
-  }
-
-  .submit-btn {
-    width: 100%;
-    text-align: center;
-    padding: 12px;
-    font-size: 0.95rem;
-  }
-
-  /* 5. Eredménykártya (Result Card) mobilra igazítva */
-  .result-card {
-    padding: 16px 14px;
-    margin-top: 20px;
-  }
-
-  .result-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  .result-card-header h3 {
-    font-size: 1.05rem;
-  }
-
-  .result-card-header span[style*="font-size: 1.35rem"] {
-    font-size: 1.15rem !important;
-  }
-
-  .breakdown-container {
-    gap: 6px;
-    margin: 10px 0;
-  }
-
-  .breakdown-pill {
-    font-size: 0.74rem;
-    padding: 3px 8px;
-  }
-
-  .xai-title {
-    font-size: 0.88rem;
-    margin: 14px 0 6px 0;
-  }
-
-  .xai-list {
-    padding-left: 16px;
-    font-size: 0.82rem;
-    line-height: 1.5;
-  }
-
-  /* 6. Felugró kerek profil modal mobilon */
-  .avatar-modal-circle {
-    width: 210px;
-    height: 210px;
-  }
-
-  /* 7. Bejelentkező kártya mobilon */
-  .auth-page-container {
-    padding: 12px;
-  }
-
-  .auth-card {
-    padding: 20px 16px;
-  }
-
-  .auth-card {
-  position: relative; /* hogy a gombsor pontosan a jobb felső sarokba igazodhasson */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
-  .history-table-wrapper.scrollable-table {
-    max-height: 420px;
-  }
+.status-badge.danger {
+  background-color: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+  border: 1px solid rgba(248, 81, 73, 0.4);
+}
+
+.status-badge.warning {
+  background-color: rgba(210, 153, 34, 0.15);
+  color: #d29922;
+  border: 1px solid rgba(210, 153, 34, 0.4);
+}
+
+.status-badge.safe {
+  background-color: rgba(63, 185, 80, 0.15);
+  color: #3fb950;
+  border: 1px solid rgba(63, 185, 80, 0.4);
+}
+
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  background-color: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.type-badge.url {
+  background-color: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.type-badge.phone {
+  background-color: rgba(234, 179, 8, 0.12);
+  color: #eab308;
+  border-color: rgba(234, 179, 8, 0.3);
+}
+
+.type-badge.email,
+.type-badge.text {
+  background-color: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.user-tag {
+  display: inline-block;
+  font-size: 0.82rem;
+  color: #8b949e;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trash-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #8b949e;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.trash-btn:hover {
+  background-color: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+}
+
+/* Előzmény cella szövegvágás a túlméretezett sorok ellen */
+.history-table td.truncate-target,
+.truncate-target {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 /* ==========================================
    PROFILKÉP KÖR ALAKÚ NAGYÍTOTT MODAL
@@ -1067,159 +969,6 @@
   vertical-align: middle;
 }
 
-/* ==========================================
-               RESZPONZIVITAS 
-   ========================================== */
-
-/* Táblagép és kisebb monitorok (max 768px) */
-@media (max-width: 768px) {
-  .top-bar {
-    padding: 12px 18px;
-  }
-
-  .top-bar-title {
-    font-size: 1.15rem;
-  }
-
-  .top-bar-right {
-    gap: 12px;
-  }
-
-  .lang-selector {
-    padding-left: 10px;
-    gap: 4px;
-  }
-
-  .profile-menu-container {
-    padding-left: 10px;
-  }
-
-  .content-area {
-    margin: 24px auto 0 auto;
-    padding: 0 16px 30px 16px;
-  }
-
-  .analyser-card-section {
-    padding: 18px;
-  }
-
-  .section-title {
-    font-size: 1.25rem;
-    margin-bottom: 12px;
-  }
-
-  .header-section {
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .header-title {
-    font-size: 1.45rem;
-  }
-
-  .tab-btn {
-    padding: 8px 12px;
-    font-size: 0.88rem;
-  }
-
-  .result-card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .history-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .export-btn,
-  .clear-btn,
-  .delete-row-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .truncate-text {
-    max-width: 140px;
-  }
-}
-
-/* Mobiltelefonok (max 480px) */
-@media (max-width: 480px) {
-  .top-bar {
-    padding: 10px 14px;
-  }
-
-  .top-bar-title {
-    font-size: 1rem;
-  }
-
-  .theme-toggle-btn span {
-    display: none;
-  }
-
-  .theme-toggle-btn {
-    padding: 6px;
-  }
-
-  .lang-selector {
-    padding-left: 8px;
-    font-size: 0.78rem;
-  }
-
-  .profile-menu-container {
-    padding-left: 8px;
-  }
-
-  .profile-avatar-btn {
-    width: 32px;
-    height: 32px;
-  }
-
-  .profile-dropdown {
-    right: -10px;
-    width: 200px;
-  }
-
-  .content-area {
-    margin: 16px auto 0 auto;
-    padding: 0 12px 24px 12px;
-  }
-
-  .analyser-card-section {
-    padding: 16px;
-    border-radius: 10px;
-  }
-
-  .section-title {
-    font-size: 1.15rem;
-  }
-
-  .submit-btn {
-    width: 100%;
-    text-align: center;
-  }
-
-  .auth-page-container {
-    padding: 16px;
-  }
-
-  .auth-card {
-    padding: 20px;
-  }
-
-  .user-badge {
-    font-size: 0.75rem;
-    padding: 4px 10px;
-  }
-
-  .role-pill {
-    font-size: 0.65rem;
-    padding: 2px 6px;
-  }
-}
 
 /* ==========================================
    BEJELENTKEZŐ ÉS REGISZTRÁCIÓS NÉZET
@@ -1402,16 +1151,6 @@
   text-decoration: underline;
 }
 
-@media (max-width: 768px) {
-  .content-area,
-  .content-area.stats-active {
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 12px auto 0 auto !important; /* kis felső külső margó */
-    padding: 0 12px 30px 12px !important; /* 0 helyett 12px oldalsó padding a szélhez tapadás ellen */
-    box-sizing: border-box !important;
-  }
-}
 .success-banner {
   color: #3fb950;
   background: rgba(63, 185, 80, 0.15);
@@ -1420,4 +1159,372 @@
   border-radius: 6px;
   font-size: 0.9rem;
   margin-top: 14px;
+}
+
+/* ==========================================
+   RESZPONZIVITAS (TABLET ÉS MOBIL OPTIMALIZÁLÁS)
+   ========================================== */
+
+/* 1. Táblagép és kisebb monitorok (max 768px) */
+@media (max-width: 768px) {
+  .top-bar {
+    padding: 10px 16px;
+  }
+
+  .top-bar-title {
+    font-size: 1.1rem;
+  }
+
+  .top-bar-right {
+    gap: 10px;
+  }
+
+  .content-area,
+  .content-area.stats-active {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 12px auto 0 auto !important;
+    padding: 0 14px calc(85px + env(safe-area-inset-bottom, 20px)) 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  .analyser-card-section {
+    padding: 20px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    margin-bottom: 14px;
+  }
+
+  .tabs-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 6px;
+    padding-bottom: 4px;
+    margin-bottom: 18px;
+  }
+
+  .tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 12px;
+    font-size: 0.88rem;
+  }
+
+  .result-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .history-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+
+  .export-btn,
+  .clear-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.84rem;
+  }
+
+  .history-table td.truncate-target {
+    max-width: 180px;
+  }
+}
+
+/* 2. Mobiltelefonok (max 480px) */
+@media (max-width: 480px) {
+  /* Kompakt fejléc szétcsúszás és szövegvágás ellen */
+  .top-bar {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+
+  .top-bar-left {
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .top-bar-logo {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .top-bar-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.2px;
+  }
+
+  .top-bar-right {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle-btn {
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+
+  .theme-toggle-btn span {
+    display: none;
+  }
+
+  .theme-icon {
+    width: 15px;
+    height: 15px;
+  }
+
+  .lang-selector {
+    padding-left: 6px;
+    gap: 2px;
+    font-size: 0.72rem;
+  }
+
+  .lang-btn {
+    padding: 2px 3px;
+    font-size: 0.72rem;
+  }
+
+  .profile-menu-container {
+    padding-left: 6px;
+  }
+
+  .profile-avatar-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .profile-dropdown {
+    right: -6px;
+    width: 200px;
+  }
+
+  /* Finoman csúsztatható (swipeable) fül-navigáció */
+  .tabs-nav {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    gap: 4px;
+    padding: 2px 2px 6px 2px;
+    margin-bottom: 14px;
+    width: 100%;
+  }
+
+  .tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 7px 10px;
+    font-size: 0.8rem;
+    gap: 5px;
+  }
+
+  .tab-btn i {
+    font-size: 0.85rem;
+  }
+
+  /* Tartalmi térköz és Safari alsó sáv védelem */
+  .content-area,
+  .content-area.stats-active {
+    margin: 8px auto 0 auto !important;
+    padding: 0 10px calc(85px + env(safe-area-inset-bottom, 20px)) 10px !important;
+  }
+
+  .analyser-card-section {
+    padding: 16px 12px;
+    border-radius: 10px;
+  }
+
+  .section-title {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+
+  .ui-icon-tab {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+  }
+
+  /* Gyors teszt chipek */
+  .quick-test-bar {
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .quick-test-label {
+    width: 100%;
+    font-size: 0.78rem;
+    margin-bottom: 2px;
+  }
+
+  .chip-btn {
+    font-size: 0.75rem;
+    padding: 5px 9px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .chip-btn i {
+    font-size: 0.82rem;
+    margin-right: 4px;
+  }
+
+  /* Szövegdoboz és eszköztár */
+  .textarea-top-toolbar {
+    margin-bottom: 4px;
+  }
+
+  .action-icon-btn {
+    padding: 4px 9px;
+    font-size: 0.74rem;
+  }
+
+  .analyser-textarea {
+    font-size: 0.88rem;
+    min-height: 100px;
+    padding: 10px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+    padding: 11px;
+    font-size: 0.92rem;
+  }
+
+  /* Eredménykártya mobilra */
+  .result-card {
+    padding: 14px 12px;
+    margin-top: 16px;
+    border-radius: 10px;
+  }
+
+  .result-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .result-card-header h3 {
+    font-size: 1rem;
+  }
+
+  .result-card-header span[style*="font-size: 1.35rem"] {
+    font-size: 1.15rem !important;
+  }
+
+  .breakdown-container {
+    gap: 5px;
+    margin: 8px 0;
+  }
+
+  .breakdown-pill {
+    font-size: 0.72rem;
+    padding: 3px 7px;
+  }
+
+  .xai-title {
+    font-size: 0.85rem;
+    margin: 12px 0 6px 0;
+  }
+
+  .xai-list {
+    padding-left: 16px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+  }
+
+  /* Előzmény táblázat mobil méretezés */
+  .history-header {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .history-title {
+    font-size: 1.05rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 10px 10px;
+    font-size: 0.82rem;
+  }
+
+  .history-table td.truncate-target {
+    max-width: 140px;
+  }
+
+  .history-table-wrapper.scrollable-table {
+    max-height: 380px;
+  }
+
+  /* Felugró profil modal mobilon */
+  .avatar-modal-circle {
+    width: 200px;
+    height: 200px;
+  }
+
+  /* Bejelentkező kártya mobilon */
+  .auth-page-container {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 20px 16px;
+  }
+
+  .user-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  .role-pill {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+  }
+}
+
+/* 3. Extra kisméretű mobiltelefonok (max 360px) */
+@media (max-width: 360px) {
+  .top-bar-title {
+    font-size: 0.8rem;
+  }
+
+  .tab-btn {
+    padding: 6px 8px;
+    font-size: 0.76rem;
+  }
 }

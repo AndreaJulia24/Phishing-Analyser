@@ -264,6 +264,94 @@
 
 @media (max-width: 768px) {
   .quiz-card-section {
-    padding: 18px;
+    padding: 16px 12px;
+    border-radius: 10px;
+  }
+
+  .quiz-status-bar {
+    padding-bottom: 8px;
+  }
+
+  .quiz-type-badge {
+    font-size: 0.74rem;
+    padding: 3px 8px;
+  }
+
+  .quiz-counter {
+    font-size: 0.82rem;
+  }
+
+  .quiz-scenario-box {
+    padding: 12px;
+    gap: 8px;
+  }
+
+  .scenario-quote-icon {
+    font-size: 1.15rem;
+  }
+
+  .scenario-text {
+    font-size: 0.86rem;
+    line-height: 1.4;
+  }
+
+  .quiz-question-prompt {
+    font-size: 1rem;
+    margin: 2px 0 0 0;
+  }
+
+  .quiz-option-button {
+    padding: 10px 12px;
+    gap: 10px;
+    font-size: 0.86rem;
+  }
+
+  .quiz-letter {
+    width: 26px;
+    height: 26px;
+    font-size: 0.8rem;
+  }
+
+  .quiz-feedback-banner {
+    padding: 12px;
+  }
+
+  .feedback-content strong {
+    font-size: 0.88rem;
+  }
+
+  .feedback-content p {
+    font-size: 0.84rem;
+  }
+
+  .quiz-next-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
+    padding: 11px;
+    font-size: 0.92rem;
+  }
+
+  .quiz-result-view {
+    padding: 12px 0;
+    gap: 10px;
+  }
+
+  .quiz-result-icon-circle {
+    width: 58px;
+    height: 58px;
+    font-size: 1.6rem;
+  }
+
+  .result-headline {
+    font-size: 1.25rem;
+  }
+
+  .result-score-display {
+    font-size: 1.05rem;
+  }
+
+  .result-evaluation-text {
+    font-size: 0.86rem;
   }
 }

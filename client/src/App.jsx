@@ -72,6 +72,7 @@ function App() {
         try {
           const userDoc = await getDoc(doc(db, 'users', user.uid));
           const isEmailAdmin = (user.email || '').toLowerCase().includes('admin');
+         // A szerepkör meghatározása
           const role = isEmailAdmin ? 'admin' : (userDoc.exists() ? (userDoc.data().role || 'user') : 'user');
           const fullName = userDoc.exists() && userDoc.data().fullName ? userDoc.data().fullName : (user.displayName || user.email);
           const photo = userDoc.exists() && userDoc.data().photoURL ? userDoc.data().photoURL : null;

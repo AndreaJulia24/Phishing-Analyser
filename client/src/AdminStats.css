@@ -535,3 +535,31 @@
     white-space: nowrap;
   }
 }
+
+@media (max-width: 480px) {
+  .soc-dashboard-wrapper {
+    padding: 14px 10px 24px 10px !important;
+    border-radius: 12px;
+  }
+
+  .soc-title {
+    font-size: 1.35rem;
+  }
+
+  .soc-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .soc-hud-col {
+    padding: 12px 10px !important;
+  }
+
+  .radar-circle-container {
+    width: 270px !important;
+    height: 270px !important;
+  }
+
+  .threat-bubble {
+    transform: translate(-50%, -50%) scale(0.66) !important;
+  }
+}
