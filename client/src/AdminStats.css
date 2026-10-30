@@ -81,7 +81,7 @@
   background-color: #38bdf8;
   border-radius: 50%;
   box-shadow: 0 0 10px #38bdf8;
-  animation: pulseDot 2s infinite; /* Pulzáló animáció a "Live" jelzéshez */
+  animation: pulseDot 2s infinite; 
 }
 
 
