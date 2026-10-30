@@ -63,7 +63,7 @@ function App() {
   const [userPhoto, setUserPhoto] = useState(null);
   const fileInputRef = useRef(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [theme, setTheme] = useState('dark');
+  const [theme, setTheme] = useState('dark'); 
 
   // 1. Hitelesítési állapot figyelése
   useEffect(() => {
